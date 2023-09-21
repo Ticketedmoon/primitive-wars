@@ -1,0 +1,6 @@
+*.exe
+*.swp
+libs
+build
+cmake-build-debug
+.idea
