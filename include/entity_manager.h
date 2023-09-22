@@ -15,7 +15,7 @@ class EntityManager
     public:
         void update();
         std::shared_ptr<Entity>& addEntity(Entity::Type type);
-        std::shared_ptr<Entity>&  removeEntity(size_t id);
+        std::shared_ptr<Entity>& removeEntity(size_t id);
         std::vector<std::shared_ptr<Entity>>& getEntities();
         std::vector<std::shared_ptr<Entity>>& getEntitiesByType(Entity::Type type);
 

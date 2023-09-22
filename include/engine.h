@@ -16,6 +16,7 @@
 #include "entity.h"
 #include "entity_manager.h"
 #include "c_transform.h"
+#include "c_user_input.h"
 #include "c_render.h"
 
 static constexpr std::string_view WINDOW_TITLE = "primitive-wars";
@@ -42,6 +43,7 @@ class Engine
 
         static void transformSystem();
         static void collisionSystem();
+        static void userInputSystem();
         static void renderSystem();
 
     private:

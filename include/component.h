@@ -12,7 +12,8 @@ class Component
         {
                 TRANSFORM,
                 USER_INPUT,
-                RENDER
+                RENDER,
+                COLLISION
         };
 
         virtual Type getType() = 0;

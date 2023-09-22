@@ -2,7 +2,11 @@
 
 void EntityManager::update()
 {
-    m_entities.insert(m_entities.begin(), m_entitiesToAdd.begin(), m_entitiesToAdd.end());
+    for (const std::shared_ptr<Entity>& e : m_entitiesToAdd)
+    {
+        m_entities.emplace_back(e);
+        m_entitiesByType[e->m_type].emplace_back(e);
+    }
 
     m_entities.erase(std::remove_if(m_entities.begin(), m_entities.end(), [](std::shared_ptr<Entity>& entity) {
         return !entity->m_alive;
@@ -40,5 +44,5 @@ std::vector<std::shared_ptr<Entity>>& EntityManager::getEntities()
 
 std::vector<std::shared_ptr<Entity>>& EntityManager::getEntitiesByType(Entity::Type type)
 {
-    return m_entitiesByType.at(type);
+    return m_entitiesByType[type];
 }
