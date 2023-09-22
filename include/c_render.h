@@ -13,7 +13,6 @@ class CRender : public Component
         Type getType() override;
 
     public:
-        uint32_t radius;
         sf::Color color;
 };
 

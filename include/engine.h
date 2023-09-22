@@ -39,6 +39,9 @@ class Engine
     private:
         static inline void createGameWindow();
         static void createPlayer();
+
+        static void transformSystem();
+        static void collisionSystem();
         static void renderSystem();
 
     private:
