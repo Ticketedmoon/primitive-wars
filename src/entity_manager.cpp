@@ -27,7 +27,7 @@ std::shared_ptr<Entity>& EntityManager::addEntity(Entity::Type type)
     size_t entityId = m_totalEntities++;
     std::shared_ptr<Entity> entity = std::shared_ptr<Entity>(new Entity(entityId, type));
     m_entitiesToAdd.emplace_back(entity);
-    return m_entitiesToAdd.at(entityId);
+    return m_entitiesToAdd.back();
 }
 
 std::shared_ptr<Entity>& EntityManager::removeEntity(size_t id)

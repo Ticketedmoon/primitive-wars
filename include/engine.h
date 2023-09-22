@@ -14,6 +14,7 @@
 #include <ranges>
 #include <iostream>
 #include <memory>
+#include <experimental/random>
 
 #include "entity.h"
 #include "entity_manager.h"
@@ -43,9 +44,11 @@ class Engine
     private:
         static inline void createGameWindow();
         static void createPlayer();
+        void spawnEnemy();
 
         static void transformSystem();
         static void collisionSystem();
+        void enemySpawnSystem();
         static void userInputSystem();
         static void renderSystem();
 
@@ -54,6 +57,7 @@ class Engine
         static inline EntityManager m_entityManager;
         static inline sf::Texture textureSprite;
         static inline sf::Sprite backgroundSprite;
+        static inline uint32_t frameNo;
 
 };
 

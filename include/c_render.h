@@ -15,7 +15,6 @@ class CRender : public Component
 
     public:
         sf::CircleShape renderBody;
-        sf::Color color;
 };
 
 
