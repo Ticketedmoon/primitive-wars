@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/CircleShape.hpp>
 #include "component.h"
 
 class CRender : public Component
@@ -13,6 +14,7 @@ class CRender : public Component
         Type getType() override;
 
     public:
+        sf::CircleShape renderBody;
         sf::Color color;
 };
 

@@ -6,6 +6,8 @@
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Window/Event.hpp>
 
 #include <string_view>
@@ -17,6 +19,7 @@
 #include "entity_manager.h"
 #include "c_transform.h"
 #include "c_user_input.h"
+#include "c_collision.h"
 #include "c_render.h"
 
 static constexpr std::string_view WINDOW_TITLE = "primitive-wars";
@@ -29,13 +32,13 @@ class Engine
 {
     public:
         Engine();
-        static void startGameLoop();
+        void startGameLoop();
 
     private:
         // Game loop logic
         static void listenForEvents();
         static void update();
-        static void render();
+        void render(sf::Sprite& backgroundSprite);
 
     private:
         static inline void createGameWindow();

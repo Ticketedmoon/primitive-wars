@@ -32,6 +32,7 @@ endif ()
 # configure_file(config.h.in config.h)
 
 file(GLOB GAME_SOURCES "src/*.cpp")
+file(COPY resources DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
 add_executable(${PROJECT_NAME} ${GAME_SOURCES})
 

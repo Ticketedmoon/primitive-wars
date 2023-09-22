@@ -13,7 +13,6 @@ class CTransform : public Component
         sf::Vector2f velocity;
         sf::Vector2f rotation;
         sf::Vector2f angle;
-        float radius;
 
         float speedX = DEFAULT_SPEED;
         float speedY = DEFAULT_SPEED;

@@ -1,5 +1,4 @@
 #include "../include/engine.h"
-#include "c_collision.h"
 
 Engine::Engine()
 {
@@ -9,6 +8,15 @@ Engine::Engine()
 void Engine::startGameLoop()
 {
     sf::Clock deltaClock;
+
+    sf::Texture textureSprite;
+    const std::string texturePath = "resources/assets/board.png";
+    if (!textureSprite.loadFromFile(texturePath)) {
+        std::string msg = "Unable to open textureSprite '" + texturePath + "'\n";
+        throw new std::runtime_error(msg);
+    }
+    sf::Sprite backgroundSprite(textureSprite);
+
     createPlayer();
 
     while (m_window.isOpen())
@@ -17,13 +25,14 @@ void Engine::startGameLoop()
 
         listenForEvents();
         update();
-        render();
+        render(backgroundSprite);
     }
 }
 
 void Engine::listenForEvents()
 {
     sf::Event event{};
+
     while (m_window.pollEvent(event))
     {
         if (event.type == sf::Event::Closed)
@@ -38,9 +47,10 @@ void Engine::update()
     m_entityManager.update();
 }
 
-void Engine::render()
+void Engine::render(sf::Sprite& backgroundSprite)
 {
     m_window.clear();
+    m_window.draw(backgroundSprite);
 
     // Do something
     userInputSystem();
@@ -68,34 +78,26 @@ void Engine::transformSystem()
 
         if (!collisionComponent->isCollidingLeft)
         {
-            transformComponent->position.x -= userInputComponent->movingLeft
-                    ? transformComponent->speedX
-                    : 0;;
+            transformComponent->position.x -= userInputComponent->movingLeft ? transformComponent->speedX : 0;;
         }
         if (!collisionComponent->isCollidingRight)
         {
-            transformComponent->position.x += userInputComponent->movingRight
-                    ? transformComponent->speedX
-                    : 0;
+            transformComponent->position.x += userInputComponent->movingRight ? transformComponent->speedX : 0;
         }
         if (!collisionComponent->isCollidingUp)
         {
-            transformComponent->position.y -= userInputComponent->movingUp
-                    ? transformComponent->speedY
-                    : 0;
+            transformComponent->position.y -= userInputComponent->movingUp ? transformComponent->speedY : 0;
         }
         if (!collisionComponent->isCollidingDown)
         {
-            transformComponent->position.y += userInputComponent->movingDown
-                    ? transformComponent->speedY
-                    : 0;
+            transformComponent->position.y += userInputComponent->movingDown ? transformComponent->speedY : 0;
         }
     }
 
     std::ranges::filter_view enemiesFiltered = m_entityManager.getEntitiesByType(Entity::Type::ENEMY) |
-                                               std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
-                                                   return e->hasComponent(Component::Type::TRANSFORM);
-                                               });
+            std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
+                return e->hasComponent(Component::Type::TRANSFORM);
+            });
     std::vector<std::shared_ptr<Entity>> enemiesToRender = std::vector(enemiesFiltered.begin(), enemiesFiltered.end());
 
     for (const std::shared_ptr<Entity>& e : enemiesToRender)
@@ -125,18 +127,19 @@ void Engine::userInputSystem()
 void Engine::collisionSystem()
 {
     std::ranges::filter_view entitiesFiltered = m_entityManager.getEntities() | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
-        return e->hasComponent(Component::Type::TRANSFORM) && e->hasComponent(Component::Type::COLLISION);
+        return e->hasComponent(Component::Type::TRANSFORM) && e->hasComponent(Component::Type::COLLISION) && e->hasComponent(Component::Type::RENDER);
     });
     std::vector<std::shared_ptr<Entity>> entitiesToRender = std::vector(entitiesFiltered.begin(), entitiesFiltered.end());
     for (const std::shared_ptr<Entity>& e : entitiesToRender)
     {
         std::shared_ptr<CTransform> transformComponentForEntity = std::dynamic_pointer_cast<CTransform> (e->getComponentByType(Component::Type::TRANSFORM));
         std::shared_ptr<CCollision> collisionComponentForEntity = std::dynamic_pointer_cast<CCollision> (e->getComponentByType(Component::Type::COLLISION));
+        std::shared_ptr<CRender> renderComponentForEntity = std::dynamic_pointer_cast<CRender> (e->getComponentByType(Component::Type::RENDER));
 
-        collisionComponentForEntity->isCollidingLeft = transformComponentForEntity->position.x <= transformComponentForEntity->radius;
-        collisionComponentForEntity->isCollidingRight = transformComponentForEntity->position.x >= WINDOW_WIDTH - transformComponentForEntity->radius;
-        collisionComponentForEntity->isCollidingUp = transformComponentForEntity->position.y <= transformComponentForEntity->radius;
-        collisionComponentForEntity->isCollidingDown = transformComponentForEntity->position.y >= WINDOW_HEIGHT - transformComponentForEntity->radius;
+        collisionComponentForEntity->isCollidingLeft = transformComponentForEntity->position.x <= renderComponentForEntity->renderBody.getRadius();
+        collisionComponentForEntity->isCollidingRight = transformComponentForEntity->position.x >= WINDOW_WIDTH - renderComponentForEntity->renderBody.getRadius();
+        collisionComponentForEntity->isCollidingUp = transformComponentForEntity->position.y <= renderComponentForEntity->renderBody.getRadius();
+        collisionComponentForEntity->isCollidingDown = transformComponentForEntity->position.y >= WINDOW_HEIGHT - renderComponentForEntity->renderBody.getRadius();
     }
 }
 
@@ -152,11 +155,11 @@ void Engine::renderSystem()
         std::shared_ptr<CTransform> transformComponentForEntity = std::dynamic_pointer_cast<CTransform> (e->getComponentByType(Component::Type::TRANSFORM));
         std::shared_ptr<CRender> renderComponentForEntity = std::dynamic_pointer_cast<CRender> (e->getComponentByType(Component::Type::RENDER));
 
-        sf::CircleShape shape(transformComponentForEntity->radius);
-        shape.setOrigin(transformComponentForEntity->radius, transformComponentForEntity->radius);
-        shape.setPosition(transformComponentForEntity->position);
-        shape.setFillColor(renderComponentForEntity->color);
-        m_window.draw(shape);
+        sf::CircleShape& drawable = renderComponentForEntity->renderBody;
+        drawable.setPosition(transformComponentForEntity->position);
+        drawable.rotate(3);
+
+        m_window.draw(drawable);
     }
 }
 
@@ -166,7 +169,6 @@ void Engine::createPlayer()
 
     std::shared_ptr<CTransform> cTransform = std::make_shared<CTransform>();
     cTransform->position = sf::Vector2f(WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
-    cTransform->radius = 30.0f;
     std::pair transformPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::TRANSFORM, cTransform);
     e->m_componentsByType.insert(transformPair);
 
@@ -180,6 +182,16 @@ void Engine::createPlayer()
 
     std::shared_ptr<CRender> cRender = std::make_shared<CRender>();
     cRender->color = sf::Color::Red;
+    
+    float radius = 30.0f;
+    sf::CircleShape shape(radius, 8);
+    shape.setOrigin(radius, radius);
+    shape.setPosition(cTransform->position);
+    shape.setFillColor(sf::Color::Transparent);
+    shape.setOutlineColor(sf::Color::Red);
+    shape.setOutlineThickness(3.0f);
+    cRender->renderBody = shape;
+    
     std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER, cRender);
     e->m_componentsByType.insert(renderPair);
 }
