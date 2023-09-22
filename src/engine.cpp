@@ -7,25 +7,13 @@ Engine::Engine()
 
 void Engine::startGameLoop()
 {
-    sf::Clock deltaClock;
-
-    sf::Texture textureSprite;
-    const std::string texturePath = "resources/assets/board.png";
-    if (!textureSprite.loadFromFile(texturePath)) {
-        std::string msg = "Unable to open textureSprite '" + texturePath + "'\n";
-        throw new std::runtime_error(msg);
-    }
-    sf::Sprite backgroundSprite(textureSprite);
-
     createPlayer();
 
     while (m_window.isOpen())
     {
-        deltaClock.restart();
-
         listenForEvents();
         update();
-        render(backgroundSprite);
+        render();
     }
 }
 
@@ -47,7 +35,7 @@ void Engine::update()
     m_entityManager.update();
 }
 
-void Engine::render(sf::Sprite& backgroundSprite)
+void Engine::render()
 {
     m_window.clear();
     m_window.draw(backgroundSprite);
@@ -212,4 +200,11 @@ void Engine::createGameWindow()
     {
         m_window.setFramerateLimit(APP_FRAME_RATE);
     }
+
+    const std::string texturePath = "resources/assets/board.png";
+    if (!textureSprite.loadFromFile(texturePath)) {
+        std::string msg = "Unable to open textureSprite '" + texturePath + "'\n";
+        throw new std::runtime_error(msg);
+    }
+    backgroundSprite = sf::Sprite(textureSprite);
 }

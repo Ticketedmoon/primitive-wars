@@ -38,7 +38,7 @@ class Engine
         // Game loop logic
         static void listenForEvents();
         static void update();
-        void render(sf::Sprite& backgroundSprite);
+        void render();
 
     private:
         static inline void createGameWindow();
@@ -52,6 +52,8 @@ class Engine
     private:
         static inline sf::RenderWindow m_window;
         static inline EntityManager m_entityManager;
+        static inline sf::Texture textureSprite;
+        static inline sf::Sprite backgroundSprite;
 
 };
 
