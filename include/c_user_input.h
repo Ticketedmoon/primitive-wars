@@ -14,6 +14,7 @@ class CUserInput : public Component
         bool movingRight;
         bool movingUp;
         bool movingDown;
+        bool isShooting;
 };
 
 

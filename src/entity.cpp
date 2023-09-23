@@ -1,6 +1,6 @@
 #include "entity.h"
 
-Entity::Entity(size_t id, Entity::Type type) : m_id(id), m_type(type), m_alive(true)
+Entity::Entity(size_t id, Entity::Type type) : m_id(id), type(type), isAlive(true)
 {
 
 }

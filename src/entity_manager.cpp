@@ -5,17 +5,17 @@ void EntityManager::update()
     for (const std::shared_ptr<Entity>& e : m_entitiesToAdd)
     {
         m_entities.emplace_back(e);
-        m_entitiesByType[e->m_type].emplace_back(e);
+        m_entitiesByType[e->type].emplace_back(e);
     }
 
     m_entities.erase(std::remove_if(m_entities.begin(), m_entities.end(), [](std::shared_ptr<Entity>& entity) {
-        return !entity->m_alive;
+        return !entity->isAlive;
     }), m_entities.end());
 
     for (auto item: m_entitiesByType)
     {
         item.second.erase(std::remove_if(item.second.begin(), item.second.end(), [](std::shared_ptr<Entity>& entity) {
-            return !entity->m_alive;
+            return !entity->isAlive;
         }), item.second.end());
     }
 
@@ -33,7 +33,7 @@ std::shared_ptr<Entity>& EntityManager::addEntity(Entity::Type type)
 std::shared_ptr<Entity>& EntityManager::removeEntity(size_t id)
 {
     std::shared_ptr<Entity>& entity = m_entities.at(id);
-    entity->m_alive = false;
+    entity->isAlive = false;
     return entity;
 }
 

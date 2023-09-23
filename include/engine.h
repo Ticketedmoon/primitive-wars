@@ -43,13 +43,19 @@ class Engine
 
     private:
         static inline void createGameWindow();
-        static void createPlayer();
-        void spawnEnemy();
+        static void spawnPlayer();
+        static void spawnEnemy();
+        static void spawnBullet(sf::Vector2f playerPos);
+        static bool isCollidingAABB(const std::shared_ptr<CTransform>& transformComponentForEntity,
+                const std::shared_ptr<CRender>& renderComponentForEntity,
+                const std::shared_ptr<CTransform>& transformComponentForEnemy,
+        const std::shared_ptr<CRender>& renderComponentForEnemy);
 
         static void transformSystem();
         static void collisionSystem();
-        void enemySpawnSystem();
+        static void enemySpawnSystem();
         static void userInputSystem();
+        static void lifeSpanSystem();
         static void renderSystem();
 
     private:

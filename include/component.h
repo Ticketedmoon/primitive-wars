@@ -13,7 +13,8 @@ class Component
                 TRANSFORM,
                 USER_INPUT,
                 RENDER,
-                COLLISION
+                COLLISION,
+                LIFESPAN
         };
 
         virtual Type getType() = 0;
