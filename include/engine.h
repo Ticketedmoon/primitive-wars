@@ -37,7 +37,7 @@ static const uint32_t APP_FRAME_RATE = 60;
 static const std::string FONT_PATH = "resources/fonts/calibri.ttf";
 
 static const sf::String& PAUSED_TEXT = "GAME PAUSED";
-static const sf::Vector2<float>& PAUSED_TEXT_POSITION = sf::Vector2f(WINDOW_WIDTH / 2 - 12, WINDOW_HEIGHT / 2 - 48);
+static const sf::Vector2<float>& PAUSED_TEXT_POSITION = sf::Vector2f(WINDOW_WIDTH / 2 - 496, WINDOW_HEIGHT / 2 - 96);
 
 class Engine
 {
