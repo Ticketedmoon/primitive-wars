@@ -35,6 +35,12 @@ void Engine::listenForEvents()
 void Engine::update()
 {
     m_entityManager.update();
+
+    std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
+    if (players.empty())
+    {
+        spawnPlayer();
+    }
 }
 
 void Engine::render()
@@ -43,8 +49,8 @@ void Engine::render()
     m_window.draw(backgroundSprite);
 
     // Do something
-    enemySpawnSystem();
     userInputSystem();
+    enemySpawnSystem();
     collisionSystem();
     lifeSpanSystem();
     transformSystem();
@@ -178,9 +184,9 @@ void Engine::enemySpawnSystem()
 void Engine::collisionSystem()
 {
     std::vector<std::shared_ptr<Entity>> bulletsToUpdate = m_entityManager.getEntitiesByType(Entity::Type::BULLET);
-    for (const std::shared_ptr<Entity>& e: bulletsToUpdate)
+    for (const std::shared_ptr<Entity>& bullet: bulletsToUpdate)
     {
-        std::shared_ptr<CRender> renderComponentForEntity = std::dynamic_pointer_cast<CRender>(e->getComponentByType(Component::Type::RENDER));
+        std::shared_ptr<CRender> renderComponentForEntity = std::dynamic_pointer_cast<CRender>(bullet->getComponentByType(Component::Type::RENDER));
         std::ranges::filter_view enemiesFiltered = m_entityManager.getEntitiesByType(Entity::Type::ENEMY) |
                 std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
                     return e->hasComponent(Component::Type::TRANSFORM) &&
@@ -194,34 +200,62 @@ void Engine::collisionSystem()
             std::shared_ptr<CRender> renderComponentForEnemy = std::dynamic_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
             if (isCollidingAABB(renderComponentForEntity, renderComponentForEnemy))
             {
+                // kill enemy
                 enemy->isAlive = false;
+
+                // destroy bullet
+                bullet->isAlive = false;
             }
         }
     }
 
-    std::ranges::filter_view entitiesFiltered = m_entityManager.getEntities() | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
-        return e->type != Entity::Type::BULLET && e->hasComponent(Component::Type::TRANSFORM) && e->hasComponent(Component::Type::COLLISION) && e->hasComponent(Component::Type::RENDER);
+    std::ranges::filter_view playersFiltered = m_entityManager.getEntitiesByType(Entity::Type::PLAYER) | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
+        return e->hasComponent(Component::Type::TRANSFORM) && e->hasComponent(Component::Type::COLLISION) && e->hasComponent(Component::Type::RENDER);
     });
-    std::vector<std::shared_ptr<Entity>> entitiesToUpdate = std::vector(entitiesFiltered.begin(), entitiesFiltered.end());
+    std::ranges::filter_view enemiesFiltered = m_entityManager.getEntitiesByType(Entity::Type::ENEMY) | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
+        return e->hasComponent(Component::Type::TRANSFORM) && e->hasComponent(Component::Type::COLLISION) && e->hasComponent(Component::Type::RENDER);
+    });
 
-    for (const std::shared_ptr<Entity>& e: entitiesToUpdate)
+    std::vector<std::shared_ptr<Entity>> enemiesToUpdate = std::vector(enemiesFiltered.begin(), enemiesFiltered.end());
+    std::vector<std::shared_ptr<Entity>> playersToUpdate = std::vector(playersFiltered.begin(), playersFiltered.end());
+
+    for (const std::shared_ptr<Entity>& player: playersToUpdate)
     {
-        std::shared_ptr<CTransform> transformComponentForEntity = std::dynamic_pointer_cast<CTransform>(e->getComponentByType(Component::Type::TRANSFORM));
-        std::shared_ptr<CCollision> collisionComponentForEntity = std::dynamic_pointer_cast<CCollision>(e->getComponentByType(Component::Type::COLLISION));
-        std::shared_ptr<CRender> renderComponentForEntity = std::dynamic_pointer_cast<CRender>(e->getComponentByType(Component::Type::RENDER));
-
-        collisionComponentForEntity->isCollidingLeft = transformComponentForEntity->position.x <=
-                renderComponentForEntity->renderBody.getRadius();
-
-        collisionComponentForEntity->isCollidingRight = transformComponentForEntity->position.x >=
-                WINDOW_WIDTH - renderComponentForEntity->renderBody.getRadius();
-
-        collisionComponentForEntity->isCollidingUp = transformComponentForEntity->position.y <=
-                renderComponentForEntity->renderBody.getRadius();
-
-        collisionComponentForEntity->isCollidingDown = transformComponentForEntity->position.y >=
-                WINDOW_HEIGHT - renderComponentForEntity->renderBody.getRadius();
+        checkForWindowCollision(player);
+        for (const std::shared_ptr<Entity>& enemy: enemiesToUpdate)
+        {
+            std::shared_ptr<CRender> playerRenderComponent = std::dynamic_pointer_cast<CRender>(player->getComponentByType(Component::Type::RENDER));
+            std::shared_ptr<CRender> enemyRenderComponent = std::dynamic_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
+            if (isCollidingAABB(playerRenderComponent, enemyRenderComponent))
+            {
+                player->isAlive = false;
+            }
+        }
     }
+
+    for (const std::shared_ptr<Entity>& enemy: enemiesToUpdate)
+    {
+        checkForWindowCollision(enemy);
+    }
+}
+
+void Engine::checkForWindowCollision(const std::shared_ptr<Entity>& e)
+{
+    std::shared_ptr<CTransform> transformComponentForEntity = std::dynamic_pointer_cast<CTransform>(e->getComponentByType(Component::Type::TRANSFORM));
+    std::shared_ptr<CCollision> collisionComponentForEntity = std::dynamic_pointer_cast<CCollision>(e->getComponentByType(Component::Type::COLLISION));
+    std::shared_ptr<CRender> renderComponentForEntity = std::dynamic_pointer_cast<CRender>(e->getComponentByType(Component::Type::RENDER));
+
+    collisionComponentForEntity->isCollidingLeft = transformComponentForEntity->position.x <=
+            renderComponentForEntity->renderBody.getRadius();
+
+    collisionComponentForEntity->isCollidingRight = transformComponentForEntity->position.x >=
+            WINDOW_WIDTH - renderComponentForEntity->renderBody.getRadius();
+
+    collisionComponentForEntity->isCollidingUp = transformComponentForEntity->position.y <=
+            renderComponentForEntity->renderBody.getRadius();
+
+    collisionComponentForEntity->isCollidingDown = transformComponentForEntity->position.y >=
+            WINDOW_HEIGHT - renderComponentForEntity->renderBody.getRadius();
 }
 
 void Engine::lifeSpanSystem()

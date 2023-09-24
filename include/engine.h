@@ -68,6 +68,7 @@ class Engine
         static inline sf::Sprite backgroundSprite;
         static inline uint32_t frameNo;
 
+        static void checkForWindowCollision(const std::shared_ptr<Entity>& e);
 };
 
 #endif //PRIMITIVE_WARS_ENGINE_H
