@@ -14,6 +14,7 @@ class CUserInput : public Component
         bool isMovingRight;
         bool isMovingUp;
         bool isMovingDown;
+        bool isMousePressed;
 };
 
 

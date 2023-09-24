@@ -148,8 +148,18 @@ void Engine::userInputSystem()
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
             // TODO New component?
-            spawnBullet(transformComponentForEntity->position);
+            if (!userInputComponentForEntity->isMousePressed)
+            {
+                spawnBullet(transformComponentForEntity->position);
+            }
+            userInputComponentForEntity->isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
         }
+        else
+        {
+            userInputComponentForEntity->isMousePressed = false;
+        }
+
+
 
         // TODO for laptops or devices with a trackpad or without a mouse, can we add optional ways to shoot?
         //      - perhaps with the arrow keys
@@ -199,12 +209,16 @@ void Engine::collisionSystem()
         std::shared_ptr<CTransform> transformComponentForEntity = std::dynamic_pointer_cast<CTransform>(e->getComponentByType(Component::Type::TRANSFORM));
         std::shared_ptr<CCollision> collisionComponentForEntity = std::dynamic_pointer_cast<CCollision>(e->getComponentByType(Component::Type::COLLISION));
         std::shared_ptr<CRender> renderComponentForEntity = std::dynamic_pointer_cast<CRender>(e->getComponentByType(Component::Type::RENDER));
+
         collisionComponentForEntity->isCollidingLeft = transformComponentForEntity->position.x <=
                 renderComponentForEntity->renderBody.getRadius();
+
         collisionComponentForEntity->isCollidingRight = transformComponentForEntity->position.x >=
                 WINDOW_WIDTH - renderComponentForEntity->renderBody.getRadius();
+
         collisionComponentForEntity->isCollidingUp = transformComponentForEntity->position.y <=
                 renderComponentForEntity->renderBody.getRadius();
+
         collisionComponentForEntity->isCollidingDown = transformComponentForEntity->position.y >=
                 WINDOW_HEIGHT - renderComponentForEntity->renderBody.getRadius();
     }
@@ -285,7 +299,7 @@ void Engine::spawnPlayer()
     shape.setPosition(cTransform->position);
     shape.setFillColor(sf::Color::Transparent);
     shape.setOutlineColor(sf::Color::Red);
-    shape.setOutlineThickness(15.0f);
+    shape.setOutlineThickness(3.0f);
     cRender->renderBody = shape;
 
     std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER, cRender);
@@ -307,8 +321,8 @@ void Engine::spawnEnemy()
     std::shared_ptr<CTransform> cTransform = std::make_shared<CTransform>();
     cTransform->position = pos;
     cTransform->speed = sf::Vector2f(
-            std::experimental::randint(1, 5),
-            std::experimental::randint(1, 5)
+            std::experimental::randint(1, 3),
+            std::experimental::randint(1, 3)
     );
     std::pair transformPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::TRANSFORM, cTransform);
     e->m_componentsByType.insert(transformPair);
@@ -319,17 +333,17 @@ void Engine::spawnEnemy()
 
     std::shared_ptr<CRender> cRender = std::make_shared<CRender>();
 
-    int r = std::experimental::randint(100, 255);
-    int g = std::experimental::randint(100, 255);
-    int b = std::experimental::randint(100, 255);
+    int r = std::experimental::randint(50, 255);
+    int g = std::experimental::randint(50, 255);
+    int b = std::experimental::randint(50, 255);
     sf::Color color = sf::Color(r, g, b, 255);
 
     sf::CircleShape shape(radius, totalVertices);
     shape.setOrigin(radius, radius);
     shape.setPosition(cTransform->position);
-    shape.setFillColor(sf::Color::Transparent);
-    shape.setOutlineColor(color);
-    shape.setOutlineThickness(10.0f);
+    shape.setFillColor(color);
+    shape.setOutlineColor(sf::Color::White);
+    shape.setOutlineThickness(3.0f);
     cRender->renderBody = shape;
 
     std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER, cRender);
@@ -365,12 +379,12 @@ void Engine::spawnBullet(sf::Vector2f position)
     std::shared_ptr<CRender> cRender = std::make_shared<CRender>();
 
     float radius = 10.0f;
-    sf::CircleShape shape(radius, 3);
+    sf::CircleShape shape(radius);
     shape.setOrigin(radius, radius);
     shape.setPosition(cTransform->position);
-    shape.setFillColor(sf::Color(255, 0, 0, 255));
-    shape.setOutlineColor(sf::Color(0, 0, 0, 255));
-    shape.setOutlineThickness(5.0f);
+    shape.setFillColor(sf::Color::White);
+    shape.setOutlineColor(sf::Color::Black);
+    shape.setOutlineThickness(1.0f);
     cRender->renderBody = shape;
 
     std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER, cRender);
