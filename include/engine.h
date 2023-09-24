@@ -8,6 +8,8 @@
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
 
 #include <string_view>
@@ -32,6 +34,7 @@ static const uint32_t WINDOW_WIDTH = 1280;
 static const uint32_t WINDOW_HEIGHT = 720;
 static const bool USE_VERTICAL_SYNC = true;
 static const uint32_t APP_FRAME_RATE = 60;
+static const std::string FONT_PATH = "resources/fonts/calibri.ttf";
 
 class Engine
 {
@@ -47,12 +50,15 @@ class Engine
 
     private:
         static inline void createGameWindow();
+        void configureTextRendering();
+
         static void spawnPlayer();
         static void spawnEnemy();
         static void spawnBullet(sf::Vector2f position);
         static bool isCollidingAABB(
                 const std::shared_ptr<CRender>& renderComponentForEntity,
                 const std::shared_ptr<CRender>& renderComponentForEnemy);
+        void drawText(sf::String text, sf::Color fillColour, uint8_t characterSize, sf::Vector2f position);
 
         static void transformSystem();
         static void collisionSystem();
@@ -66,7 +72,10 @@ class Engine
         static inline EntityManager m_entityManager;
         static inline sf::Texture textureSprite;
         static inline sf::Sprite backgroundSprite;
-        static inline uint32_t frameNo;
+        static inline size_t frameNo;
+        static inline size_t score = 0;
+        static inline size_t totalDeaths;
+        static inline sf::Font m_font;
 
         static void checkForWindowCollision(const std::shared_ptr<Entity>& e);
 };

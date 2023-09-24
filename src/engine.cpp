@@ -3,6 +3,8 @@
 Engine::Engine()
 {
     createGameWindow();
+
+    configureTextRendering();
 }
 
 void Engine::startGameLoop()
@@ -53,6 +55,7 @@ void Engine::render()
 {
     m_window.clear();
     m_window.draw(backgroundSprite);
+    drawText("Score: " + std::to_string(score), sf::Color::White, 24, sf::Vector2f(20, 20));
 
     renderSystem();
 
@@ -174,7 +177,7 @@ void Engine::userInputSystem()
 
 void Engine::enemySpawnSystem()
 {
-    if (frameNo % 100 == 0)
+    if (frameNo % 250 == 0)
     {
         // spawn enemy
         spawnEnemy();
@@ -205,6 +208,44 @@ void Engine::collisionSystem()
 
                 // destroy bullet
                 bullet->isAlive = false;
+
+                // update score
+                size_t totalVertices = renderComponentForEnemy->renderBody.getPointCount();
+                score += (100 * totalVertices);
+
+                // animation
+                for (int i = 1; i <= totalVertices; i++)
+                {
+                    std::shared_ptr<Entity>& entity = m_entityManager.addEntity(Entity::Type::ENEMY);
+
+                    std::shared_ptr<CTransform> cTransform = std::make_shared<CTransform>();
+                    cTransform->position = sf::Vector2f(transformComponentForEnemy->position.x + (i * 10),
+                            transformComponentForEnemy->position.y + (i * -10));
+                    //cTransform->speed = sf::Vector2f(5, 5);
+                    std::shared_ptr<CCollision> cCollision = std::make_shared<CCollision>();
+                    std::shared_ptr<CLifespan> cLifespan = std::make_shared<CLifespan>(50);
+
+                    float radius = 30.0f;
+                    sf::CircleShape shape(radius, 8);
+                    shape.setOrigin(radius, radius);
+                    shape.setPosition(cTransform->position);
+                    shape.setFillColor(sf::Color::Transparent);
+                    shape.setOutlineColor(sf::Color::Red);
+                    shape.setOutlineThickness(3.0f);
+
+                    std::shared_ptr<CRender> cRender = std::make_shared<CRender>();
+                    cRender->renderBody = shape;
+
+                    std::pair transformPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::TRANSFORM, cTransform);
+                    std::pair collisionPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::COLLISION, cCollision);
+                    std::pair userInputPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::LIFESPAN, cLifespan);
+                    std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER, cRender);
+
+                    entity->m_componentsByType.insert(transformPair);
+                    entity->m_componentsByType.insert(collisionPair);
+                    entity->m_componentsByType.insert(userInputPair);
+                    entity->m_componentsByType.insert(renderPair);
+                }
             }
         }
     }
@@ -229,6 +270,8 @@ void Engine::collisionSystem()
             if (isCollidingAABB(playerRenderComponent, enemyRenderComponent))
             {
                 player->isAlive = false;
+
+                totalDeaths++;
             }
         }
     }
@@ -260,7 +303,7 @@ void Engine::checkForWindowCollision(const std::shared_ptr<Entity>& e)
 
 void Engine::lifeSpanSystem()
 {
-    std::ranges::filter_view view = m_entityManager.getEntitiesByType(Entity::Type::BULLET) | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
+    std::ranges::filter_view view = m_entityManager.getEntities() | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
         return e->hasComponent(Component::Type::LIFESPAN) && e->hasComponent(Component::Type::RENDER);
     });
     std::vector<std::shared_ptr<Entity>> entitiesToUpdate = std::vector(view.begin(), view.end());
@@ -455,5 +498,28 @@ bool Engine::isCollidingAABB(
         const std::shared_ptr<CRender>& renderComponentForEnemy)
 {
     return renderComponentForEntity->renderBody.getGlobalBounds()
-        .contains(renderComponentForEnemy->renderBody.getPosition());
+        .intersects(renderComponentForEnemy->renderBody.getGlobalBounds());
+}
+
+void Engine::drawText(sf::String text, sf::Color fillColour, uint8_t characterSize, sf::Vector2f position) {
+    sf::Text sf_text = sf::Text(text, m_font);
+    sf_text.setFillColor(fillColour);
+    sf_text.setCharacterSize(characterSize); // in pixels, not points!
+    sf_text.setPosition(position);
+
+    // TODO parameterise us
+    sf_text.setOutlineColor(sf::Color::Black);
+    sf_text.setOutlineThickness(2.0f);
+    sf_text.setLetterSpacing(3.0f);
+
+    m_window.draw(sf_text);
+}
+
+void Engine::configureTextRendering()
+{
+    if (!m_font.loadFromFile(FONT_PATH))
+    {
+        std::string msg = "Failed to load font from font path: " + FONT_PATH;
+        throw new std::runtime_error(msg);
+    }
 }
