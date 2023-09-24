@@ -12,11 +12,16 @@ void EntityManager::update()
         return !entity->isAlive;
     }), m_entities.end());
 
-    for (auto item: m_entitiesByType)
+    for (auto& item: m_entitiesByType)
     {
-        item.second.erase(std::remove_if(item.second.begin(), item.second.end(), [](std::shared_ptr<Entity>& entity) {
-            return !entity->isAlive;
-        }), item.second.end());
+        std::vector<std::shared_ptr<Entity>>& entitiesForType = item.second;
+        const auto& callback = std::remove_if(
+                entitiesForType.begin(),
+                entitiesForType.end(),
+                [](std::shared_ptr<Entity>& entity) {
+                    return !entity->isAlive;
+                });
+        entitiesForType.erase(callback, entitiesForType.end());
     }
 
     m_entitiesToAdd.clear();

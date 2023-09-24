@@ -14,7 +14,10 @@
 #include <ranges>
 #include <iostream>
 #include <memory>
+#include <numeric>
+
 #include <experimental/random>
+#include <cmath>
 
 #include "entity.h"
 #include "entity_manager.h"
@@ -22,6 +25,7 @@
 #include "c_user_input.h"
 #include "c_collision.h"
 #include "c_render.h"
+#include "c_lifespan.h"
 
 static constexpr std::string_view WINDOW_TITLE = "primitive-wars";
 static const uint32_t WINDOW_WIDTH = 1280;
@@ -45,11 +49,10 @@ class Engine
         static inline void createGameWindow();
         static void spawnPlayer();
         static void spawnEnemy();
-        static void spawnBullet(sf::Vector2f playerPos);
-        static bool isCollidingAABB(const std::shared_ptr<CTransform>& transformComponentForEntity,
+        static void spawnBullet(sf::Vector2f position);
+        static bool isCollidingAABB(
                 const std::shared_ptr<CRender>& renderComponentForEntity,
-                const std::shared_ptr<CTransform>& transformComponentForEnemy,
-        const std::shared_ptr<CRender>& renderComponentForEnemy);
+                const std::shared_ptr<CRender>& renderComponentForEnemy);
 
         static void transformSystem();
         static void collisionSystem();

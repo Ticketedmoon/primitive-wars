@@ -10,11 +10,10 @@ class CUserInput : public Component
     public:
         Type getType() override;
 
-        bool movingLeft;
-        bool movingRight;
-        bool movingUp;
-        bool movingDown;
-        bool isShooting;
+        bool isMovingLeft;
+        bool isMovingRight;
+        bool isMovingUp;
+        bool isMovingDown;
 };
 
 

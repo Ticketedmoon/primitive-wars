@@ -12,7 +12,7 @@ if (IS_RELEASE_MODE)
     set(CXXFLAGS  "-Wall -std=c++${CMAKE_CXX_STANDARD} -I./include -I./libs/headers -g -O2")
 else()
     message("-- Loading debug build, compiler optimisations disabled")
-    set(CXXFLAGS  "-Wall -std=c++${CMAKE_CXX_STANDARD} -I./include -I./libs/headers")
+    set(CXXFLAGS  "-Wall -std=c++${CMAKE_CXX_STANDARD} -I./include -I./libs/headers -g -O0")
 endif ()
 set(CMAKE_CXX_FLAGS "${CXXFLAGS}")
 

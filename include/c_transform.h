@@ -8,8 +8,8 @@ class CTransform : public Component
 
     public:
         sf::Vector2f position;
-        sf::Vector2f velocity;
-        sf::Vector2f rotation;
-        sf::Vector2f angle;
         sf::Vector2f speed;
+
+        // TODO temporary
+        sf::Vector2f speedDelta;
 };
