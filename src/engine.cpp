@@ -14,7 +14,11 @@ void Engine::startGameLoop()
     while (m_window.isOpen())
     {
         listenForEvents();
-        update();
+        if (!hasPaused)
+        {
+            update();
+        }
+
         render();
 
         frameNo++;
@@ -30,6 +34,13 @@ void Engine::listenForEvents()
         if (event.type == sf::Event::Closed)
         {
             m_window.close();
+        }
+        if (event.type == sf::Event::KeyReleased)
+        {
+            if (event.key.code == sf::Keyboard::Key::P)
+            {
+                hasPaused = !hasPaused;
+            }
         }
     }
 }
@@ -55,10 +66,18 @@ void Engine::render()
 {
     m_window.clear();
     m_window.draw(backgroundSprite);
-    const std::string& text = "Score: " + std::to_string(score) + "\nDeaths: " + std::to_string(totalDeaths);
-    drawText(text, sf::Color::White, 24, sf::Vector2f(20, 20));
 
     renderSystem();
+
+    const std::string text = "Score: " + std::to_string(score) + "\nDeaths: " + std::to_string(totalDeaths);
+    gameOverlayText.setString(text);
+
+    drawText(gameOverlayText, sf::Color::White, 24, sf::Vector2f(128, 36));
+
+    if (hasPaused)
+    {
+        drawText(pauseText, sf::Color::Green, 128, PAUSED_TEXT_POSITION);
+    }
 
     m_window.display();
 }
@@ -169,8 +188,6 @@ void Engine::userInputSystem()
             userInputComponentForEntity->isMousePressed = false;
         }
 
-
-
         // TODO for laptops or devices with a trackpad or without a mouse, can we add optional ways to shoot?
         //      - perhaps with the arrow keys
     }
@@ -178,7 +195,7 @@ void Engine::userInputSystem()
 
 void Engine::enemySpawnSystem()
 {
-    if (frameNo % 250 == 0)
+    if (frameNo % 50 == 0)
     {
         // spawn enemy
         spawnEnemy();
@@ -217,13 +234,12 @@ void Engine::collisionSystem()
                 // animation
                 for (int i = 1; i <= totalVertices; i++)
                 {
-                    std::shared_ptr<Entity>& entity = m_entityManager.addEntity(Entity::Type::ENEMY);
+                    std::shared_ptr<Entity>& entity = m_entityManager.addEntity(Entity::Type::ENEMY_DEATH_ANIMATION);
 
                     std::shared_ptr<CTransform> cTransform = std::make_shared<CTransform>();
                     cTransform->position = sf::Vector2f(transformComponentForEnemy->position.x + (i * 10),
                             transformComponentForEnemy->position.y + (i * -10));
                     //cTransform->speed = sf::Vector2f(5, 5);
-                    std::shared_ptr<CCollision> cCollision = std::make_shared<CCollision>();
                     std::shared_ptr<CLifespan> cLifespan = std::make_shared<CLifespan>(50);
 
                     float radius = 30.0f;
@@ -238,12 +254,10 @@ void Engine::collisionSystem()
                     cRender->renderBody = shape;
 
                     std::pair transformPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::TRANSFORM, cTransform);
-                    std::pair collisionPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::COLLISION, cCollision);
                     std::pair userInputPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::LIFESPAN, cLifespan);
                     std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER, cRender);
 
                     entity->m_componentsByType.insert(transformPair);
-                    entity->m_componentsByType.insert(collisionPair);
                     entity->m_componentsByType.insert(userInputPair);
                     entity->m_componentsByType.insert(renderPair);
                 }
@@ -270,7 +284,11 @@ void Engine::collisionSystem()
             std::shared_ptr<CRender> enemyRenderComponent = std::dynamic_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
             if (isCollidingAABB(playerRenderComponent, enemyRenderComponent))
             {
+                // kill player
                 player->isAlive = false;
+
+                // kill enemy
+                enemy->isAlive = false;
 
                 totalDeaths++;
             }
@@ -502,18 +520,22 @@ bool Engine::isCollidingAABB(
         .intersects(renderComponentForEnemy->renderBody.getGlobalBounds());
 }
 
-void Engine::drawText(sf::String text, sf::Color fillColour, uint8_t characterSize, sf::Vector2f position) {
-    sf::Text sf_text = sf::Text(text, m_font);
-    sf_text.setFillColor(fillColour);
-    sf_text.setCharacterSize(characterSize); // in pixels, not points!
-    sf_text.setPosition(position);
+void Engine::drawText(sf::Text& text, const sf::Color& fillColour, const uint8_t characterSize,
+        sf::Vector2f position) {
+    text.setFillColor(fillColour);
+    text.setCharacterSize(characterSize); // in pixels, not points!
+
+    const sf::FloatRect& textRect = text.getLocalBounds();
+    text.setOrigin(textRect.width/2, textRect.height/2);
+
+    text.setPosition(position);
 
     // TODO parameterise us
-    sf_text.setOutlineColor(sf::Color::Black);
-    sf_text.setOutlineThickness(2.0f);
-    sf_text.setLetterSpacing(3.0f);
+    text.setOutlineColor(sf::Color::Black);
+    text.setOutlineThickness(2.0f);
+    text.setLetterSpacing(3.0f);
 
-    m_window.draw(sf_text);
+    m_window.draw(text);
 }
 
 void Engine::configureTextRendering()
@@ -523,4 +545,7 @@ void Engine::configureTextRendering()
         std::string msg = "Failed to load font from font path: " + FONT_PATH;
         throw new std::runtime_error(msg);
     }
+
+    gameOverlayText = sf::Text("", m_font);
+    pauseText = sf::Text(PAUSED_TEXT, m_font);
 }

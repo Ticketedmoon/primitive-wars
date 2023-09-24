@@ -23,7 +23,8 @@ class Entity
         {
             PLAYER,
             ENEMY,
-            BULLET
+            BULLET,
+            ENEMY_DEATH_ANIMATION
         };
 
         Type type;

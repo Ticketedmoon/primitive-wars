@@ -36,6 +36,9 @@ static const bool USE_VERTICAL_SYNC = true;
 static const uint32_t APP_FRAME_RATE = 60;
 static const std::string FONT_PATH = "resources/fonts/calibri.ttf";
 
+static const sf::String& PAUSED_TEXT = "GAME PAUSED";
+static const sf::Vector2<float>& PAUSED_TEXT_POSITION = sf::Vector2f(WINDOW_WIDTH / 2 - 12, WINDOW_HEIGHT / 2 - 48);
+
 class Engine
 {
     public:
@@ -58,7 +61,8 @@ class Engine
         static bool isCollidingAABB(
                 const std::shared_ptr<CRender>& renderComponentForEntity,
                 const std::shared_ptr<CRender>& renderComponentForEnemy);
-        void drawText(sf::String text, sf::Color fillColour, uint8_t characterSize, sf::Vector2f position);
+        static void drawText(sf::Text& text, const sf::Color& fillColour, uint8_t characterSize,
+                sf::Vector2f position);
 
         static void transformSystem();
         static void collisionSystem();
@@ -76,6 +80,9 @@ class Engine
         static inline size_t score = 0;
         static inline size_t totalDeaths;
         static inline sf::Font m_font;
+        static inline sf::Text gameOverlayText;
+        static inline sf::Text pauseText;
+        static inline bool hasPaused;
 
         static void checkForWindowCollision(const std::shared_ptr<Entity>& e);
 };
