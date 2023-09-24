@@ -55,7 +55,8 @@ void Engine::render()
 {
     m_window.clear();
     m_window.draw(backgroundSprite);
-    drawText("Score: " + std::to_string(score), sf::Color::White, 24, sf::Vector2f(20, 20));
+    const std::string& text = "Score: " + std::to_string(score) + "\nDeaths: " + std::to_string(totalDeaths);
+    drawText(text, sf::Color::White, 24, sf::Vector2f(20, 20));
 
     renderSystem();
 
