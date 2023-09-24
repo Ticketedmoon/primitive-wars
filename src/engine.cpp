@@ -41,6 +41,12 @@ void Engine::update()
     {
         spawnPlayer();
     }
+
+    userInputSystem();
+    enemySpawnSystem();
+    collisionSystem();
+    lifeSpanSystem();
+    transformSystem();
 }
 
 void Engine::render()
@@ -48,12 +54,6 @@ void Engine::render()
     m_window.clear();
     m_window.draw(backgroundSprite);
 
-    // Do something
-    userInputSystem();
-    enemySpawnSystem();
-    collisionSystem();
-    lifeSpanSystem();
-    transformSystem();
     renderSystem();
 
     m_window.display();
