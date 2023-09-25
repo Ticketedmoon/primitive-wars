@@ -45,7 +45,7 @@ class Engine
 {
     public:
         Engine();
-        void startGameLoop();
+        static void startGameLoop();
 
     private:
         // Game loop logic

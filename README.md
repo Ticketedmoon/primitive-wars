@@ -2,7 +2,11 @@
 
 ### What is this project?
 A simple 2D game where you play as a rotating geometrical shape and must destroy other rotating geometrical shapes that spawn over time.
-Move around with `W, S, A, D` and shoot to click with your mouse.
+
+**Controls:**
+- Move around with `W, S, A, D` or the arrow keys. 
+- `left-click` to shoot with your mouse.
+- `right-click` to activate a special power. 
 
 ---
 
