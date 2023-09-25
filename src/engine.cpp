@@ -3,19 +3,16 @@
 Engine::Engine()
 {
     createGameWindow();
-
     configureTextRendering();
+    spawnPlayer();
 }
 
 void Engine::startGameLoop()
 {
-    spawnPlayer();
-
     while (m_window.isOpen())
     {
         update();
         render();
-
         frameNo++;
     }
 }

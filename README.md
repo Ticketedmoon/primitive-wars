@@ -7,6 +7,7 @@ A simple 2D game where you play as a rotating geometrical shape and must destroy
 - Move around with `W, S, A, D` or the arrow keys. 
 - `left-click` to shoot with your mouse.
 - `right-click` to activate a special power. 
+- `p` to pause the game.
 
 ---
 
