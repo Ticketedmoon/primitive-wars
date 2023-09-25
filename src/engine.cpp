@@ -27,7 +27,10 @@ void Engine::update()
     std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
     if (players.empty())
     {
-        spawnPlayer();
+        if (worldClock.getElapsedTime().asSeconds() > playerDeadTimer)
+        {
+            spawnPlayer();
+        }
     }
 
    if (hasPaused)
@@ -50,14 +53,29 @@ void Engine::render()
 
     renderSystem();
 
-    const std::string text = "Score: " + std::to_string(score) + "\nDeaths: " + std::to_string(totalDeaths);
+    uint8_t coolDownSeconds = worldClock.getElapsedTime().asSeconds() > specialAttackCoolDown
+            ? 0.0f
+            : std::ceil(specialAttackCoolDown - worldClock.getElapsedTime().asSeconds());
+
+    const std::string text = "Score: " + std::to_string(score) + "\n"
+            + "Deaths: " + std::to_string(totalDeaths) + "\n"
+            + "Special Attack Cooldown: " + std::to_string(coolDownSeconds);
+
     gameOverlayText.setString(text);
 
-    drawText(gameOverlayText, sf::Color::White, 24, sf::Vector2f(24, 12));
+    drawText(gameOverlayText, sf::Color::Yellow, 24, sf::Vector2f(24, 12));
+
+    std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
+    if (players.empty())
+    {
+        uint8_t respawnTime = (playerDeadTimer - worldClock.getElapsedTime().asSeconds()) + 1;
+        respawnText.setString("Respawn Time: " + std::to_string(respawnTime));
+        drawText(respawnText, sf::Color::Yellow, 72, sf::Vector2f(WINDOW_WIDTH / 2 - 324, WINDOW_HEIGHT / 2 - 64));
+    }
 
     if (hasPaused)
     {
-        drawText(pauseText, sf::Color::Green, 128, PAUSED_TEXT_POSITION);
+        drawText(pauseText, sf::Color::Green, 128, CENTRE_SCREEN_POSITION);
     }
 
     m_window.display();
@@ -196,15 +214,20 @@ void Engine::userInputSystem()
                 }
                 if (event.mouseButton.button == sf::Mouse::Right)
                 {
-                    // TODO Add cooldown for special move, maybe once every 10 seconds.
-                    //      Show cooldown timer on screen
+                    if (specialAttackCoolDown > worldClock.getElapsedTime().asSeconds())
+                    {
+                        return;
+                    }
+
+                    specialAttackCoolDown = (worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
+                    
                     float PI = std::numbers::pi_v<float> * 2;
                     size_t totalVertices = 15;
 
                     for (int i = 0; i < totalVertices; i++)
                     {
                         double shotAngle = (PI / totalVertices) * i;
-                        const SpawnProperties& properties = SpawnProperties(Entity::Type::BULLET, shotAngle, true, sf::Vector2f(5.0f, 5.0f));
+                        const SpawnProperties& properties = SpawnProperties(Entity::Type::BULLET, shotAngle, true, sf::Vector2f(7.5f, 7.5f));
                         spawnDuplicateEnemyForAnimation(e, properties);
                     }
                 }
@@ -217,7 +240,7 @@ void Engine::userInputSystem()
 
 void Engine::enemySpawnSystem()
 {
-    if (frameNo % 150 == 0)
+    if (frameNo % 100 == 0)
     {
         // spawn enemy
         spawnEnemy();
@@ -287,8 +310,20 @@ void Engine::collisionSystem()
                 // kill player
                 player->isAlive = false;
 
+                playerDeadTimer = (worldClock.getElapsedTime().asSeconds() + PLAYER_DEAD_TIME_OFFSET);
+
                 // kill enemy
                 enemy->isAlive = false;
+
+                // animation
+                size_t totalVertices = enemyRenderComponent->renderBody.getPointCount();
+                float PI = std::numbers::pi_v<float> * 2;
+                for (int i = 0; i < totalVertices; i++)
+                {
+                    double shotAngle = (PI / totalVertices) * i;
+                    const SpawnProperties& properties = SpawnProperties(Entity::Type::ENEMY, shotAngle, false, sf::Vector2f(2.0f, 2.0f));
+                    spawnDuplicateEnemyForAnimation(enemy, properties);
+                }
 
                 totalDeaths++;
             }
@@ -426,15 +461,6 @@ void Engine::spawnEnemy()
         std::shared_ptr<CRender> cNewEnemyRender = std::make_shared<CRender>();
         sf::CircleShape shape(radius, totalVertices);
         shape.setPosition(pos);
-        while (isCollidingAABB(cPlayerRender, cNewEnemyRender))
-        {
-            pos = sf::Vector2f(
-                    std::experimental::randint(radius, static_cast<int>(WINDOW_WIDTH - radius)),
-                    std::experimental::randint(radius, static_cast<int>(WINDOW_HEIGHT - radius))
-            );
-            shape.setPosition(pos);
-        }
-
         int r = std::experimental::randint(50, 255);
         int g = std::experimental::randint(50, 255);
         int b = std::experimental::randint(50, 255);
@@ -444,14 +470,20 @@ void Engine::spawnEnemy()
         shape.setFillColor(color);
         shape.setOutlineColor(sf::Color::White);
         shape.setOutlineThickness(3.0f);
-        cNewEnemyRender->renderBody = shape;
 
+        if (isNearPlayer(cPlayerRender->renderBody.getGlobalBounds(), shape.getGlobalBounds()))
+        {
+            float pos = radius * 2;
+            shape.setPosition(pos, pos);
+        }
+
+        cNewEnemyRender->renderBody = shape;
         std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER,
                 cNewEnemyRender);
         e->m_componentsByType.insert(renderPair);
 
         std::shared_ptr<CTransform> cTransform = std::make_shared<CTransform>();
-        cTransform->position = pos;
+        cTransform->position = shape.getPosition();
         cTransform->speed = sf::Vector2f(
                 std::experimental::randint(1, 3),
                 std::experimental::randint(1, 3)
@@ -583,6 +615,25 @@ bool Engine::isCollidingAABB(
         .intersects(renderComponentForEnemy->renderBody.getGlobalBounds());
 }
 
+/*
+ * This is about nearness and not collision.
+ * We do not want an enemy to spawn on-top or even close-by to the player as this is either impossible or very difficult
+ * to react to, and does not provide a good user experience.
+ */
+bool Engine::isNearPlayer(
+        sf::FloatRect playerBoundingBox,
+        sf::FloatRect enemyBoundingBox)
+{
+    // Make player rect larger for this calculation so enemies are not 'near'
+    int offsetPx = 256;
+    playerBoundingBox.left = (playerBoundingBox.left - offsetPx) < 0 ? 0 : (playerBoundingBox.left - offsetPx);
+    playerBoundingBox.top = (playerBoundingBox.top - offsetPx) < 0 ? 0 : (playerBoundingBox.top - offsetPx);
+    playerBoundingBox.width = playerBoundingBox.width + offsetPx;
+    playerBoundingBox.height = playerBoundingBox.height + offsetPx;
+
+    return playerBoundingBox.contains(sf::Vector2f(enemyBoundingBox.left, enemyBoundingBox.top));
+}
+
 void Engine::drawText(sf::Text& text, const sf::Color& fillColour, const uint8_t characterSize,
         sf::Vector2f position) {
     text.setFillColor(fillColour);
@@ -591,7 +642,7 @@ void Engine::drawText(sf::Text& text, const sf::Color& fillColour, const uint8_t
 
     // TODO parameterise us
     text.setOutlineColor(sf::Color::Black);
-    text.setOutlineThickness(2.0f);
+    text.setOutlineThickness(3.0f);
     text.setLetterSpacing(3.0f);
 
     m_window.draw(text);
@@ -606,5 +657,6 @@ void Engine::configureTextRendering()
     }
 
     gameOverlayText = sf::Text("", m_font);
+    respawnText = sf::Text("", m_font);
     pauseText = sf::Text(PAUSED_TEXT, m_font);
 }
