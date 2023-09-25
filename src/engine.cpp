@@ -13,35 +13,10 @@ void Engine::startGameLoop()
 
     while (m_window.isOpen())
     {
-        listenForEvents();
-        if (!hasPaused)
-        {
-            update();
-        }
-
+        update();
         render();
 
         frameNo++;
-    }
-}
-
-void Engine::listenForEvents()
-{
-    sf::Event event{};
-
-    while (m_window.pollEvent(event))
-    {
-        if (event.type == sf::Event::Closed)
-        {
-            m_window.close();
-        }
-        if (event.type == sf::Event::KeyReleased)
-        {
-            if (event.key.code == sf::Keyboard::Key::P)
-            {
-                hasPaused = !hasPaused;
-            }
-        }
     }
 }
 
@@ -54,6 +29,12 @@ void Engine::update()
     {
         spawnPlayer();
     }
+
+   if (hasPaused)
+   {
+       userInputSystem();
+       return;
+   }
 
     userInputSystem();
     enemySpawnSystem();
@@ -163,37 +144,72 @@ void Engine::transformSystem()
 
 void Engine::userInputSystem()
 {
-    std::ranges::filter_view view = m_entityManager.getEntitiesByType(Entity::Type::PLAYER) | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
-        return e->hasComponent(Component::Type::USER_INPUT);
-    });
-    std::vector<std::shared_ptr<Entity>> entitiesToUpdate = std::vector(view.begin(), view.end());
-    for (const std::shared_ptr<Entity>& e : entitiesToUpdate)
+    sf::Event event{};
+
+    while (m_window.pollEvent(event))
     {
-        std::shared_ptr<CUserInput> userInputComponentForEntity = std::dynamic_pointer_cast<CUserInput> (e->getComponentByType(Component::Type::USER_INPUT));
-        std::shared_ptr<CTransform> transformComponentForEntity = std::dynamic_pointer_cast<CTransform> (e->getComponentByType(Component::Type::TRANSFORM));
-
-        userInputComponentForEntity->isMovingLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A);
-        userInputComponentForEntity->isMovingRight = sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D);
-        userInputComponentForEntity->isMovingUp = sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W);
-        userInputComponentForEntity->isMovingDown = sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S);
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        if (event.type == sf::Event::Closed)
         {
-            // TODO New component?
-            if (!userInputComponentForEntity->isMousePressed)
+            m_window.close();
+        }
+
+        if (event.type == sf::Event::KeyReleased)
+        {
+            if (event.key.code == sf::Keyboard::Key::P)
             {
-                sf::Vector2f targetDestinationForBullet = m_window.mapPixelToCoords(sf::Mouse::getPosition(m_window));
-                float h = targetDestinationForBullet.y - transformComponentForEntity->position.y;
-                float a = targetDestinationForBullet.x - transformComponentForEntity->position.x;
-                double shotAngle = atan2(h, a);
-                spawnBullet(transformComponentForEntity->position, shotAngle);
+                hasPaused = !hasPaused;
             }
-            userInputComponentForEntity->isMousePressed = sf::Mouse::isButtonPressed(sf::Mouse::Left);
-        }
-        else
-        {
-            userInputComponentForEntity->isMousePressed = false;
         }
 
+        if (hasPaused)
+        {
+            return;
+        }
+
+        std::ranges::filter_view view = m_entityManager.getEntitiesByType(Entity::Type::PLAYER) | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
+            return e->hasComponent(Component::Type::USER_INPUT);
+        });
+        std::vector<std::shared_ptr<Entity>> entitiesToUpdate = std::vector(view.begin(), view.end());
+        for (const std::shared_ptr<Entity>& e : entitiesToUpdate)
+        {
+            std::shared_ptr<CUserInput> userInputComponentForEntity = std::dynamic_pointer_cast<CUserInput> (e->getComponentByType(Component::Type::USER_INPUT));
+
+            userInputComponentForEntity->isMovingLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
+                    sf::Keyboard::isKeyPressed(sf::Keyboard::A);
+            userInputComponentForEntity->isMovingRight = sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
+                    sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+            userInputComponentForEntity->isMovingUp = sf::Keyboard::isKeyPressed(sf::Keyboard::Up) ||
+                    sf::Keyboard::isKeyPressed(sf::Keyboard::W);
+            userInputComponentForEntity->isMovingDown = sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ||
+                    sf::Keyboard::isKeyPressed(sf::Keyboard::S);
+
+            if (event.type == sf::Event::MouseButtonPressed)
+            {
+                if (event.mouseButton.button == sf::Mouse::Left)
+                {
+                    std::shared_ptr<CTransform> transformComponentForEntity = std::dynamic_pointer_cast<CTransform> (e->getComponentByType(Component::Type::TRANSFORM));
+                    sf::Vector2f targetDestinationForBullet = m_window.mapPixelToCoords(sf::Mouse::getPosition(m_window));
+                    float h = targetDestinationForBullet.y - transformComponentForEntity->position.y;
+                    float a = targetDestinationForBullet.x - transformComponentForEntity->position.x;
+                    double shotAngle = atan2(h, a);
+                    spawnBullet(transformComponentForEntity->position, shotAngle);
+                }
+                if (event.mouseButton.button == sf::Mouse::Right)
+                {
+                    // TODO Add cooldown for special move, maybe once every 10 seconds.
+                    //      Show cooldown timer on screen
+                    float PI = std::numbers::pi_v<float> * 2;
+                    size_t totalVertices = 15;
+
+                    for (int i = 0; i < totalVertices; i++)
+                    {
+                        double shotAngle = (PI / totalVertices) * i;
+                        const SpawnProperties& properties = SpawnProperties(Entity::Type::BULLET, shotAngle, true, sf::Vector2f(5.0f, 5.0f));
+                        spawnDuplicateEnemyForAnimation(e, properties);
+                    }
+                }
+            }
+        }
         // TODO for laptops or devices with a trackpad or without a mouse, can we add optional ways to shoot?
         //      - perhaps with the arrow keys
     }
@@ -242,7 +258,8 @@ void Engine::collisionSystem()
                 for (int i = 0; i < totalVertices; i++)
                 {
                     double shotAngle = (PI / totalVertices) * i;
-                    spawnDuplicateEnemyForAnimation(enemy, shotAngle);
+                    const SpawnProperties& properties = SpawnProperties(Entity::Type::ENEMY, shotAngle, false, sf::Vector2f(2.0f, 2.0f));
+                    spawnDuplicateEnemyForAnimation(enemy, properties);
                 }
             }
         }
@@ -452,18 +469,25 @@ void Engine::spawnEnemy()
     }
 }
 
-void Engine::spawnDuplicateEnemyForAnimation(const std::shared_ptr<Entity>& enemyEntity, const double shotAngle)
+void Engine::spawnDuplicateEnemyForAnimation(const std::shared_ptr<Entity>& entity, SpawnProperties spawnProperties)
 {
     std::shared_ptr<CTransform> cTransformForExistingEnemy =
-            std::dynamic_pointer_cast<CTransform>(enemyEntity->getComponentByType(Component::Type::TRANSFORM));
+            std::dynamic_pointer_cast<CTransform>(entity->getComponentByType(Component::Type::TRANSFORM));
     
-    std::shared_ptr<Entity>& e = m_entityManager.addEntity(Entity::Type::ENEMY);
+    std::shared_ptr<Entity>& e = m_entityManager.addEntity(spawnProperties.entityType);
+
+    if (spawnProperties.isCollidable)
+    {
+        std::shared_ptr<CCollision> cCollision = std::make_shared<CCollision>();
+        std::pair collisionPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::COLLISION, cCollision);
+        e->m_componentsByType.insert(collisionPair);
+    }
 
     std::shared_ptr<CTransform> cEnemyAnimationTransform = std::make_shared<CTransform>();
 
     cEnemyAnimationTransform->position = sf::Vector2f(cTransformForExistingEnemy->position);
-    cEnemyAnimationTransform->speed = sf::Vector2f(2.0f, 2.0f);
-    cEnemyAnimationTransform->speedDelta = sf::Vector2f(cos(shotAngle) * 1.0f, sin(shotAngle) * 1.0f);
+    cEnemyAnimationTransform->speed = spawnProperties.speed;
+    cEnemyAnimationTransform->speedDelta = sf::Vector2f(cos(spawnProperties.shotAngle) * 1.0f, sin(spawnProperties.shotAngle) * 1.0f);
 
     std::pair transformPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::TRANSFORM, cEnemyAnimationTransform);
     e->m_componentsByType.insert(transformPair);
@@ -473,7 +497,7 @@ void Engine::spawnDuplicateEnemyForAnimation(const std::shared_ptr<Entity>& enem
     e->m_componentsByType.insert(lifespanPair);
 
     std::shared_ptr<CRender> cRenderForExistingEnemy =
-            std::dynamic_pointer_cast<CRender>(enemyEntity->getComponentByType(Component::Type::RENDER));
+            std::dynamic_pointer_cast<CRender>(entity->getComponentByType(Component::Type::RENDER));
     
     std::shared_ptr<CRender> cRender = std::make_shared<CRender>();
     float radius = cRenderForExistingEnemy->renderBody.getRadius() / 3;

@@ -47,23 +47,31 @@ class Engine
 
     private:
         // Game loop logic
-        static void listenForEvents();
         static void update();
         void render();
 
     private:
+        struct SpawnProperties
+        {
+            Entity::Type entityType;
+            double shotAngle;
+            bool isCollidable;
+            sf::Vector2f speed;
+        };
+
         static inline void createGameWindow();
         void configureTextRendering();
 
         static void spawnPlayer();
         static void spawnEnemy();
         static void spawnBullet(sf::Vector2f position, double shotAngle);
-        static void spawnDuplicateEnemyForAnimation(const std::shared_ptr<Entity>& enemyEntity, double shotAngle);
+        static void spawnDuplicateEnemyForAnimation(const std::shared_ptr<Entity>& entity, SpawnProperties spawnProperties);
         static bool isCollidingAABB(
                 const std::shared_ptr<CRender>& renderComponentForEntity,
                 const std::shared_ptr<CRender>& renderComponentForEnemy);
         static void drawText(sf::Text& text, const sf::Color& fillColour, uint8_t characterSize,
                 sf::Vector2f position);
+        static void checkForWindowCollision(const std::shared_ptr<Entity>& e);
 
         static void transformSystem();
         static void collisionSystem();
@@ -73,6 +81,7 @@ class Engine
         static void renderSystem();
 
     private:
+
         static inline sf::RenderWindow m_window;
         static inline EntityManager m_entityManager;
         static inline sf::Texture textureSprite;
@@ -84,8 +93,6 @@ class Engine
         static inline sf::Text gameOverlayText;
         static inline sf::Text pauseText;
         static inline bool hasPaused;
-
-        static void checkForWindowCollision(const std::shared_ptr<Entity>& e);
 };
 
 #endif //PRIMITIVE_WARS_ENGINE_H
