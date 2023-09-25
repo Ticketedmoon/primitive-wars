@@ -20,27 +20,21 @@ void Engine::startGameLoop()
 void Engine::update()
 {
     m_entityManager.update();
-
     std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
-    if (players.empty())
+    if (players.empty() && worldClock.getElapsedTime().asSeconds() > playerDeadTimer)
     {
-        if (worldClock.getElapsedTime().asSeconds() > playerDeadTimer)
-        {
-            spawnPlayer();
-        }
+        spawnPlayer();
     }
 
-   if (hasPaused)
-   {
-       userInputSystem();
-       return;
-   }
-
     userInputSystem();
-    enemySpawnSystem();
-    collisionSystem();
-    lifeSpanSystem();
-    transformSystem();
+    if (!hasPaused)
+    {
+        userInputSystem();
+        enemySpawnSystem();
+        collisionSystem();
+        lifeSpanSystem();
+        transformSystem();
+    }
 }
 
 void Engine::render()
@@ -157,6 +151,8 @@ void Engine::transformSystem()
     }
 }
 
+// TODO
+//  For laptops or devices with a trackpad or without a mouse, can we add optional ways to shoot?
 void Engine::userInputSystem()
 {
     sf::Event event{};
@@ -230,8 +226,6 @@ void Engine::userInputSystem()
                 }
             }
         }
-        // TODO for laptops or devices with a trackpad or without a mouse, can we add optional ways to shoot?
-        //      - perhaps with the arrow keys
     }
 }
 
@@ -424,13 +418,13 @@ void Engine::spawnPlayer()
 
     std::shared_ptr<CRender> cRender = std::make_shared<CRender>();
 
-    float radius = 30.0f;
-    sf::CircleShape shape(radius, 8);
+    float radius = 20.0f;
+    sf::CircleShape shape(radius, 3);
     shape.setOrigin(radius, radius);
     shape.setPosition(cTransform->position);
-    shape.setFillColor(sf::Color::Transparent);
+    shape.setFillColor(sf::Color::Black);
     shape.setOutlineColor(sf::Color::Red);
-    shape.setOutlineThickness(3.0f);
+    shape.setOutlineThickness(5.0f);
     cRender->renderBody = shape;
 
     std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER, cRender);
