@@ -1,3 +1,4 @@
+#include <iostream>
 #include "entity.h"
 
 Entity::Entity(size_t id, Entity::Type type) : m_id(id), type(type), isAlive(true)
@@ -5,13 +6,12 @@ Entity::Entity(size_t id, Entity::Type type) : m_id(id), type(type), isAlive(tru
 
 }
 
-bool Entity::hasComponent(Component::Type type) const
+bool Entity::hasComponent(const Component::Type componentType) const
 {
-    return m_componentsByType.contains(type);
+    return  m_componentsByType.contains(componentType);
 }
 
-std::shared_ptr<Component> Entity::getComponentByType(Component::Type type) const
+std::shared_ptr<Component> Entity::getComponentByType(const Component::Type componentType)
 {
-    std::shared_ptr<Component> component = m_componentsByType.at(type);
-    return component;
+    return m_componentsByType[componentType];
 }

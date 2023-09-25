@@ -57,7 +57,8 @@ class Engine
 
         static void spawnPlayer();
         static void spawnEnemy();
-        static void spawnBullet(sf::Vector2f position);
+        static void spawnBullet(sf::Vector2f position, double shotAngle);
+        static void spawnDuplicateEnemyForAnimation(const std::shared_ptr<Entity>& enemyEntity, double shotAngle);
         static bool isCollidingAABB(
                 const std::shared_ptr<CRender>& renderComponentForEntity,
                 const std::shared_ptr<CRender>& renderComponentForEnemy);

@@ -15,16 +15,15 @@ class Entity
     public:
         friend class EntityManager;
 
-        [[nodiscard]] bool hasComponent(Component::Type type) const;
+        [[nodiscard]] bool hasComponent(const Component::Type componentType) const;
 
-        std::shared_ptr<Component> getComponentByType(Component::Type type) const;
+        std::shared_ptr<Component> getComponentByType(const Component::Type componentType);
 
         enum class Type
         {
             PLAYER,
             ENEMY,
-            BULLET,
-            ENEMY_DEATH_ANIMATION
+            BULLET
         };
 
         Type type;
