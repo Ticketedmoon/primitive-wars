@@ -6,6 +6,18 @@ Move around with `W, S, A, D` and shoot to click with your mouse.
 
 ---
 
+### Project Architecture?
+- This game is built using an ECS architecture
+
+---
+
+### Tools & Libraries
+- C++
+- SFML
+- CMake
+
+---
+
 ### Dev Log
 
 #### 2023-09-24
@@ -28,13 +40,3 @@ Move around with `W, S, A, D` and shoot to click with your mouse.
 ![Mon 25 Sep 2023 20:44:33 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/30642de9-f648-40d4-88b6-16d9e85540fa)
 
 ---
-
-### Project Architecture?
-- This game is built using an ECS architecture
-
----
-
-### Tools & Libraries
-- C++
-- SFML
-- CMake
