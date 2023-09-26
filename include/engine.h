@@ -17,6 +17,7 @@
 #include <iostream>
 #include <memory>
 #include <numeric>
+#include <cassert>
 
 #include <experimental/random>
 #include <cmath>

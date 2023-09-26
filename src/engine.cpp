@@ -495,10 +495,9 @@ void Engine::createGameWindow()
     }
 
     const std::string texturePath = "resources/assets/board.png";
-    if (!textureSprite.loadFromFile(texturePath)) {
-        std::string msg = "Unable to open textureSprite '" + texturePath + "'\n";
-        throw new std::runtime_error(msg);
-    }
+    bool isFileLoaded = textureSprite.loadFromFile(texturePath);
+    assert(isFileLoaded);
+
     backgroundSprite = sf::Sprite(textureSprite);
 }
 
@@ -535,8 +534,8 @@ bool Engine::isNearPlayer(sf::FloatRect enemyBoundingBox)
     return playerBoundingBox.contains(sf::Vector2f(enemyBoundingBox.left, enemyBoundingBox.top));
 }
 
-void Engine::drawText(sf::Text& text, const sf::Color& fillColour, const uint8_t characterSize,
-        sf::Vector2f position) {
+void Engine::drawText(sf::Text& text, const sf::Color& fillColour, const uint8_t characterSize, sf::Vector2f position)
+{
     text.setFillColor(fillColour);
     text.setCharacterSize(characterSize); // in pixels, not points!
     text.setPosition(position);
@@ -551,11 +550,8 @@ void Engine::drawText(sf::Text& text, const sf::Color& fillColour, const uint8_t
 
 void Engine::configureTextRendering()
 {
-    if (!m_font.loadFromFile(FONT_PATH))
-    {
-        std::string msg = "Failed to load font from font path: " + FONT_PATH;
-        throw new std::runtime_error(msg);
-    }
+    bool isFontLoaded = m_font.loadFromFile(FONT_PATH);
+    assert(isFontLoaded);
 
     gameOverlayText = sf::Text("", m_font);
     respawnText = sf::Text("", m_font);
