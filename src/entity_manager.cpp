@@ -5,7 +5,7 @@ void EntityManager::update()
     for (const std::shared_ptr<Entity>& e : m_entitiesToAdd)
     {
         m_entities.emplace_back(e);
-        m_entitiesByType[e->type].emplace_back(e);
+        m_entitiesByType[e->getType()].emplace_back(e);
     }
 
     removeDeadEntities(m_entities);
@@ -32,7 +32,7 @@ void EntityManager::removeDeadEntities(std::vector<std::shared_ptr<Entity>>& ent
             entities.begin(),
             entities.end(),
             [](std::shared_ptr<Entity>& entity) {
-                return !entity->isAlive;
+                return !entity->isAlive();
             });
     entities.erase(callback, entities.end());
 }
@@ -40,6 +40,15 @@ void EntityManager::removeDeadEntities(std::vector<std::shared_ptr<Entity>>& ent
 std::vector<std::shared_ptr<Entity>>& EntityManager::getEntities()
 {
     return m_entities;
+}
+
+std::vector<std::shared_ptr<Entity>> EntityManager::getEntitiesByComponentTypes(const std::vector<Component::Type>& componentTypes)
+{
+    std::ranges::filter_view filteredEntities = m_entities | std::ranges::views::filter([componentTypes](std::shared_ptr<Entity>& e) {
+        return e->hasComponents(componentTypes);
+    });
+    std::vector<std::shared_ptr<Entity>> entities = std::vector(filteredEntities.begin(), filteredEntities.end());
+    return entities;
 }
 
 std::vector<std::shared_ptr<Entity>>& EntityManager::getEntitiesByType(Entity::Type type)

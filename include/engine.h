@@ -29,7 +29,8 @@
 #include "component/c_collision.h"
 #include "component/c_render.h"
 #include "component/c_lifespan.h"
-#include "system/spawner_system.h"
+#include "spawner_system.h"
+#include "transform_system.h"
 
 static constexpr std::string_view WINDOW_TITLE = "primitive-wars";
 static const uint32_t WINDOW_WIDTH = 1280;
@@ -70,7 +71,6 @@ class Engine
         static void playerRespawnSystem();
         static void enemySpawnSystem();
         static void userInputSystem();
-        static void transformSystem();
         static void collisionSystem();
         static void lifeSpanSystem();
         static void renderSystem();
@@ -79,7 +79,8 @@ class Engine
 
         static inline sf::RenderWindow m_window;
         static inline EntityManager m_entityManager;
-        static inline SpawnerSystem m_spawnerSystem{m_entityManager, WINDOW_WIDTH, WINDOW_HEIGHT};
+        static inline EntitySpawner m_spawnerSystem{m_entityManager, WINDOW_WIDTH, WINDOW_HEIGHT};
+        static inline TransformSystem m_transformSystem{m_entityManager};
 
         static inline sf::Texture textureSprite;
         static inline sf::Sprite backgroundSprite;

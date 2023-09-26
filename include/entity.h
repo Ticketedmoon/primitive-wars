@@ -7,6 +7,8 @@
 #include <cstddef>
 #include <memory>
 #include <unordered_map>
+#include <vector>
+
 #include "component/component.h"
 
 const uint8_t TOTAL_COMPONENTS = static_cast<uint8_t>(Component::Type::COUNT);
@@ -17,6 +19,7 @@ class Entity
         friend class EntityManager;
 
         [[nodiscard]] bool hasComponent(Component::Type componentType) const;
+        [[nodiscard]] bool hasComponents(const std::vector<Component::Type>& componentTypes) const;
 
         std::shared_ptr<Component> getComponentByType(Component::Type componentType);
 
@@ -29,8 +32,9 @@ class Entity
             NONE
         };
 
-        Type type;
-        bool isAlive;
+        Type getType();
+        [[nodiscard]] bool isAlive() const;
+        void destroy();
 
         std::array<std::shared_ptr<Component>, TOTAL_COMPONENTS> m_components;
 
@@ -39,6 +43,8 @@ class Entity
 
     private:
         size_t m_id;
+        Type m_type;
+        bool m_isAlive;
 
 };
 

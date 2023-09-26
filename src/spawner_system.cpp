@@ -1,12 +1,12 @@
-#include "system/spawner_system.h"
+#include "spawner_system.h"
 
-SpawnerSystem::SpawnerSystem(EntityManager& entityManager, uint16_t windowWidth, uint16_t windowHeight)
+EntitySpawner::EntitySpawner(EntityManager& entityManager, uint16_t windowWidth, uint16_t windowHeight)
     : m_entityManager(entityManager), m_windowWidth(windowWidth), m_windowHeight(windowHeight)
 {
 
 }
 
-void SpawnerSystem::spawnPlayer()
+void EntitySpawner::spawnPlayer()
 {
     std::shared_ptr<Entity>& player = m_entityManager.addEntity(Entity::Type::PLAYER);
 
@@ -19,7 +19,7 @@ void SpawnerSystem::spawnPlayer()
     player->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 
-void SpawnerSystem::spawnEnemy()
+void EntitySpawner::spawnEnemy()
 {
     std::shared_ptr<Entity>& enemy = m_entityManager.addEntity(Entity::Type::ENEMY);
 
@@ -42,7 +42,7 @@ void SpawnerSystem::spawnEnemy()
     enemy->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 
-void SpawnerSystem::spawnEntityClone(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties,
+void EntitySpawner::spawnEntityClone(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties,
         double shotAngle)
 {
     std::shared_ptr<Entity>& enemyDeathAnimationEntity = m_entityManager.addEntity(spawnProperties.entityType);
@@ -65,7 +65,7 @@ void SpawnerSystem::spawnEntityClone(const std::shared_ptr<Entity>& existingEnti
     enemyDeathAnimationEntity->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 
-void SpawnerSystem::spawnBullet(sf::Vector2f position, double shotAngle)
+void EntitySpawner::spawnBullet(sf::Vector2f position, double shotAngle)
 {
     std::shared_ptr<Entity>& e = m_entityManager.addEntity(Entity::Type::BULLET);
 
@@ -78,7 +78,7 @@ void SpawnerSystem::spawnBullet(sf::Vector2f position, double shotAngle)
     e->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 
-void SpawnerSystem::spawnEntityAnimation(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties)
+void EntitySpawner::spawnEntityAnimation(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties)
 {
     for (size_t i = 0; i < spawnProperties.totalVertices; i++)
     {
@@ -87,7 +87,7 @@ void SpawnerSystem::spawnEntityAnimation(const std::shared_ptr<Entity>& existing
     }
 }
 
-sf::CircleShape SpawnerSystem::createShape(ShapeProperties properties)
+sf::CircleShape EntitySpawner::createShape(ShapeProperties properties)
 {
     float radius = properties.radius;
     sf::CircleShape shape(radius, properties.totalVertices);
@@ -104,7 +104,7 @@ sf::CircleShape SpawnerSystem::createShape(ShapeProperties properties)
  * We do not want an enemy to spawn on-top or even close-by to the player as this is either impossible or very difficult
  * to react to, and does not provide a good user experience.
  */
-bool SpawnerSystem::isNearPlayer(sf::FloatRect enemyBoundingBox)
+bool EntitySpawner::isNearPlayer(sf::FloatRect enemyBoundingBox)
 {
     const std::shared_ptr<CRender>& renderComponentForPlayer = std::static_pointer_cast<CRender>(
             m_entityManager.getEntityByType(Entity::Type::PLAYER)->getComponentByType(Component::Type::RENDER));

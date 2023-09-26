@@ -28,7 +28,7 @@ void Engine::update()
         enemySpawnSystem();
         collisionSystem();
         lifeSpanSystem();
-        transformSystem();
+        m_transformSystem.execute();
     }
 }
 
@@ -49,7 +49,7 @@ void Engine::render()
 
     gameOverlayText.setString(text);
 
-    drawText(gameOverlayText, sf::Color::Yellow, 24, sf::Vector2f(24, 12));
+    drawText(gameOverlayText, sf::Color::White, 20, sf::Vector2f(24, 12));
 
     std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
 
@@ -65,81 +65,6 @@ void Engine::render()
         drawText(respawnText, sf::Color::Yellow, 72, sf::Vector2f(WINDOW_WIDTH / 2 - 324, WINDOW_HEIGHT / 2 - 64));
     }
     m_window.display();
-}
-
-void Engine::transformSystem()
-{
-    std::vector<std::shared_ptr<Entity>> playersToUpdate = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
-    for (const std::shared_ptr<Entity>& e: playersToUpdate)
-    {
-        std::shared_ptr<CTransform> transformComponent = std::static_pointer_cast<CTransform>(e->getComponentByType(
-                Component::Type::TRANSFORM));
-        std::shared_ptr<CCollision> collisionComponent = std::static_pointer_cast<CCollision>(e->getComponentByType(
-                Component::Type::COLLISION));
-        std::shared_ptr<CUserInput> userInputComponent = std::static_pointer_cast<CUserInput>(e->getComponentByType(
-                Component::Type::USER_INPUT));
-
-        if (!collisionComponent->isCollidingLeft)
-        {
-            transformComponent->m_position.x -= userInputComponent->isMovingLeft
-                    ? transformComponent->m_speed.x
-                    : 0;
-        }
-        if (!collisionComponent->isCollidingRight)
-        {
-            transformComponent->m_position.x += userInputComponent->isMovingRight
-                    ? transformComponent->m_speed.x
-                    : 0;
-        }
-        if (!collisionComponent->isCollidingUp)
-        {
-            transformComponent->m_position.y -= userInputComponent->isMovingUp
-                    ? transformComponent->m_speed.y
-                    : 0;
-        }
-        if (!collisionComponent->isCollidingDown)
-        {
-            transformComponent->m_position.y += userInputComponent->isMovingDown
-                    ? transformComponent->m_speed.y
-                    : 0;
-        }
-    }
-
-    std::vector<std::shared_ptr<Entity>> bulletsToUpdate = m_entityManager.getEntitiesByType(Entity::Type::BULLET);
-    for (const std::shared_ptr<Entity>& bullet: bulletsToUpdate)
-    {
-        std::shared_ptr <CTransform> transformComponent = std::static_pointer_cast<CTransform>(bullet->getComponentByType(
-                Component::Type::TRANSFORM));
-        std::shared_ptr <CCollision> collisionComponent = std::static_pointer_cast<CCollision>(bullet->getComponentByType(
-                Component::Type::COLLISION));
-
-        transformComponent->m_position.x += transformComponent->m_speed.x * transformComponent->m_speedDelta.x;
-        transformComponent->m_position.y += transformComponent->m_speed.y * transformComponent->m_speedDelta.y;
-    }
-
-    std::vector <std::shared_ptr<Entity>> enemiesToUpdate = m_entityManager.getEntitiesByType(Entity::Type::ENEMY);
-    for (const std::shared_ptr <Entity>& e: enemiesToUpdate)
-    {
-        std::shared_ptr <CTransform> transformComponent = std::static_pointer_cast<CTransform>(e->getComponentByType(
-                Component::Type::TRANSFORM));
-
-        if (e->hasComponent(Component::Type::COLLISION))
-        {
-            std::shared_ptr <CCollision> collisionComponent = std::static_pointer_cast<CCollision>(e->getComponentByType(
-                    Component::Type::COLLISION));
-            if (collisionComponent->isCollidingLeft || collisionComponent->isCollidingRight)
-            {
-                transformComponent->m_speed.x = -transformComponent->m_speed.x;
-            }
-            if (collisionComponent->isCollidingUp || collisionComponent->isCollidingDown)
-            {
-                transformComponent->m_speed.y = -transformComponent->m_speed.y;
-            }
-        }
-
-        transformComponent->m_position.x += (transformComponent->m_speed.x * transformComponent->m_speedDelta.x);
-        transformComponent->m_position.y += (transformComponent->m_speed.y * transformComponent->m_speedDelta.y);
-    }
 }
 
 // TODO
@@ -252,11 +177,11 @@ void Engine::collisionSystem()
             std::shared_ptr<CRender> enemyRenderComponent = std::static_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
             if (isCollidingAABB(bulletRenderComponent, enemyRenderComponent))
             {
-                // kill enemy
-                enemy->isAlive = false;
+                // destroy enemy
+                enemy->destroy();
 
                 // destroy bullet
-                bullet->isAlive = false;
+                bullet->destroy();
 
                 // update score
                 size_t totalVertices = enemyRenderComponent->m_shape.getPointCount();
@@ -286,13 +211,13 @@ void Engine::collisionSystem()
             std::shared_ptr<CRender> enemyRenderComponent = std::static_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
             if (isCollidingAABB(playerRenderComponent, enemyRenderComponent))
             {
-                // kill player
-                player->isAlive = false;
+                // destroy player
+                player->destroy();
 
                 playerRespawnTimeSeconds = (worldClock.getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
 
-                // kill enemy
-                enemy->isAlive = false;
+                // destroy enemy
+                enemy->destroy();
 
                 m_spawnerSystem.spawnEntityAnimation(enemy, SpawnProperties(enemyRenderComponent->m_shape.getPointCount(), Entity::Type::ENEMY, false, sf::Vector2f(2.0f, 2.0f)));
 
@@ -341,7 +266,7 @@ void Engine::lifeSpanSystem()
 
         if (!lifeSpanComponent->isAlive())
         {
-            e->isAlive = false;
+            e->destroy();
         }
         else
         {

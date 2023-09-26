@@ -26,10 +26,10 @@ struct SpawnProperties
     sf::Vector2f speed;
 };
 
-class SpawnerSystem
+class EntitySpawner
 {
     public:
-        SpawnerSystem(EntityManager& entityManager, uint16_t windowWidth, uint16_t windowHeight);
+        EntitySpawner(EntityManager& entityManager, uint16_t windowWidth, uint16_t windowHeight);
 
         void spawnPlayer();
         void spawnEnemy();
