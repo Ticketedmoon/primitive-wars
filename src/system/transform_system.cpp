@@ -13,7 +13,7 @@ void TransformSystem::execute()
     {
         std::shared_ptr<CTransform> transformComponent = std::static_pointer_cast<CTransform>(e->getComponentByType(
                 Component::Type::TRANSFORM));
-        if (e->hasComponents({Component::Type::COLLISION}))
+        if (e->hasComponent(Component::Type::COLLISION))
         {
             std::shared_ptr<CCollision> collisionComponent = std::static_pointer_cast<CCollision>(e->getComponentByType(
                     Component::Type::COLLISION));

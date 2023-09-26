@@ -4,7 +4,6 @@ Engine::Engine()
 {
     createGameWindow();
     configureTextRendering();
-    m_spawnerSystem.spawnPlayer();
 }
 
 void Engine::startGameLoop()
@@ -24,9 +23,8 @@ void Engine::update()
     userInputSystem();
     if (!hasPaused)
     {
-        playerRespawnSystem();
-        enemySpawnSystem();
-        collisionSystem();
+        m_collisionSystem.execute();
+        m_entitySpawnerSystem.execute();
         lifeSpanSystem();
         m_transformSystem.execute();
     }
@@ -119,7 +117,7 @@ void Engine::userInputSystem()
                     float h = targetDestinationForBullet.y - transformComponentForEntity->m_position.y;
                     float a = targetDestinationForBullet.x - transformComponentForEntity->m_position.x;
                     double shotAngle = atan2(h, a);
-                    m_spawnerSystem.spawnBullet(transformComponentForEntity->m_position, shotAngle);
+                    m_entitySpawnerSystem.spawnBullet(transformComponentForEntity->m_position, shotAngle);
                 }
                 if (event.mouseButton.button == sf::Mouse::Right)
                 {
@@ -128,129 +126,11 @@ void Engine::userInputSystem()
                         return;
                     }
 
-                    m_spawnerSystem.spawnEntityAnimation(e, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(7.5f, 7.5f)));
+                    m_entitySpawnerSystem.spawnEntityAnimation(e, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(7.5f, 7.5f)));
                     specialAttackCoolDownSeconds = (worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
                 }
             }
         }
-    }
-}
-
-void Engine::playerRespawnSystem()
-{
-    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
-    if (isPlayerDead)
-    {
-        frameNo = 1;
-        if (worldClock.getElapsedTime().asSeconds() >= playerRespawnTimeSeconds)
-        {
-            m_spawnerSystem.spawnPlayer();
-        }
-    }
-}
-
-void Engine::enemySpawnSystem()
-{
-    if (frameNo % 100 == 0)
-    {
-        // spawn enemy
-        m_spawnerSystem.spawnEnemy();
-    }
-}
-
-void Engine::collisionSystem()
-{
-    std::vector<std::shared_ptr<Entity>> bulletsToUpdate = m_entityManager.getEntitiesByType(Entity::Type::BULLET);
-    for (const std::shared_ptr<Entity>& bullet: bulletsToUpdate)
-    {
-        std::shared_ptr<CRender> bulletRenderComponent = std::static_pointer_cast<CRender>(bullet->getComponentByType(Component::Type::RENDER));
-        std::ranges::filter_view enemiesFiltered = m_entityManager.getEntitiesByType(Entity::Type::ENEMY) |
-                std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
-                    return e->hasComponent(Component::Type::TRANSFORM) &&
-                    e->hasComponent(Component::Type::COLLISION) &&
-                    e->hasComponent(Component::Type::RENDER);
-                });
-        std::vector<std::shared_ptr<Entity>> enemiesToUpdate = std::vector(enemiesFiltered.begin(), enemiesFiltered.end());
-        for (const std::shared_ptr<Entity>& enemy: enemiesToUpdate)
-        {
-            std::shared_ptr<CTransform> transformComponentForEnemy = std::static_pointer_cast<CTransform>(enemy->getComponentByType(Component::Type::TRANSFORM));
-            std::shared_ptr<CRender> enemyRenderComponent = std::static_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
-            if (isCollidingAABB(bulletRenderComponent, enemyRenderComponent))
-            {
-                // destroy enemy
-                enemy->destroy();
-
-                // destroy bullet
-                bullet->destroy();
-
-                // update score
-                size_t totalVertices = enemyRenderComponent->m_shape.getPointCount();
-                score += (100 * totalVertices);
-
-                m_spawnerSystem.spawnEntityAnimation(enemy, SpawnProperties(totalVertices, Entity::Type::ENEMY, false, sf::Vector2f(2.0f, 2.0f)));
-            }
-        }
-    }
-
-    std::ranges::filter_view playersFiltered = m_entityManager.getEntitiesByType(Entity::Type::PLAYER) | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
-        return e->hasComponent(Component::Type::TRANSFORM) && e->hasComponent(Component::Type::COLLISION) && e->hasComponent(Component::Type::RENDER);
-    });
-    std::ranges::filter_view enemiesFiltered = m_entityManager.getEntitiesByType(Entity::Type::ENEMY) | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
-        return e->hasComponent(Component::Type::TRANSFORM) && e->hasComponent(Component::Type::COLLISION) && e->hasComponent(Component::Type::RENDER);
-    });
-
-    std::vector<std::shared_ptr<Entity>> enemiesToUpdate = std::vector(enemiesFiltered.begin(), enemiesFiltered.end());
-    std::vector<std::shared_ptr<Entity>> playersToUpdate = std::vector(playersFiltered.begin(), playersFiltered.end());
-
-    for (const std::shared_ptr<Entity>& player: playersToUpdate)
-    {
-        checkForWindowCollision(player);
-        for (const std::shared_ptr<Entity>& enemy: enemiesToUpdate)
-        {
-            std::shared_ptr<CRender> playerRenderComponent = std::static_pointer_cast<CRender>(player->getComponentByType(Component::Type::RENDER));
-            std::shared_ptr<CRender> enemyRenderComponent = std::static_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
-            if (isCollidingAABB(playerRenderComponent, enemyRenderComponent))
-            {
-                // destroy player
-                player->destroy();
-
-                playerRespawnTimeSeconds = (worldClock.getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
-
-                // destroy enemy
-                enemy->destroy();
-
-                m_spawnerSystem.spawnEntityAnimation(enemy, SpawnProperties(enemyRenderComponent->m_shape.getPointCount(), Entity::Type::ENEMY, false, sf::Vector2f(2.0f, 2.0f)));
-
-                totalDeaths++;
-            }
-        }
-    }
-
-    for (const std::shared_ptr<Entity>& enemy: enemiesToUpdate)
-    {
-        checkForWindowCollision(enemy);
-    }
-}
-
-void Engine::checkForWindowCollision(const std::shared_ptr<Entity>& e)
-{
-    std::shared_ptr<CTransform> transformComponentForEntity = std::static_pointer_cast<CTransform>(e->getComponentByType(Component::Type::TRANSFORM));
-    std::shared_ptr<CCollision> collisionComponentForEntity = std::static_pointer_cast<CCollision>(e->getComponentByType(Component::Type::COLLISION));
-    if (collisionComponentForEntity != nullptr)
-    {
-        std::shared_ptr<CRender> renderComponentForEntity = std::static_pointer_cast<CRender>(e->getComponentByType(Component::Type::RENDER));
-
-        collisionComponentForEntity->isCollidingLeft = transformComponentForEntity->m_position.x <=
-                renderComponentForEntity->m_shape.getRadius();
-
-        collisionComponentForEntity->isCollidingRight = transformComponentForEntity->m_position.x >=
-                WINDOW_WIDTH - renderComponentForEntity->m_shape.getRadius();
-
-        collisionComponentForEntity->isCollidingUp = transformComponentForEntity->m_position.y <=
-                renderComponentForEntity->m_shape.getRadius();
-
-        collisionComponentForEntity->isCollidingDown = transformComponentForEntity->m_position.y >=
-                WINDOW_HEIGHT - renderComponentForEntity->m_shape.getRadius();
     }
 }
 
@@ -324,14 +204,6 @@ void Engine::createGameWindow()
     assert(isFileLoaded);
 
     backgroundSprite = sf::Sprite(textureSprite);
-}
-
-bool Engine::isCollidingAABB(
-        const std::shared_ptr<CRender>& renderComponentForEntity,
-        const std::shared_ptr<CRender>& renderComponentForEnemy)
-{
-    return renderComponentForEntity->m_shape.getGlobalBounds()
-        .intersects(renderComponentForEnemy->m_shape.getGlobalBounds());
 }
 
 void Engine::drawText(sf::Text& text, const sf::Color& fillColour, const uint8_t characterSize, sf::Vector2f position)

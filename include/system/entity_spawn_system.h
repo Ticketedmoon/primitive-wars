@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef PRIMITIVE_WARS_SPAWNER_SYSTEM_H
-#define PRIMITIVE_WARS_SPAWNER_SYSTEM_H
+#ifndef PRIMITIVE_WARS_ENTITY_SPAWN_SYSTEM_H
+#define PRIMITIVE_WARS_ENTITY_SPAWN_SYSTEM_H
 
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/Color.hpp>
@@ -9,14 +9,18 @@
 
 #include <utility>
 #include <experimental/random>
+#include <SFML/System/Clock.hpp>
+#include <SFML/System/Time.hpp>
 
 #include "c_transform.h"
+#include "common_constants.h"
 #include "entity.h"
 #include "entity_manager.h"
 #include "c_collision.h"
 #include "c_user_input.h"
 #include "c_render.h"
 #include "c_lifespan.h"
+#include "system.h"
 
 struct SpawnProperties
 {
@@ -26,13 +30,15 @@ struct SpawnProperties
     sf::Vector2f speed;
 };
 
-class EntitySpawner
+class EntitySpawnSystem : public System
 {
     public:
-        EntitySpawner(EntityManager& entityManager, uint16_t windowWidth, uint16_t windowHeight);
+        EntitySpawnSystem(EntityManager& entityManager, sf::Clock& worldClock, size_t& frameNo,
+                float& playerRespawnTimeSeconds);
 
-        void spawnPlayer();
-        void spawnEnemy();
+        void execute() override;
+
+        // FIXME these should be private
         void spawnBullet(sf::Vector2f position, double shotAngle);
         void spawnEntityAnimation(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties);
 
@@ -47,6 +53,8 @@ class EntitySpawner
             float outlineThickness{};
         };
 
+        void spawnPlayer();
+        void spawnEnemy();
         void spawnEntityClone(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties,
                 double shotAngle);
         static sf::CircleShape createShape(ShapeProperties properties);
@@ -54,11 +62,12 @@ class EntitySpawner
 
     private:
         EntityManager& m_entityManager;
-        uint16_t m_windowWidth;
-        uint16_t m_windowHeight;
+        sf::Clock& m_worldClock;
+        size_t& m_frameNo;
+        float& m_playerRespawnTimeSeconds;
 
-        float PI_FULL_CIRCLE = std::numbers::pi_v<float> * 2;
+        static constexpr float PI_FULL_CIRCLE = std::numbers::pi_v<float> * 2;
 };
 
 
-#endif //PRIMITIVE_WARS_SPAWNER_SYSTEM_H
+#endif //PRIMITIVE_WARS_ENTITY_SPAWN_SYSTEM_H

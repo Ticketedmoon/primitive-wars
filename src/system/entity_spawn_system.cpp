@@ -1,31 +1,63 @@
-#include "spawner_system.h"
+#include "entity_spawn_system.h"
 
-EntitySpawner::EntitySpawner(EntityManager& entityManager, uint16_t windowWidth, uint16_t windowHeight)
-    : m_entityManager(entityManager), m_windowWidth(windowWidth), m_windowHeight(windowHeight)
+EntitySpawnSystem::EntitySpawnSystem(EntityManager& entityManager, sf::Clock& worldClock, size_t& frameNo,
+        float& playerRespawnTimeSeconds)
+        : m_entityManager(entityManager), m_worldClock(worldClock), m_frameNo(frameNo),
+        m_playerRespawnTimeSeconds(playerRespawnTimeSeconds)
 {
+    spawnPlayer();
+}
+
+void EntitySpawnSystem::execute()
+{
+    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
+    if (isPlayerDead)
+    {
+        m_frameNo = 1;
+        if (m_worldClock.getElapsedTime().asSeconds() > m_playerRespawnTimeSeconds)
+        {
+            spawnPlayer();
+        }
+    }
+
+    if (m_frameNo % 100 == 0)
+    {
+        // spawn enemy
+        spawnEnemy();
+    }
+    std::vector<std::shared_ptr<Entity>>& enemies = m_entityManager.getEntitiesByType(Entity::Type::ENEMY);
+    for (const auto& enemy: enemies)
+    {
+        if (!enemy->isAlive())
+        {
+            std::shared_ptr<CRender> enemyRenderComponent = std::static_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
+            size_t totalVertices = enemyRenderComponent->m_shape.getPointCount();
+            spawnEntityAnimation(enemy, SpawnProperties(totalVertices, Entity::Type::ENEMY, false, sf::Vector2f(2.0f, 2.0f)));
+        }
+    }
 
 }
 
-void EntitySpawner::spawnPlayer()
+void EntitySpawnSystem::spawnPlayer()
 {
     std::shared_ptr<Entity>& player = m_entityManager.addEntity(Entity::Type::PLAYER);
 
     const sf::Vector2f& position = sf::Vector2f(10.0f, 10.0f);
     sf::CircleShape shape = createShape({20.0f, 3, position, sf::Color::Black, sf::Color::Red, 5.0f});
 
-    player->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(sf::Vector2f(m_windowWidth/2, m_windowHeight/2), position);
+    player->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(sf::Vector2f(WINDOW_WIDTH/2, WINDOW_HEIGHT/2), position);
     player->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
     player->m_components[Component::Type::USER_INPUT] = std::make_shared<CUserInput>();
     player->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 
-void EntitySpawner::spawnEnemy()
+void EntitySpawnSystem::spawnEnemy()
 {
     std::shared_ptr<Entity>& enemy = m_entityManager.addEntity(Entity::Type::ENEMY);
 
     const int radius = std::experimental::randint(10, 50);
-    const int x = std::experimental::randint(radius, static_cast<int>(m_windowWidth - radius));
-    const int y = std::experimental::randint(radius, static_cast<int>(m_windowHeight - radius));
+    const int x = std::experimental::randint(radius, static_cast<int>(WINDOW_WIDTH - radius));
+    const int y = std::experimental::randint(radius, static_cast<int>(WINDOW_HEIGHT - radius));
 
     const sf::Vector2f position = isNearPlayer(sf::FloatRect(x, y, radius, radius))
             ? sf::Vector2f(radius * 2, radius * 2)
@@ -42,7 +74,7 @@ void EntitySpawner::spawnEnemy()
     enemy->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 
-void EntitySpawner::spawnEntityClone(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties,
+void EntitySpawnSystem::spawnEntityClone(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties,
         double shotAngle)
 {
     std::shared_ptr<Entity>& enemyDeathAnimationEntity = m_entityManager.addEntity(spawnProperties.entityType);
@@ -65,7 +97,7 @@ void EntitySpawner::spawnEntityClone(const std::shared_ptr<Entity>& existingEnti
     enemyDeathAnimationEntity->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 
-void EntitySpawner::spawnBullet(sf::Vector2f position, double shotAngle)
+void EntitySpawnSystem::spawnBullet(sf::Vector2f position, double shotAngle)
 {
     std::shared_ptr<Entity>& e = m_entityManager.addEntity(Entity::Type::BULLET);
 
@@ -78,7 +110,7 @@ void EntitySpawner::spawnBullet(sf::Vector2f position, double shotAngle)
     e->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 
-void EntitySpawner::spawnEntityAnimation(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties)
+void EntitySpawnSystem::spawnEntityAnimation(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties)
 {
     for (size_t i = 0; i < spawnProperties.totalVertices; i++)
     {
@@ -87,7 +119,7 @@ void EntitySpawner::spawnEntityAnimation(const std::shared_ptr<Entity>& existing
     }
 }
 
-sf::CircleShape EntitySpawner::createShape(ShapeProperties properties)
+sf::CircleShape EntitySpawnSystem::createShape(ShapeProperties properties)
 {
     float radius = properties.radius;
     sf::CircleShape shape(radius, properties.totalVertices);
@@ -104,7 +136,7 @@ sf::CircleShape EntitySpawner::createShape(ShapeProperties properties)
  * We do not want an enemy to spawn on-top or even close-by to the player as this is either impossible or very difficult
  * to react to, and does not provide a good user experience.
  */
-bool EntitySpawner::isNearPlayer(sf::FloatRect enemyBoundingBox)
+bool EntitySpawnSystem::isNearPlayer(sf::FloatRect enemyBoundingBox)
 {
     const std::shared_ptr<CRender>& renderComponentForPlayer = std::static_pointer_cast<CRender>(
             m_entityManager.getEntityByType(Entity::Type::PLAYER)->getComponentByType(Component::Type::RENDER));
