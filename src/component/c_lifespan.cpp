@@ -1,13 +1,8 @@
-#include "c_lifespan.h"
+#include "component/c_lifespan.h"
 
 CLifespan::CLifespan(uint8_t timeToLive) : m_timeToLive(timeToLive)
 {
 
-}
-
-Component::Type CLifespan::getType()
-{
-    return Component::Type::LIFESPAN;
 }
 
 bool CLifespan::isAlive() const

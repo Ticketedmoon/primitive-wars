@@ -8,8 +8,6 @@
 class CUserInput : public Component
 {
     public:
-        Type getType() override;
-
         bool isMovingLeft;
         bool isMovingRight;
         bool isMovingUp;

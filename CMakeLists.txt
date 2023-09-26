@@ -31,13 +31,14 @@ endif ()
 #  our project's major and minor version number. CMake reads config.h.in to produce this header file:
 # configure_file(config.h.in config.h)
 
-file(GLOB GAME_SOURCES "src/*.cpp")
+file(GLOB CORE_GAME_SOURCES "src/*.cpp")
+file(GLOB COMPONENT_SOURCES "src/component/*.cpp")
 file(COPY resources DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
-add_executable(${PROJECT_NAME} ${GAME_SOURCES})
+add_executable(${PROJECT_NAME} ${CORE_GAME_SOURCES} ${COMPONENT_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${PROJECT_BINARY_DIR}")
-target_include_directories(${PROJECT_NAME} PRIVATE include)
+target_include_directories(${PROJECT_NAME} PRIVATE include include/component)
 
 # Detect and add SFML
 find_package(SFML 2.5.1 COMPONENTS system window graphics network audio REQUIRED)

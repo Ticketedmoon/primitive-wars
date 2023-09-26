@@ -11,10 +11,10 @@
 class CRender : public Component
 {
     public:
-        Type getType() override;
+        explicit CRender(sf::CircleShape& shape);
 
     public:
-        sf::CircleShape renderBody;
+        sf::CircleShape m_shape;
 };
 
 

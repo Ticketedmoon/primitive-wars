@@ -8,20 +8,11 @@ void EntityManager::update()
         m_entitiesByType[e->type].emplace_back(e);
     }
 
-    m_entities.erase(std::remove_if(m_entities.begin(), m_entities.end(), [](std::shared_ptr<Entity>& entity) {
-        return !entity->isAlive;
-    }), m_entities.end());
+    removeDeadEntities(m_entities);
 
     for (auto& item: m_entitiesByType)
     {
-        std::vector<std::shared_ptr<Entity>>& entitiesForType = item.second;
-        const auto& callback = std::remove_if(
-                entitiesForType.begin(),
-                entitiesForType.end(),
-                [](std::shared_ptr<Entity>& entity) {
-                    return !entity->isAlive;
-                });
-        entitiesForType.erase(callback, entitiesForType.end());
+        removeDeadEntities(item.second);
     }
 
     m_entitiesToAdd.clear();
@@ -35,11 +26,15 @@ std::shared_ptr<Entity>& EntityManager::addEntity(Entity::Type type)
     return m_entitiesToAdd.back();
 }
 
-std::shared_ptr<Entity>& EntityManager::removeEntity(size_t id)
+void EntityManager::removeDeadEntities(std::vector<std::shared_ptr<Entity>>& entities)
 {
-    std::shared_ptr<Entity>& entity = m_entities.at(id);
-    entity->isAlive = false;
-    return entity;
+    const auto& callback = std::remove_if(
+            entities.begin(),
+            entities.end(),
+            [](std::shared_ptr<Entity>& entity) {
+                return !entity->isAlive;
+            });
+    entities.erase(callback, entities.end());
 }
 
 std::vector<std::shared_ptr<Entity>>& EntityManager::getEntities()
@@ -50,4 +45,9 @@ std::vector<std::shared_ptr<Entity>>& EntityManager::getEntities()
 std::vector<std::shared_ptr<Entity>>& EntityManager::getEntitiesByType(Entity::Type type)
 {
     return m_entitiesByType[type];
+}
+
+std::shared_ptr<Entity>& EntityManager::getEntityByType(Entity::Type type)
+{
+    return m_entitiesByType[type].front();
 }

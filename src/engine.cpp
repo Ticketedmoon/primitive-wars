@@ -74,42 +74,38 @@ void Engine::render()
 
 void Engine::transformSystem()
 {
-    std::ranges::filter_view playersFiltered = m_entityManager.getEntitiesByType(Entity::Type::PLAYER) |
-            std::ranges::views::filter([](std::shared_ptr <Entity>& e) {
-                return e->hasComponent(Component::Type::TRANSFORM) && e->hasComponent(Component::Type::COLLISION);
-            });
     std::vector<std::shared_ptr<Entity>> playersToUpdate = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
     for (const std::shared_ptr<Entity>& e: playersToUpdate)
     {
-        std::shared_ptr<CTransform> transformComponent = std::dynamic_pointer_cast<CTransform>(e->getComponentByType(
+        std::shared_ptr<CTransform> transformComponent = std::static_pointer_cast<CTransform>(e->getComponentByType(
                 Component::Type::TRANSFORM));
-        std::shared_ptr<CCollision> collisionComponent = std::dynamic_pointer_cast<CCollision>(e->getComponentByType(
+        std::shared_ptr<CCollision> collisionComponent = std::static_pointer_cast<CCollision>(e->getComponentByType(
                 Component::Type::COLLISION));
-        std::shared_ptr<CUserInput> userInputComponent = std::dynamic_pointer_cast<CUserInput>(e->getComponentByType(
+        std::shared_ptr<CUserInput> userInputComponent = std::static_pointer_cast<CUserInput>(e->getComponentByType(
                 Component::Type::USER_INPUT));
 
         if (!collisionComponent->isCollidingLeft)
         {
-            transformComponent->position.x -= userInputComponent->isMovingLeft
-                    ? transformComponent->speed.x
+            transformComponent->m_position.x -= userInputComponent->isMovingLeft
+                    ? transformComponent->m_speed.x
                     : 0;
         }
         if (!collisionComponent->isCollidingRight)
         {
-            transformComponent->position.x += userInputComponent->isMovingRight
-                    ? transformComponent->speed.x
+            transformComponent->m_position.x += userInputComponent->isMovingRight
+                    ? transformComponent->m_speed.x
                     : 0;
         }
         if (!collisionComponent->isCollidingUp)
         {
-            transformComponent->position.y -= userInputComponent->isMovingUp
-                    ? transformComponent->speed.y
+            transformComponent->m_position.y -= userInputComponent->isMovingUp
+                    ? transformComponent->m_speed.y
                     : 0;
         }
         if (!collisionComponent->isCollidingDown)
         {
-            transformComponent->position.y += userInputComponent->isMovingDown
-                    ? transformComponent->speed.y
+            transformComponent->m_position.y += userInputComponent->isMovingDown
+                    ? transformComponent->m_speed.y
                     : 0;
         }
     }
@@ -117,37 +113,37 @@ void Engine::transformSystem()
     std::vector<std::shared_ptr<Entity>> bulletsToUpdate = m_entityManager.getEntitiesByType(Entity::Type::BULLET);
     for (const std::shared_ptr<Entity>& bullet: bulletsToUpdate)
     {
-        std::shared_ptr <CTransform> transformComponent = std::dynamic_pointer_cast<CTransform>(bullet->getComponentByType(
+        std::shared_ptr <CTransform> transformComponent = std::static_pointer_cast<CTransform>(bullet->getComponentByType(
                 Component::Type::TRANSFORM));
-        std::shared_ptr <CCollision> collisionComponent = std::dynamic_pointer_cast<CCollision>(bullet->getComponentByType(
+        std::shared_ptr <CCollision> collisionComponent = std::static_pointer_cast<CCollision>(bullet->getComponentByType(
                 Component::Type::COLLISION));
 
-        transformComponent->position.x += transformComponent->speed.x * transformComponent->speedDelta.x;
-        transformComponent->position.y += transformComponent->speed.y * transformComponent->speedDelta.y;
+        transformComponent->m_position.x += transformComponent->m_speed.x * transformComponent->m_speedDelta.x;
+        transformComponent->m_position.y += transformComponent->m_speed.y * transformComponent->m_speedDelta.y;
     }
 
     std::vector <std::shared_ptr<Entity>> enemiesToUpdate = m_entityManager.getEntitiesByType(Entity::Type::ENEMY);
     for (const std::shared_ptr <Entity>& e: enemiesToUpdate)
     {
-        std::shared_ptr <CTransform> transformComponent = std::dynamic_pointer_cast<CTransform>(e->getComponentByType(
+        std::shared_ptr <CTransform> transformComponent = std::static_pointer_cast<CTransform>(e->getComponentByType(
                 Component::Type::TRANSFORM));
 
         if (e->hasComponent(Component::Type::COLLISION))
         {
-            std::shared_ptr <CCollision> collisionComponent = std::dynamic_pointer_cast<CCollision>(e->getComponentByType(
+            std::shared_ptr <CCollision> collisionComponent = std::static_pointer_cast<CCollision>(e->getComponentByType(
                     Component::Type::COLLISION));
             if (collisionComponent->isCollidingLeft || collisionComponent->isCollidingRight)
             {
-                transformComponent->speed.x = -transformComponent->speed.x;
+                transformComponent->m_speed.x = -transformComponent->m_speed.x;
             }
             if (collisionComponent->isCollidingUp || collisionComponent->isCollidingDown)
             {
-                transformComponent->speed.y = -transformComponent->speed.y;
+                transformComponent->m_speed.y = -transformComponent->m_speed.y;
             }
         }
 
-        transformComponent->position.x += (transformComponent->speed.x * transformComponent->speedDelta.x);
-        transformComponent->position.y += (transformComponent->speed.y * transformComponent->speedDelta.y);
+        transformComponent->m_position.x += (transformComponent->m_speed.x * transformComponent->m_speedDelta.x);
+        transformComponent->m_position.y += (transformComponent->m_speed.y * transformComponent->m_speedDelta.y);
     }
 }
 
@@ -183,7 +179,7 @@ void Engine::userInputSystem()
         std::vector<std::shared_ptr<Entity>> entitiesToUpdate = std::vector(view.begin(), view.end());
         for (const std::shared_ptr<Entity>& e : entitiesToUpdate)
         {
-            std::shared_ptr<CUserInput> userInputComponentForEntity = std::dynamic_pointer_cast<CUserInput> (e->getComponentByType(Component::Type::USER_INPUT));
+            std::shared_ptr<CUserInput> userInputComponentForEntity = std::static_pointer_cast<CUserInput> (e->getComponentByType(Component::Type::USER_INPUT));
 
             userInputComponentForEntity->isMovingLeft = sf::Keyboard::isKeyPressed(sf::Keyboard::Left) ||
                     sf::Keyboard::isKeyPressed(sf::Keyboard::A);
@@ -198,12 +194,12 @@ void Engine::userInputSystem()
             {
                 if (event.mouseButton.button == sf::Mouse::Left)
                 {
-                    std::shared_ptr<CTransform> transformComponentForEntity = std::dynamic_pointer_cast<CTransform> (e->getComponentByType(Component::Type::TRANSFORM));
+                    std::shared_ptr<CTransform> transformComponentForEntity = std::static_pointer_cast<CTransform> (e->getComponentByType(Component::Type::TRANSFORM));
                     sf::Vector2f targetDestinationForBullet = m_window.mapPixelToCoords(sf::Mouse::getPosition(m_window));
-                    float h = targetDestinationForBullet.y - transformComponentForEntity->position.y;
-                    float a = targetDestinationForBullet.x - transformComponentForEntity->position.x;
+                    float h = targetDestinationForBullet.y - transformComponentForEntity->m_position.y;
+                    float a = targetDestinationForBullet.x - transformComponentForEntity->m_position.x;
                     double shotAngle = atan2(h, a);
-                    spawnBullet(transformComponentForEntity->position, shotAngle);
+                    spawnBullet(transformComponentForEntity->m_position, shotAngle);
                 }
                 if (event.mouseButton.button == sf::Mouse::Right)
                 {
@@ -212,17 +208,17 @@ void Engine::userInputSystem()
                         return;
                     }
 
-                    specialAttackCoolDown = (worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
-                    
                     float PI = std::numbers::pi_v<float> * 2;
                     size_t totalVertices = 15;
 
-                    for (int i = 0; i < totalVertices; i++)
+                    for (size_t i = 0; i < totalVertices; i++)
                     {
                         double shotAngle = (PI / totalVertices) * i;
                         const SpawnProperties& properties = SpawnProperties(Entity::Type::BULLET, shotAngle, true, sf::Vector2f(7.5f, 7.5f));
-                        spawnDuplicateEnemyForAnimation(e, properties);
+                        spawnEntityClone(e, properties);
                     }
+
+                    specialAttackCoolDown = (worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
                 }
             }
         }
@@ -243,7 +239,7 @@ void Engine::collisionSystem()
     std::vector<std::shared_ptr<Entity>> bulletsToUpdate = m_entityManager.getEntitiesByType(Entity::Type::BULLET);
     for (const std::shared_ptr<Entity>& bullet: bulletsToUpdate)
     {
-        std::shared_ptr<CRender> bulletRenderComponent = std::dynamic_pointer_cast<CRender>(bullet->getComponentByType(Component::Type::RENDER));
+        std::shared_ptr<CRender> bulletRenderComponent = std::static_pointer_cast<CRender>(bullet->getComponentByType(Component::Type::RENDER));
         std::ranges::filter_view enemiesFiltered = m_entityManager.getEntitiesByType(Entity::Type::ENEMY) |
                 std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
                     return e->hasComponent(Component::Type::TRANSFORM) &&
@@ -253,8 +249,8 @@ void Engine::collisionSystem()
         std::vector<std::shared_ptr<Entity>> enemiesToUpdate = std::vector(enemiesFiltered.begin(), enemiesFiltered.end());
         for (const std::shared_ptr<Entity>& enemy: enemiesToUpdate)
         {
-            std::shared_ptr<CTransform> transformComponentForEnemy = std::dynamic_pointer_cast<CTransform>(enemy->getComponentByType(Component::Type::TRANSFORM));
-            std::shared_ptr<CRender> enemyRenderComponent = std::dynamic_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
+            std::shared_ptr<CTransform> transformComponentForEnemy = std::static_pointer_cast<CTransform>(enemy->getComponentByType(Component::Type::TRANSFORM));
+            std::shared_ptr<CRender> enemyRenderComponent = std::static_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
             if (isCollidingAABB(bulletRenderComponent, enemyRenderComponent))
             {
                 // kill enemy
@@ -264,16 +260,16 @@ void Engine::collisionSystem()
                 bullet->isAlive = false;
 
                 // update score
-                size_t totalVertices = enemyRenderComponent->renderBody.getPointCount();
+                size_t totalVertices = enemyRenderComponent->m_shape.getPointCount();
                 score += (100 * totalVertices);
 
                 // animation
                 float PI = std::numbers::pi_v<float> * 2;
-                for (int i = 0; i < totalVertices; i++)
+                for (size_t i = 0; i < totalVertices; i++)
                 {
                     double shotAngle = (PI / totalVertices) * i;
                     const SpawnProperties& properties = SpawnProperties(Entity::Type::ENEMY, shotAngle, false, sf::Vector2f(2.0f, 2.0f));
-                    spawnDuplicateEnemyForAnimation(enemy, properties);
+                    spawnEntityClone(enemy, properties);
                 }
             }
         }
@@ -294,8 +290,8 @@ void Engine::collisionSystem()
         checkForWindowCollision(player);
         for (const std::shared_ptr<Entity>& enemy: enemiesToUpdate)
         {
-            std::shared_ptr<CRender> playerRenderComponent = std::dynamic_pointer_cast<CRender>(player->getComponentByType(Component::Type::RENDER));
-            std::shared_ptr<CRender> enemyRenderComponent = std::dynamic_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
+            std::shared_ptr<CRender> playerRenderComponent = std::static_pointer_cast<CRender>(player->getComponentByType(Component::Type::RENDER));
+            std::shared_ptr<CRender> enemyRenderComponent = std::static_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
             if (isCollidingAABB(playerRenderComponent, enemyRenderComponent))
             {
                 // kill player
@@ -307,13 +303,13 @@ void Engine::collisionSystem()
                 enemy->isAlive = false;
 
                 // animation
-                size_t totalVertices = enemyRenderComponent->renderBody.getPointCount();
+                size_t totalVertices = enemyRenderComponent->m_shape.getPointCount();
                 float PI = std::numbers::pi_v<float> * 2;
-                for (int i = 0; i < totalVertices; i++)
+                for (size_t i = 0; i < totalVertices; i++)
                 {
                     double shotAngle = (PI / totalVertices) * i;
                     const SpawnProperties& properties = SpawnProperties(Entity::Type::ENEMY, shotAngle, false, sf::Vector2f(2.0f, 2.0f));
-                    spawnDuplicateEnemyForAnimation(enemy, properties);
+                    spawnEntityClone(enemy, properties);
                 }
 
                 totalDeaths++;
@@ -329,23 +325,23 @@ void Engine::collisionSystem()
 
 void Engine::checkForWindowCollision(const std::shared_ptr<Entity>& e)
 {
-    std::shared_ptr<CTransform> transformComponentForEntity = std::dynamic_pointer_cast<CTransform>(e->getComponentByType(Component::Type::TRANSFORM));
-    std::shared_ptr<CCollision> collisionComponentForEntity = std::dynamic_pointer_cast<CCollision>(e->getComponentByType(Component::Type::COLLISION));
+    std::shared_ptr<CTransform> transformComponentForEntity = std::static_pointer_cast<CTransform>(e->getComponentByType(Component::Type::TRANSFORM));
+    std::shared_ptr<CCollision> collisionComponentForEntity = std::static_pointer_cast<CCollision>(e->getComponentByType(Component::Type::COLLISION));
     if (collisionComponentForEntity != nullptr)
     {
-        std::shared_ptr<CRender> renderComponentForEntity = std::dynamic_pointer_cast<CRender>(e->getComponentByType(Component::Type::RENDER));
+        std::shared_ptr<CRender> renderComponentForEntity = std::static_pointer_cast<CRender>(e->getComponentByType(Component::Type::RENDER));
 
-        collisionComponentForEntity->isCollidingLeft = transformComponentForEntity->position.x <=
-                renderComponentForEntity->renderBody.getRadius();
+        collisionComponentForEntity->isCollidingLeft = transformComponentForEntity->m_position.x <=
+                renderComponentForEntity->m_shape.getRadius();
 
-        collisionComponentForEntity->isCollidingRight = transformComponentForEntity->position.x >=
-                WINDOW_WIDTH - renderComponentForEntity->renderBody.getRadius();
+        collisionComponentForEntity->isCollidingRight = transformComponentForEntity->m_position.x >=
+                WINDOW_WIDTH - renderComponentForEntity->m_shape.getRadius();
 
-        collisionComponentForEntity->isCollidingUp = transformComponentForEntity->position.y <=
-                renderComponentForEntity->renderBody.getRadius();
+        collisionComponentForEntity->isCollidingUp = transformComponentForEntity->m_position.y <=
+                renderComponentForEntity->m_shape.getRadius();
 
-        collisionComponentForEntity->isCollidingDown = transformComponentForEntity->position.y >=
-                WINDOW_HEIGHT - renderComponentForEntity->renderBody.getRadius();
+        collisionComponentForEntity->isCollidingDown = transformComponentForEntity->m_position.y >=
+                WINDOW_HEIGHT - renderComponentForEntity->m_shape.getRadius();
     }
 }
 
@@ -357,7 +353,7 @@ void Engine::lifeSpanSystem()
     std::vector<std::shared_ptr<Entity>> entitiesToUpdate = std::vector(view.begin(), view.end());
     for (const std::shared_ptr<Entity>& e : entitiesToUpdate)
     {
-        std::shared_ptr<CLifespan> lifeSpanComponent = std::dynamic_pointer_cast<CLifespan> (e->getComponentByType(Component::Type::LIFESPAN));
+        std::shared_ptr<CLifespan> lifeSpanComponent = std::static_pointer_cast<CLifespan> (e->getComponentByType(Component::Type::LIFESPAN));
 
         if (!lifeSpanComponent->isAlive())
         {
@@ -365,14 +361,14 @@ void Engine::lifeSpanSystem()
         }
         else
         {
-            std::shared_ptr<CRender> renderComponent = std::dynamic_pointer_cast<CRender> (e->getComponentByType(Component::Type::RENDER));
-            sf::Color fillColor = renderComponent->renderBody.getFillColor();
-            sf::Color outlineColor = renderComponent->renderBody.getOutlineColor();
+            std::shared_ptr<CRender> renderComponent = std::static_pointer_cast<CRender> (e->getComponentByType(Component::Type::RENDER));
+            sf::Color fillColor = renderComponent->m_shape.getFillColor();
+            sf::Color outlineColor = renderComponent->m_shape.getOutlineColor();
             fillColor.a -= fillColor.a >= 2.55 ? 2.55 : 0;
             outlineColor.a -= outlineColor.a >= 2.55 ? 2.55 : 0;
 
-            renderComponent->renderBody.setFillColor(fillColor);
-            renderComponent->renderBody.setOutlineColor(outlineColor);
+            renderComponent->m_shape.setFillColor(fillColor);
+            renderComponent->m_shape.setOutlineColor(outlineColor);
 
             lifeSpanComponent->decreaseTimeToLive();
         }
@@ -387,11 +383,11 @@ void Engine::renderSystem()
     std::vector<std::shared_ptr<Entity>> entitiesToUpdate = std::vector(view.begin(), view.end());
     for (const std::shared_ptr<Entity>& e : entitiesToUpdate)
     {
-        std::shared_ptr<CTransform> transformComponentForEntity = std::dynamic_pointer_cast<CTransform> (e->getComponentByType(Component::Type::TRANSFORM));
-        std::shared_ptr<CRender> renderComponentForEntity = std::dynamic_pointer_cast<CRender> (e->getComponentByType(Component::Type::RENDER));
+        std::shared_ptr<CTransform> transformComponentForEntity = std::static_pointer_cast<CTransform> (e->getComponentByType(Component::Type::TRANSFORM));
+        std::shared_ptr<CRender> renderComponentForEntity = std::static_pointer_cast<CRender> (e->getComponentByType(Component::Type::RENDER));
 
-        sf::CircleShape& drawable = renderComponentForEntity->renderBody;
-        drawable.setPosition(transformComponentForEntity->position);
+        sf::CircleShape& drawable = renderComponentForEntity->m_shape;
+        drawable.setPosition(transformComponentForEntity->m_position);
         drawable.rotate(2);
 
         m_window.draw(drawable);
@@ -400,177 +396,85 @@ void Engine::renderSystem()
 
 void Engine::spawnPlayer()
 {
-    std::shared_ptr<Entity>& e = m_entityManager.addEntity(Entity::Type::PLAYER);
+    std::shared_ptr<Entity>& player = m_entityManager.addEntity(Entity::Type::PLAYER);
 
-    std::shared_ptr<CTransform> cTransform = std::make_shared<CTransform>();
-    cTransform->position = sf::Vector2f(WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
-    cTransform->speed = sf::Vector2f(10.0f, 10.0f);
-    std::pair transformPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::TRANSFORM, cTransform);
-    e->m_componentsByType.insert(transformPair);
+    const sf::Vector2f& position = sf::Vector2f(10.0f, 10.0f);
+    sf::CircleShape shape = createShape({20.0f, 3, position, sf::Color::Black, sf::Color::Red, 5.0f});
 
-    std::shared_ptr<CCollision> cCollision = std::make_shared<CCollision>();
-    std::pair collisionPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::COLLISION, cCollision);
-    e->m_componentsByType.insert(collisionPair);
-
-    std::shared_ptr<CUserInput> cUserInput = std::make_shared<CUserInput>();
-    std::pair userInputPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::USER_INPUT, cUserInput);
-    e->m_componentsByType.insert(userInputPair);
-
-    std::shared_ptr<CRender> cRender = std::make_shared<CRender>();
-
-    float radius = 20.0f;
-    sf::CircleShape shape(radius, 3);
-    shape.setOrigin(radius, radius);
-    shape.setPosition(cTransform->position);
-    shape.setFillColor(sf::Color::Black);
-    shape.setOutlineColor(sf::Color::Red);
-    shape.setOutlineThickness(5.0f);
-    cRender->renderBody = shape;
-
-    std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER, cRender);
-    e->m_componentsByType.insert(renderPair);
+    player->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(sf::Vector2f(WINDOW_WIDTH/2, WINDOW_HEIGHT/2), position);
+    player->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
+    player->m_components[Component::Type::USER_INPUT] = std::make_shared<CUserInput>();
+    player->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 
 void Engine::spawnEnemy()
 {
-    std::vector<std::shared_ptr<Entity>> players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
-    for (const std::shared_ptr<Entity>& player : players)
-    {
-        std::shared_ptr<CRender> cPlayerRender =
-                std::dynamic_pointer_cast<CRender>(player->getComponentByType(Component::Type::RENDER));
+    std::shared_ptr<Entity>& enemy = m_entityManager.addEntity(Entity::Type::ENEMY);
 
-        std::shared_ptr<Entity>& e = m_entityManager.addEntity(Entity::Type::ENEMY);
+    const int radius = std::experimental::randint(10, 50);
+    const int x = std::experimental::randint(radius, static_cast<int>(WINDOW_WIDTH - radius));
+    const int y = std::experimental::randint(radius, static_cast<int>(WINDOW_HEIGHT - radius));
 
-        int radius = std::experimental::randint(10, 50);
-        int totalVertices = std::experimental::randint(3, 10);
+    const sf::Vector2f position = isNearPlayer(sf::FloatRect(x, y, radius, radius))
+            ? sf::Vector2f(radius * 2, radius * 2)
+            : sf::Vector2f(x, y);
+    const uint8_t totalVertices = std::experimental::randint(3, 10);
+    const sf::Color fillColor = sf::Color(std::experimental::randint(50, 255), std::experimental::randint(50, 255),
+            std::experimental::randint(50, 255), 255);
 
-        sf::Vector2f pos = sf::Vector2f(
-                std::experimental::randint(radius, static_cast<int>(WINDOW_WIDTH - radius)),
-                std::experimental::randint(radius, static_cast<int>(WINDOW_HEIGHT - radius))
-        );
+    sf::CircleShape shape = createShape({static_cast<float>(radius), totalVertices, position, fillColor, sf::Color::White, 3.0f});
 
-        std::shared_ptr<CRender> cNewEnemyRender = std::make_shared<CRender>();
-        sf::CircleShape shape(radius, totalVertices);
-        shape.setPosition(pos);
-        int r = std::experimental::randint(50, 255);
-        int g = std::experimental::randint(50, 255);
-        int b = std::experimental::randint(50, 255);
-        sf::Color color = sf::Color(r, g, b, 255);
-
-        shape.setOrigin(radius, radius);
-        shape.setFillColor(color);
-        shape.setOutlineColor(sf::Color::White);
-        shape.setOutlineThickness(3.0f);
-
-        if (isNearPlayer(cPlayerRender->renderBody.getGlobalBounds(), shape.getGlobalBounds()))
-        {
-            float pos = radius * 2;
-            shape.setPosition(pos, pos);
-        }
-
-        cNewEnemyRender->renderBody = shape;
-        std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER,
-                cNewEnemyRender);
-        e->m_componentsByType.insert(renderPair);
-
-        std::shared_ptr<CTransform> cTransform = std::make_shared<CTransform>();
-        cTransform->position = shape.getPosition();
-        cTransform->speed = sf::Vector2f(
-                std::experimental::randint(1, 3),
-                std::experimental::randint(1, 3)
-        );
-        cTransform->speedDelta = sf::Vector2f(1, 1);
-
-        std::pair transformPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(
-                Component::Type::TRANSFORM, cTransform);
-        e->m_componentsByType.insert(transformPair);
-
-        std::shared_ptr<CCollision> cCollision = std::make_shared<CCollision>();
-        std::pair collisionPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(
-                Component::Type::COLLISION, cCollision);
-        e->m_componentsByType.insert(collisionPair);
-    }
+    enemy->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(shape.getPosition(),
+            sf::Vector2f(std::experimental::randint(1, 3), std::experimental::randint(1, 3)), sf::Vector2f(1, 1));
+    enemy->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
+    enemy->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 
-void Engine::spawnDuplicateEnemyForAnimation(const std::shared_ptr<Entity>& entity, SpawnProperties spawnProperties)
+void Engine::spawnEntityClone(const std::shared_ptr<Entity>& existingEnemy, SpawnProperties spawnProperties)
 {
-    std::shared_ptr<CTransform> cTransformForExistingEnemy =
-            std::dynamic_pointer_cast<CTransform>(entity->getComponentByType(Component::Type::TRANSFORM));
+    std::shared_ptr<Entity>& enemyDeathAnimationEntity = m_entityManager.addEntity(spawnProperties.entityType);
+
+    sf::CircleShape shapeForExistingEnemy =
+            std::static_pointer_cast<CRender>(existingEnemy->getComponentByType(Component::Type::RENDER))->m_shape;
+
+    sf::Vector2f enemyAnimationPosition =
+            std::static_pointer_cast<CTransform>(existingEnemy->getComponentByType(Component::Type::TRANSFORM))->m_position;
+
+    float radius = shapeForExistingEnemy.getRadius() / 3;
+    sf::CircleShape shape = createShape({radius, shapeForExistingEnemy.getPointCount(), enemyAnimationPosition,
+                                         shapeForExistingEnemy.getFillColor(), shapeForExistingEnemy.getOutlineColor(), 
+                                         shapeForExistingEnemy.getOutlineThickness()});
     
-    std::shared_ptr<Entity>& e = m_entityManager.addEntity(spawnProperties.entityType);
-
-    if (spawnProperties.isCollidable)
-    {
-        std::shared_ptr<CCollision> cCollision = std::make_shared<CCollision>();
-        std::pair collisionPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::COLLISION, cCollision);
-        e->m_componentsByType.insert(collisionPair);
-    }
-
-    std::shared_ptr<CTransform> cEnemyAnimationTransform = std::make_shared<CTransform>();
-
-    cEnemyAnimationTransform->position = sf::Vector2f(cTransformForExistingEnemy->position);
-    cEnemyAnimationTransform->speed = spawnProperties.speed;
-    cEnemyAnimationTransform->speedDelta = sf::Vector2f(cos(spawnProperties.shotAngle) * 1.0f, sin(spawnProperties.shotAngle) * 1.0f);
-
-    std::pair transformPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::TRANSFORM, cEnemyAnimationTransform);
-    e->m_componentsByType.insert(transformPair);
-
-    std::shared_ptr<CLifespan> cLifespan = std::make_shared<CLifespan>(100);
-    std::pair lifespanPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::LIFESPAN, cLifespan);
-    e->m_componentsByType.insert(lifespanPair);
-
-    std::shared_ptr<CRender> cRenderForExistingEnemy =
-            std::dynamic_pointer_cast<CRender>(entity->getComponentByType(Component::Type::RENDER));
-    
-    std::shared_ptr<CRender> cRender = std::make_shared<CRender>();
-    float radius = cRenderForExistingEnemy->renderBody.getRadius() / 3;
-    sf::CircleShape shape(radius, cRenderForExistingEnemy->renderBody.getPointCount());
-    shape.setOrigin(radius, radius);
-    shape.setPosition(cEnemyAnimationTransform->position);
-    shape.setFillColor(cRenderForExistingEnemy->renderBody.getFillColor());
-    shape.setOutlineColor(cRenderForExistingEnemy->renderBody.getOutlineColor());
-    shape.setOutlineThickness(cRenderForExistingEnemy->renderBody.getOutlineThickness());
-    cRender->renderBody = shape;
-
-    std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER, cRender);
-    e->m_componentsByType.insert(renderPair);
+    enemyDeathAnimationEntity->m_components[Component::Type::COLLISION] = spawnProperties.isCollidable ? std::make_shared<CCollision>() : nullptr;
+    enemyDeathAnimationEntity->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(enemyAnimationPosition,
+            spawnProperties.speed, sf::Vector2f(cos(spawnProperties.shotAngle) * 1.0f, sin(spawnProperties.shotAngle) * 1.0f));
+    enemyDeathAnimationEntity->m_components[Component::Type::LIFESPAN] = std::make_shared<CLifespan>(100);
+    enemyDeathAnimationEntity->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 
 void Engine::spawnBullet(sf::Vector2f position, double shotAngle)
 {
     std::shared_ptr<Entity>& e = m_entityManager.addEntity(Entity::Type::BULLET);
 
-    std::shared_ptr<CTransform> cBulletTransform = std::make_shared<CTransform>();
+    sf::CircleShape shape = createShape({10, 32, position, sf::Color::White, sf::Color::Black, 1.0f});
 
-    cBulletTransform->position = sf::Vector2f(position);
-    cBulletTransform->speed = sf::Vector2f(10.0f, 10.0f);
-    cBulletTransform->speedDelta = sf::Vector2f(cos(shotAngle) * 1.0f, sin(shotAngle) * 1.0f);
+    e->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(position, sf::Vector2f(10.0f, 10.0f),
+            sf::Vector2f(cos(shotAngle) * 1.0f, sin(shotAngle) * 1.0f));
+    e->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
+    e->m_components[Component::Type::LIFESPAN] = std::make_shared<CLifespan>(100);
+    e->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
+}
 
-    //cBulletTransform->speed = sf::Vector2f(5.0f, 5.0f);
-    std::pair transformPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::TRANSFORM, cBulletTransform);
-    e->m_componentsByType.insert(transformPair);
-
-    std::shared_ptr<CCollision> cCollision = std::make_shared<CCollision>();
-    std::pair collisionPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::COLLISION, cCollision);
-    e->m_componentsByType.insert(collisionPair);
-
-    std::shared_ptr<CLifespan> cLifespan = std::make_shared<CLifespan>(100);
-    std::pair lifespanPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::LIFESPAN, cLifespan);
-    e->m_componentsByType.insert(lifespanPair);
-
-    std::shared_ptr<CRender> cRender = std::make_shared<CRender>();
-
-    float radius = 10.0f;
-    sf::CircleShape shape(radius);
+sf::CircleShape Engine::createShape(ShapeProperties properties)
+{
+    uint8_t radius = properties.radius;
+    sf::CircleShape shape(radius, properties.totalVertices);
     shape.setOrigin(radius, radius);
-    shape.setPosition(cBulletTransform->position);
-    shape.setFillColor(sf::Color::White);
-    shape.setOutlineColor(sf::Color::Black);
-    shape.setOutlineThickness(1.0f);
-    cRender->renderBody = shape;
-
-    std::pair renderPair = std::make_pair<Component::Type, std::shared_ptr<Component>>(Component::Type::RENDER, cRender);
-    e->m_componentsByType.insert(renderPair);
+    shape.setPosition(properties.position);
+    shape.setFillColor(properties.fillColor);
+    shape.setOutlineColor(properties.outlineColor);
+    shape.setOutlineThickness(properties.outlineThickness);
+    return shape;
 }
 
 void Engine::createGameWindow()
@@ -602,8 +506,8 @@ bool Engine::isCollidingAABB(
         const std::shared_ptr<CRender>& renderComponentForEntity,
         const std::shared_ptr<CRender>& renderComponentForEnemy)
 {
-    return renderComponentForEntity->renderBody.getGlobalBounds()
-        .intersects(renderComponentForEnemy->renderBody.getGlobalBounds());
+    return renderComponentForEntity->m_shape.getGlobalBounds()
+        .intersects(renderComponentForEnemy->m_shape.getGlobalBounds());
 }
 
 /*
@@ -611,10 +515,12 @@ bool Engine::isCollidingAABB(
  * We do not want an enemy to spawn on-top or even close-by to the player as this is either impossible or very difficult
  * to react to, and does not provide a good user experience.
  */
-bool Engine::isNearPlayer(
-        sf::FloatRect playerBoundingBox,
-        sf::FloatRect enemyBoundingBox)
+bool Engine::isNearPlayer(sf::FloatRect enemyBoundingBox)
 {
+    const std::shared_ptr<CRender>& renderComponentForPlayer = std::static_pointer_cast<CRender>(
+            m_entityManager.getEntityByType(Entity::Type::PLAYER)->getComponentByType(Component::Type::RENDER));
+    sf::FloatRect playerBoundingBox = renderComponentForPlayer->m_shape.getGlobalBounds();
+    
     // Make player rect larger for this calculation so enemies are not 'near'
     int offsetPx = 256;
     playerBoundingBox.left = (playerBoundingBox.left - offsetPx) < 0 ? 0 : (playerBoundingBox.left - offsetPx);

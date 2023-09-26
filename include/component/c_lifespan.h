@@ -11,8 +11,6 @@ class CLifespan : public Component
     public:
         explicit CLifespan(uint8_t timeToLive);
 
-        Type getType() override;
-
         [[nodiscard]] bool isAlive() const;
         void decreaseTimeToLive();
 

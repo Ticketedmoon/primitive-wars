@@ -23,11 +23,11 @@
 
 #include "entity.h"
 #include "entity_manager.h"
-#include "c_transform.h"
-#include "c_user_input.h"
-#include "c_collision.h"
-#include "c_render.h"
-#include "c_lifespan.h"
+#include "component/c_transform.h"
+#include "component/c_user_input.h"
+#include "component/c_collision.h"
+#include "component/c_render.h"
+#include "component/c_lifespan.h"
 
 static constexpr std::string_view WINDOW_TITLE = "primitive-wars";
 static const uint32_t WINDOW_WIDTH = 1280;
@@ -61,24 +61,33 @@ class Engine
             sf::Vector2f speed;
         };
 
+        struct ShapeProperties
+        {
+            float radius;
+            size_t totalVertices;
+            sf::Vector2f position;
+            sf::Color fillColor;
+            sf::Color outlineColor;
+            float outlineThickness;
+        };
+
         static inline void createGameWindow();
-        void configureTextRendering();
+        static void configureTextRendering();
 
         static void spawnPlayer();
         static void spawnEnemy();
         static void spawnBullet(sf::Vector2f position, double shotAngle);
-        static void spawnDuplicateEnemyForAnimation(const std::shared_ptr<Entity>& entity, SpawnProperties spawnProperties);
+        static void spawnEntityClone(const std::shared_ptr<Entity>& existingEnemy, SpawnProperties spawnProperties);
 
         static bool isCollidingAABB(
                 const std::shared_ptr<CRender>& renderComponentForEntity,
                 const std::shared_ptr<CRender>& renderComponentForEnemy);
-        static bool isNearPlayer(
-                sf::FloatRect playerBoundingBox,
-                sf::FloatRect enemyBoundingBox);
+        static void checkForWindowCollision(const std::shared_ptr<Entity>& e);
+        static bool isNearPlayer(sf::FloatRect enemyBoundingBox);
 
         static void drawText(sf::Text& text, const sf::Color& fillColour, uint8_t characterSize,
                 sf::Vector2f position);
-        static void checkForWindowCollision(const std::shared_ptr<Entity>& e);
+        static sf::CircleShape createShape(ShapeProperties properties);
 
         static void transformSystem();
         static void collisionSystem();

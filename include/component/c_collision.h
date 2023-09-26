@@ -8,9 +8,6 @@
 class CCollision : public Component
 {
     public:
-        Type getType() override;
-
-    public:
         bool isCollidingLeft = false;
         bool isCollidingRight = false;
         bool isCollidingUp = false;
