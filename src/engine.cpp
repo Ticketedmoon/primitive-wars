@@ -20,15 +20,11 @@ void Engine::startGameLoop()
 void Engine::update()
 {
     m_entityManager.update();
-    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
-    if (isPlayerDead && worldClock.getElapsedTime().asSeconds() > playerDeadTimer)
-    {
-        m_spawnerSystem.spawnPlayer();
-    }
 
     userInputSystem();
     if (!hasPaused)
     {
+        playerRespawnSystem();
         enemySpawnSystem();
         collisionSystem();
         lifeSpanSystem();
@@ -43,9 +39,9 @@ void Engine::render()
 
     renderSystem();
 
-    uint8_t coolDownSeconds = worldClock.getElapsedTime().asSeconds() > specialAttackCoolDown
+    uint8_t coolDownSeconds = worldClock.getElapsedTime().asSeconds() > specialAttackCoolDownSeconds
             ? 0.0f
-            : std::ceil(specialAttackCoolDown - worldClock.getElapsedTime().asSeconds());
+            : std::ceil(specialAttackCoolDownSeconds - worldClock.getElapsedTime().asSeconds());
 
     const std::string text = "Score: " + std::to_string(score) + "\n"
             + "Deaths: " + std::to_string(totalDeaths) + "\n"
@@ -56,18 +52,18 @@ void Engine::render()
     drawText(gameOverlayText, sf::Color::Yellow, 24, sf::Vector2f(24, 12));
 
     std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
-    if (players.empty())
-    {
-        uint8_t respawnTime = (playerDeadTimer - worldClock.getElapsedTime().asSeconds()) + 1;
-        respawnText.setString("Respawn Time: " + std::to_string(respawnTime));
-        drawText(respawnText, sf::Color::Yellow, 72, sf::Vector2f(WINDOW_WIDTH / 2 - 324, WINDOW_HEIGHT / 2 - 64));
-    }
 
     if (hasPaused)
     {
         drawText(pauseText, sf::Color::Green, 128, CENTRE_SCREEN_POSITION);
+        playerRespawnTimeSeconds = (worldClock.getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
     }
-
+    else if (players.empty())
+    {
+        uint8_t respawnTime = (playerRespawnTimeSeconds - worldClock.getElapsedTime().asSeconds()) + 1;
+        respawnText.setString("Respawn Time: " + std::to_string(respawnTime));
+        drawText(respawnText, sf::Color::Yellow, 72, sf::Vector2f(WINDOW_WIDTH / 2 - 324, WINDOW_HEIGHT / 2 - 64));
+    }
     m_window.display();
 }
 
@@ -202,15 +198,28 @@ void Engine::userInputSystem()
                 }
                 if (event.mouseButton.button == sf::Mouse::Right)
                 {
-                    if (specialAttackCoolDown > worldClock.getElapsedTime().asSeconds())
+                    if (specialAttackCoolDownSeconds > worldClock.getElapsedTime().asSeconds())
                     {
                         return;
                     }
 
                     m_spawnerSystem.spawnEntityAnimation(e, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(7.5f, 7.5f)));
-                    specialAttackCoolDown = (worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
+                    specialAttackCoolDownSeconds = (worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
                 }
             }
+        }
+    }
+}
+
+void Engine::playerRespawnSystem()
+{
+    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
+    if (isPlayerDead)
+    {
+        frameNo = 1;
+        if (worldClock.getElapsedTime().asSeconds() >= playerRespawnTimeSeconds)
+        {
+            m_spawnerSystem.spawnPlayer();
         }
     }
 }
@@ -280,7 +289,7 @@ void Engine::collisionSystem()
                 // kill player
                 player->isAlive = false;
 
-                playerDeadTimer = (worldClock.getElapsedTime().asSeconds() + PLAYER_DEAD_TIME_OFFSET);
+                playerRespawnTimeSeconds = (worldClock.getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
 
                 // kill enemy
                 enemy->isAlive = false;

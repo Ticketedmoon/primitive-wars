@@ -42,7 +42,7 @@ static const std::string FONT_PATH = "resources/fonts/calibri.ttf";
 static const sf::String& PAUSED_TEXT = "GAME PAUSED";
 static const sf::Vector2<float>& CENTRE_SCREEN_POSITION = sf::Vector2f(WINDOW_WIDTH / 2 - 496, WINDOW_HEIGHT / 2 - 96);
 static const uint8_t SPECIAL_ATTACK_COOLDOWN_OFFSET = 5;
-static const uint8_t PLAYER_DEAD_TIME_OFFSET = 3;
+static const float DEFAULT_RESPAWN_RATE_SECONDS = 3.0f;
 
 class Engine
 {
@@ -67,10 +67,11 @@ class Engine
         static void drawText(sf::Text& text, const sf::Color& fillColour, uint8_t characterSize,
                 sf::Vector2f position);
 
-        static void transformSystem();
-        static void collisionSystem();
+        static void playerRespawnSystem();
         static void enemySpawnSystem();
         static void userInputSystem();
+        static void transformSystem();
+        static void collisionSystem();
         static void lifeSpanSystem();
         static void renderSystem();
 
@@ -87,8 +88,8 @@ class Engine
         static inline size_t totalDeaths;
 
         static inline sf::Clock worldClock;
-        static inline float playerDeadTimer = worldClock.getElapsedTime().asSeconds();
-        static inline float specialAttackCoolDown = worldClock.getElapsedTime().asSeconds();
+        static inline float playerRespawnTimeSeconds = worldClock.getElapsedTime().asSeconds();
+        static inline float specialAttackCoolDownSeconds = worldClock.getElapsedTime().asSeconds();
 
         static inline sf::Text gameOverlayText;
         static inline sf::Text respawnText;

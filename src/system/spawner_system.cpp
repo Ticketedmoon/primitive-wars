@@ -106,14 +106,8 @@ sf::CircleShape SpawnerSystem::createShape(ShapeProperties properties)
  */
 bool SpawnerSystem::isNearPlayer(sf::FloatRect enemyBoundingBox)
 {
-    std::shared_ptr<Entity>& ptr = m_entityManager.getEntityByType(Entity::Type::PLAYER);
     const std::shared_ptr<CRender>& renderComponentForPlayer = std::static_pointer_cast<CRender>(
-            ptr->getComponentByType(Component::Type::RENDER));
-    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
-    if (isPlayerDead)
-    {
-        return false;
-    }
+            m_entityManager.getEntityByType(Entity::Type::PLAYER)->getComponentByType(Component::Type::RENDER));
 
     // Make player rect larger for this calculation so enemies are not 'near'
     int offsetPx = 256;
