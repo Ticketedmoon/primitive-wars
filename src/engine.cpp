@@ -20,8 +20,8 @@ void Engine::startGameLoop()
 void Engine::update()
 {
     m_entityManager.update();
-    std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
-    if (players.empty() && worldClock.getElapsedTime().asSeconds() > playerDeadTimer)
+    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
+    if (isPlayerDead && worldClock.getElapsedTime().asSeconds() > playerDeadTimer)
     {
         spawnPlayer();
     }
@@ -437,14 +437,14 @@ void Engine::spawnEntityClone(const std::shared_ptr<Entity>& existingEnemy, Spaw
     sf::CircleShape shapeForExistingEnemy =
             std::static_pointer_cast<CRender>(existingEnemy->getComponentByType(Component::Type::RENDER))->m_shape;
 
+    float radius = shapeForExistingEnemy.getRadius() / 3;
+    sf::CircleShape shape = createShape({radius, shapeForExistingEnemy.getPointCount(), shapeForExistingEnemy.getPosition(),
+                                         shapeForExistingEnemy.getFillColor(), shapeForExistingEnemy.getOutlineColor(),
+                                         shapeForExistingEnemy.getOutlineThickness()});
+
     sf::Vector2f enemyAnimationPosition =
             std::static_pointer_cast<CTransform>(existingEnemy->getComponentByType(Component::Type::TRANSFORM))->m_position;
 
-    float radius = shapeForExistingEnemy.getRadius() / 3;
-    sf::CircleShape shape = createShape({radius, shapeForExistingEnemy.getPointCount(), enemyAnimationPosition,
-                                         shapeForExistingEnemy.getFillColor(), shapeForExistingEnemy.getOutlineColor(), 
-                                         shapeForExistingEnemy.getOutlineThickness()});
-    
     enemyDeathAnimationEntity->m_components[Component::Type::COLLISION] = spawnProperties.isCollidable ? std::make_shared<CCollision>() : nullptr;
     enemyDeathAnimationEntity->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(enemyAnimationPosition,
             spawnProperties.speed, sf::Vector2f(cos(spawnProperties.shotAngle) * 1.0f, sin(spawnProperties.shotAngle) * 1.0f));
@@ -467,7 +467,7 @@ void Engine::spawnBullet(sf::Vector2f position, double shotAngle)
 
 sf::CircleShape Engine::createShape(ShapeProperties properties)
 {
-    uint8_t radius = properties.radius;
+    float radius = properties.radius;
     sf::CircleShape shape(radius, properties.totalVertices);
     shape.setOrigin(radius, radius);
     shape.setPosition(properties.position);
@@ -519,15 +519,19 @@ bool Engine::isNearPlayer(sf::FloatRect enemyBoundingBox)
 {
     const std::shared_ptr<CRender>& renderComponentForPlayer = std::static_pointer_cast<CRender>(
             m_entityManager.getEntityByType(Entity::Type::PLAYER)->getComponentByType(Component::Type::RENDER));
-    sf::FloatRect playerBoundingBox = renderComponentForPlayer->m_shape.getGlobalBounds();
-    
+    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
+    if (isPlayerDead)
+    {
+        return false;
+    }
+
     // Make player rect larger for this calculation so enemies are not 'near'
     int offsetPx = 256;
+    sf::FloatRect playerBoundingBox = renderComponentForPlayer->m_shape.getGlobalBounds();
     playerBoundingBox.left = (playerBoundingBox.left - offsetPx) < 0 ? 0 : (playerBoundingBox.left - offsetPx);
     playerBoundingBox.top = (playerBoundingBox.top - offsetPx) < 0 ? 0 : (playerBoundingBox.top - offsetPx);
     playerBoundingBox.width = playerBoundingBox.width + offsetPx;
     playerBoundingBox.height = playerBoundingBox.height + offsetPx;
-
     return playerBoundingBox.contains(sf::Vector2f(enemyBoundingBox.left, enemyBoundingBox.top));
 }
 
