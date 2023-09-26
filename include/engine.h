@@ -35,6 +35,7 @@ static const uint32_t WINDOW_WIDTH = 1280;
 static const uint32_t WINDOW_HEIGHT = 720;
 static const bool USE_VERTICAL_SYNC = true;
 static const uint32_t APP_FRAME_RATE = 60;
+static const std::string BACKGROUND_IMAGE_PATH = "resources/assets/board.png";
 static const std::string FONT_PATH = "resources/fonts/calibri.ttf";
 
 static const sf::String& PAUSED_TEXT = "GAME PAUSED";

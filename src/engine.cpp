@@ -494,8 +494,7 @@ void Engine::createGameWindow()
         m_window.setFramerateLimit(APP_FRAME_RATE);
     }
 
-    const std::string texturePath = "resources/assets/board.png";
-    bool isFileLoaded = textureSprite.loadFromFile(texturePath);
+    bool isFileLoaded = textureSprite.loadFromFile(BACKGROUND_IMAGE_PATH);
     assert(isFileLoaded);
 
     backgroundSprite = sf::Sprite(textureSprite);
