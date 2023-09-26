@@ -29,6 +29,7 @@
 #include "component/c_collision.h"
 #include "component/c_render.h"
 #include "component/c_lifespan.h"
+#include "system/spawner_system.h"
 
 static constexpr std::string_view WINDOW_TITLE = "primitive-wars";
 static const uint32_t WINDOW_WIDTH = 1280;
@@ -55,41 +56,16 @@ class Engine
         static void render();
 
     private:
-        struct SpawnProperties
-        {
-            Entity::Type entityType;
-            double shotAngle;
-            bool isCollidable;
-            sf::Vector2f speed;
-        };
-
-        struct ShapeProperties
-        {
-            float radius;
-            size_t totalVertices;
-            sf::Vector2f position;
-            sf::Color fillColor;
-            sf::Color outlineColor;
-            float outlineThickness;
-        };
-
         static inline void createGameWindow();
         static void configureTextRendering();
-
-        static void spawnPlayer();
-        static void spawnEnemy();
-        static void spawnBullet(sf::Vector2f position, double shotAngle);
-        static void spawnEntityClone(const std::shared_ptr<Entity>& existingEnemy, SpawnProperties spawnProperties);
 
         static bool isCollidingAABB(
                 const std::shared_ptr<CRender>& renderComponentForEntity,
                 const std::shared_ptr<CRender>& renderComponentForEnemy);
         static void checkForWindowCollision(const std::shared_ptr<Entity>& e);
-        static bool isNearPlayer(sf::FloatRect enemyBoundingBox);
 
         static void drawText(sf::Text& text, const sf::Color& fillColour, uint8_t characterSize,
                 sf::Vector2f position);
-        static sf::CircleShape createShape(ShapeProperties properties);
 
         static void transformSystem();
         static void collisionSystem();
@@ -102,6 +78,8 @@ class Engine
 
         static inline sf::RenderWindow m_window;
         static inline EntityManager m_entityManager;
+        static inline SpawnerSystem m_spawnerSystem{m_entityManager, WINDOW_WIDTH, WINDOW_HEIGHT};
+
         static inline sf::Texture textureSprite;
         static inline sf::Sprite backgroundSprite;
         static inline size_t frameNo;

@@ -4,7 +4,7 @@ Engine::Engine()
 {
     createGameWindow();
     configureTextRendering();
-    spawnPlayer();
+    m_spawnerSystem.spawnPlayer();
 }
 
 void Engine::startGameLoop()
@@ -23,13 +23,12 @@ void Engine::update()
     bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
     if (isPlayerDead && worldClock.getElapsedTime().asSeconds() > playerDeadTimer)
     {
-        spawnPlayer();
+        m_spawnerSystem.spawnPlayer();
     }
 
     userInputSystem();
     if (!hasPaused)
     {
-        userInputSystem();
         enemySpawnSystem();
         collisionSystem();
         lifeSpanSystem();
@@ -199,7 +198,7 @@ void Engine::userInputSystem()
                     float h = targetDestinationForBullet.y - transformComponentForEntity->m_position.y;
                     float a = targetDestinationForBullet.x - transformComponentForEntity->m_position.x;
                     double shotAngle = atan2(h, a);
-                    spawnBullet(transformComponentForEntity->m_position, shotAngle);
+                    m_spawnerSystem.spawnBullet(transformComponentForEntity->m_position, shotAngle);
                 }
                 if (event.mouseButton.button == sf::Mouse::Right)
                 {
@@ -208,16 +207,7 @@ void Engine::userInputSystem()
                         return;
                     }
 
-                    float PI = std::numbers::pi_v<float> * 2;
-                    size_t totalVertices = 15;
-
-                    for (size_t i = 0; i < totalVertices; i++)
-                    {
-                        double shotAngle = (PI / totalVertices) * i;
-                        const SpawnProperties& properties = SpawnProperties(Entity::Type::BULLET, shotAngle, true, sf::Vector2f(7.5f, 7.5f));
-                        spawnEntityClone(e, properties);
-                    }
-
+                    m_spawnerSystem.spawnEntityAnimation(e, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(7.5f, 7.5f)));
                     specialAttackCoolDown = (worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
                 }
             }
@@ -230,7 +220,7 @@ void Engine::enemySpawnSystem()
     if (frameNo % 100 == 0)
     {
         // spawn enemy
-        spawnEnemy();
+        m_spawnerSystem.spawnEnemy();
     }
 }
 
@@ -263,14 +253,7 @@ void Engine::collisionSystem()
                 size_t totalVertices = enemyRenderComponent->m_shape.getPointCount();
                 score += (100 * totalVertices);
 
-                // animation
-                float PI = std::numbers::pi_v<float> * 2;
-                for (size_t i = 0; i < totalVertices; i++)
-                {
-                    double shotAngle = (PI / totalVertices) * i;
-                    const SpawnProperties& properties = SpawnProperties(Entity::Type::ENEMY, shotAngle, false, sf::Vector2f(2.0f, 2.0f));
-                    spawnEntityClone(enemy, properties);
-                }
+                m_spawnerSystem.spawnEntityAnimation(enemy, SpawnProperties(totalVertices, Entity::Type::ENEMY, false, sf::Vector2f(2.0f, 2.0f)));
             }
         }
     }
@@ -302,15 +285,7 @@ void Engine::collisionSystem()
                 // kill enemy
                 enemy->isAlive = false;
 
-                // animation
-                size_t totalVertices = enemyRenderComponent->m_shape.getPointCount();
-                float PI = std::numbers::pi_v<float> * 2;
-                for (size_t i = 0; i < totalVertices; i++)
-                {
-                    double shotAngle = (PI / totalVertices) * i;
-                    const SpawnProperties& properties = SpawnProperties(Entity::Type::ENEMY, shotAngle, false, sf::Vector2f(2.0f, 2.0f));
-                    spawnEntityClone(enemy, properties);
-                }
+                m_spawnerSystem.spawnEntityAnimation(enemy, SpawnProperties(enemyRenderComponent->m_shape.getPointCount(), Entity::Type::ENEMY, false, sf::Vector2f(2.0f, 2.0f)));
 
                 totalDeaths++;
             }
@@ -394,89 +369,6 @@ void Engine::renderSystem()
     }
 }
 
-void Engine::spawnPlayer()
-{
-    std::shared_ptr<Entity>& player = m_entityManager.addEntity(Entity::Type::PLAYER);
-
-    const sf::Vector2f& position = sf::Vector2f(10.0f, 10.0f);
-    sf::CircleShape shape = createShape({20.0f, 3, position, sf::Color::Black, sf::Color::Red, 5.0f});
-
-    player->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(sf::Vector2f(WINDOW_WIDTH/2, WINDOW_HEIGHT/2), position);
-    player->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
-    player->m_components[Component::Type::USER_INPUT] = std::make_shared<CUserInput>();
-    player->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
-}
-
-void Engine::spawnEnemy()
-{
-    std::shared_ptr<Entity>& enemy = m_entityManager.addEntity(Entity::Type::ENEMY);
-
-    const int radius = std::experimental::randint(10, 50);
-    const int x = std::experimental::randint(radius, static_cast<int>(WINDOW_WIDTH - radius));
-    const int y = std::experimental::randint(radius, static_cast<int>(WINDOW_HEIGHT - radius));
-
-    const sf::Vector2f position = isNearPlayer(sf::FloatRect(x, y, radius, radius))
-            ? sf::Vector2f(radius * 2, radius * 2)
-            : sf::Vector2f(x, y);
-    const uint8_t totalVertices = std::experimental::randint(3, 10);
-    const sf::Color fillColor = sf::Color(std::experimental::randint(50, 255), std::experimental::randint(50, 255),
-            std::experimental::randint(50, 255), 255);
-
-    sf::CircleShape shape = createShape({static_cast<float>(radius), totalVertices, position, fillColor, sf::Color::White, 3.0f});
-
-    enemy->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(shape.getPosition(),
-            sf::Vector2f(std::experimental::randint(1, 3), std::experimental::randint(1, 3)), sf::Vector2f(1, 1));
-    enemy->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
-    enemy->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
-}
-
-void Engine::spawnEntityClone(const std::shared_ptr<Entity>& existingEnemy, SpawnProperties spawnProperties)
-{
-    std::shared_ptr<Entity>& enemyDeathAnimationEntity = m_entityManager.addEntity(spawnProperties.entityType);
-
-    sf::CircleShape shapeForExistingEnemy =
-            std::static_pointer_cast<CRender>(existingEnemy->getComponentByType(Component::Type::RENDER))->m_shape;
-
-    float radius = shapeForExistingEnemy.getRadius() / 3;
-    sf::CircleShape shape = createShape({radius, shapeForExistingEnemy.getPointCount(), shapeForExistingEnemy.getPosition(),
-                                         shapeForExistingEnemy.getFillColor(), shapeForExistingEnemy.getOutlineColor(),
-                                         shapeForExistingEnemy.getOutlineThickness()});
-
-    sf::Vector2f enemyAnimationPosition =
-            std::static_pointer_cast<CTransform>(existingEnemy->getComponentByType(Component::Type::TRANSFORM))->m_position;
-
-    enemyDeathAnimationEntity->m_components[Component::Type::COLLISION] = spawnProperties.isCollidable ? std::make_shared<CCollision>() : nullptr;
-    enemyDeathAnimationEntity->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(enemyAnimationPosition,
-            spawnProperties.speed, sf::Vector2f(cos(spawnProperties.shotAngle) * 1.0f, sin(spawnProperties.shotAngle) * 1.0f));
-    enemyDeathAnimationEntity->m_components[Component::Type::LIFESPAN] = std::make_shared<CLifespan>(100);
-    enemyDeathAnimationEntity->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
-}
-
-void Engine::spawnBullet(sf::Vector2f position, double shotAngle)
-{
-    std::shared_ptr<Entity>& e = m_entityManager.addEntity(Entity::Type::BULLET);
-
-    sf::CircleShape shape = createShape({10, 32, position, sf::Color::White, sf::Color::Black, 1.0f});
-
-    e->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(position, sf::Vector2f(10.0f, 10.0f),
-            sf::Vector2f(cos(shotAngle) * 1.0f, sin(shotAngle) * 1.0f));
-    e->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
-    e->m_components[Component::Type::LIFESPAN] = std::make_shared<CLifespan>(100);
-    e->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
-}
-
-sf::CircleShape Engine::createShape(ShapeProperties properties)
-{
-    float radius = properties.radius;
-    sf::CircleShape shape(radius, properties.totalVertices);
-    shape.setOrigin(radius, radius);
-    shape.setPosition(properties.position);
-    shape.setFillColor(properties.fillColor);
-    shape.setOutlineColor(properties.outlineColor);
-    shape.setOutlineThickness(properties.outlineThickness);
-    return shape;
-}
-
 void Engine::createGameWindow()
 {
     m_window.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE.data());
@@ -506,31 +398,6 @@ bool Engine::isCollidingAABB(
 {
     return renderComponentForEntity->m_shape.getGlobalBounds()
         .intersects(renderComponentForEnemy->m_shape.getGlobalBounds());
-}
-
-/*
- * This is about nearness and not collision.
- * We do not want an enemy to spawn on-top or even close-by to the player as this is either impossible or very difficult
- * to react to, and does not provide a good user experience.
- */
-bool Engine::isNearPlayer(sf::FloatRect enemyBoundingBox)
-{
-    const std::shared_ptr<CRender>& renderComponentForPlayer = std::static_pointer_cast<CRender>(
-            m_entityManager.getEntityByType(Entity::Type::PLAYER)->getComponentByType(Component::Type::RENDER));
-    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
-    if (isPlayerDead)
-    {
-        return false;
-    }
-
-    // Make player rect larger for this calculation so enemies are not 'near'
-    int offsetPx = 256;
-    sf::FloatRect playerBoundingBox = renderComponentForPlayer->m_shape.getGlobalBounds();
-    playerBoundingBox.left = (playerBoundingBox.left - offsetPx) < 0 ? 0 : (playerBoundingBox.left - offsetPx);
-    playerBoundingBox.top = (playerBoundingBox.top - offsetPx) < 0 ? 0 : (playerBoundingBox.top - offsetPx);
-    playerBoundingBox.width = playerBoundingBox.width + offsetPx;
-    playerBoundingBox.height = playerBoundingBox.height + offsetPx;
-    return playerBoundingBox.contains(sf::Vector2f(enemyBoundingBox.left, enemyBoundingBox.top));
 }
 
 void Engine::drawText(sf::Text& text, const sf::Color& fillColour, const uint8_t characterSize, sf::Vector2f position)

@@ -25,7 +25,8 @@ class Entity
         {
             PLAYER,
             ENEMY,
-            BULLET
+            BULLET,
+            NONE
         };
 
         Type type;
