@@ -3,7 +3,6 @@
 Engine::Engine()
 {
     createGameWindow();
-    configureTextRendering();
 }
 
 void Engine::startGameLoop()
@@ -21,47 +20,60 @@ void Engine::update()
     m_entityManager.update();
 
     userInputSystem();
-    if (!hasPaused)
+    if (hasPaused)
     {
-        m_collisionSystem.execute();
-        m_entitySpawnerSystem.execute();
-        lifeSpanSystem();
-        m_transformSystem.execute();
+        playerRespawnTimeSeconds = (worldClock.getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
+        return;
     }
+
+    m_collisionSystem.execute();
+
+    // FIXME Move system(s)?
+    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
+    if (isPlayerDead)
+    {
+        frameNo = 1;
+        if (worldClock.getElapsedTime().asSeconds() > playerRespawnTimeSeconds)
+        {
+            m_entitySpawnerSystem.spawnPlayer();
+        }
+    }
+
+    // FIXME Move system(s)?
+    if (frameNo % 100 == 0)
+    {
+        m_entitySpawnerSystem.spawnEnemy();
+    }
+
+    // FIXME Move system(s)?
+    std::vector<std::shared_ptr<Entity>> destroyedEntities = m_entityManager.getDestroyedEntities();
+    for (const auto& e: destroyedEntities)
+    {
+        if (e->getType() == Entity::Type::PLAYER)
+        {
+            playerRespawnTimeSeconds = (worldClock.getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
+            totalDeaths++;
+        }
+
+        if (e->getType() == Entity::Type::ENEMY)
+        {
+            std::shared_ptr<CRender> renderComponent = std::static_pointer_cast<CRender>(
+                    e->getComponentByType(Component::Type::RENDER));
+            score += (100 * renderComponent->m_shape.getPointCount());
+        }
+    }
+
+    m_entitySpawnerSystem.execute();
+    m_lifespanSystem.execute();
+    m_transformSystem.execute();
 }
 
 void Engine::render()
 {
     m_window.clear();
-    m_window.draw(backgroundSprite);
 
-    renderSystem();
+    m_renderSystem.execute();
 
-    uint8_t coolDownSeconds = worldClock.getElapsedTime().asSeconds() > specialAttackCoolDownSeconds
-            ? 0.0f
-            : std::ceil(specialAttackCoolDownSeconds - worldClock.getElapsedTime().asSeconds());
-
-    const std::string text = "Score: " + std::to_string(score) + "\n"
-            + "Deaths: " + std::to_string(totalDeaths) + "\n"
-            + "Special Attack Cooldown: " + std::to_string(coolDownSeconds);
-
-    gameOverlayText.setString(text);
-
-    drawText(gameOverlayText, sf::Color::White, 20, sf::Vector2f(24, 12));
-
-    std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
-
-    if (hasPaused)
-    {
-        drawText(pauseText, sf::Color::Green, 128, CENTRE_SCREEN_POSITION);
-        playerRespawnTimeSeconds = (worldClock.getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
-    }
-    else if (players.empty())
-    {
-        uint8_t respawnTime = (playerRespawnTimeSeconds - worldClock.getElapsedTime().asSeconds()) + 1;
-        respawnText.setString("Respawn Time: " + std::to_string(respawnTime));
-        drawText(respawnText, sf::Color::Yellow, 72, sf::Vector2f(WINDOW_WIDTH / 2 - 324, WINDOW_HEIGHT / 2 - 64));
-    }
     m_window.display();
 }
 
@@ -134,55 +146,6 @@ void Engine::userInputSystem()
     }
 }
 
-void Engine::lifeSpanSystem()
-{
-    std::ranges::filter_view view = m_entityManager.getEntities() | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
-        return e->hasComponent(Component::Type::LIFESPAN) && e->hasComponent(Component::Type::RENDER);
-    });
-    std::vector<std::shared_ptr<Entity>> entitiesToUpdate = std::vector(view.begin(), view.end());
-    for (const std::shared_ptr<Entity>& e : entitiesToUpdate)
-    {
-        std::shared_ptr<CLifespan> lifeSpanComponent = std::static_pointer_cast<CLifespan> (e->getComponentByType(Component::Type::LIFESPAN));
-
-        if (!lifeSpanComponent->isAlive())
-        {
-            e->destroy();
-        }
-        else
-        {
-            std::shared_ptr<CRender> renderComponent = std::static_pointer_cast<CRender> (e->getComponentByType(Component::Type::RENDER));
-            sf::Color fillColor = renderComponent->m_shape.getFillColor();
-            sf::Color outlineColor = renderComponent->m_shape.getOutlineColor();
-            fillColor.a -= fillColor.a >= 2.55 ? 2.55 : 0;
-            outlineColor.a -= outlineColor.a >= 2.55 ? 2.55 : 0;
-
-            renderComponent->m_shape.setFillColor(fillColor);
-            renderComponent->m_shape.setOutlineColor(outlineColor);
-
-            lifeSpanComponent->decreaseTimeToLive();
-        }
-    }
-}
-
-void Engine::renderSystem()
-{
-    std::ranges::filter_view view = m_entityManager.getEntities() | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
-        return e->hasComponent(Component::Type::RENDER) && e->hasComponent(Component::Type::TRANSFORM);
-    });
-    std::vector<std::shared_ptr<Entity>> entitiesToUpdate = std::vector(view.begin(), view.end());
-    for (const std::shared_ptr<Entity>& e : entitiesToUpdate)
-    {
-        std::shared_ptr<CTransform> transformComponentForEntity = std::static_pointer_cast<CTransform> (e->getComponentByType(Component::Type::TRANSFORM));
-        std::shared_ptr<CRender> renderComponentForEntity = std::static_pointer_cast<CRender> (e->getComponentByType(Component::Type::RENDER));
-
-        sf::CircleShape& drawable = renderComponentForEntity->m_shape;
-        drawable.setPosition(transformComponentForEntity->m_position);
-        drawable.rotate(2);
-
-        m_window.draw(drawable);
-    }
-}
-
 void Engine::createGameWindow()
 {
     m_window.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE.data());
@@ -199,33 +162,4 @@ void Engine::createGameWindow()
     {
         m_window.setFramerateLimit(APP_FRAME_RATE);
     }
-
-    bool isFileLoaded = textureSprite.loadFromFile(BACKGROUND_IMAGE_PATH);
-    assert(isFileLoaded);
-
-    backgroundSprite = sf::Sprite(textureSprite);
-}
-
-void Engine::drawText(sf::Text& text, const sf::Color& fillColour, const uint8_t characterSize, sf::Vector2f position)
-{
-    text.setFillColor(fillColour);
-    text.setCharacterSize(characterSize); // in pixels, not points!
-    text.setPosition(position);
-
-    // TODO parameterise us
-    text.setOutlineColor(sf::Color::Black);
-    text.setOutlineThickness(3.0f);
-    text.setLetterSpacing(3.0f);
-
-    m_window.draw(text);
-}
-
-void Engine::configureTextRendering()
-{
-    bool isFontLoaded = m_font.loadFromFile(FONT_PATH);
-    assert(isFontLoaded);
-
-    gameOverlayText = sf::Text("", m_font);
-    respawnText = sf::Text("", m_font);
-    pauseText = sf::Text(PAUSED_TEXT, m_font);
 }

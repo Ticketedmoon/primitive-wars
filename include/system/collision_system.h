@@ -18,24 +18,18 @@
 class CollisionSystem : public System
 {
     public:
-        CollisionSystem(EntityManager& entityManager, sf::Clock& worldClock, size_t& score,
-                float& playerRespawnSeconds, size_t& totalDeaths);
+        explicit CollisionSystem(EntityManager& entityManager);
 
         void execute() override;
 
     private:
 
-        void checkForWindowCollision(const std::shared_ptr<Entity>& e) const;
+        static void checkForWindowCollision(const std::shared_ptr<Entity>& e);
         static bool isCollidingAABB(const std::shared_ptr<CRender>& renderComponentForEntity,
                 const std::shared_ptr<CRender>& renderComponentForEnemy);
 
     private:
         EntityManager& m_entityManager;
-
-        sf::Clock& m_worldClock;
-        size_t& m_score;
-        float& m_playerRespawnSeconds;
-        size_t& m_totalDeaths;
 };
 
 

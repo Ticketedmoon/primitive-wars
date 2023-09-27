@@ -33,12 +33,13 @@ struct SpawnProperties
 class EntitySpawnSystem : public System
 {
     public:
-        EntitySpawnSystem(EntityManager& entityManager, sf::Clock& worldClock, size_t& frameNo,
-                float& playerRespawnTimeSeconds);
+        explicit EntitySpawnSystem(EntityManager& entityManager);
 
         void execute() override;
 
-        // FIXME these should be private
+        // FIXME investigate moving these to be private
+        void spawnPlayer();
+        void spawnEnemy();
         void spawnBullet(sf::Vector2f position, double shotAngle);
         void spawnEntityAnimation(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties);
 
@@ -53,8 +54,6 @@ class EntitySpawnSystem : public System
             float outlineThickness{};
         };
 
-        void spawnPlayer();
-        void spawnEnemy();
         void spawnEntityClone(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties,
                 double shotAngle);
         static sf::CircleShape createShape(ShapeProperties properties);
@@ -62,9 +61,6 @@ class EntitySpawnSystem : public System
 
     private:
         EntityManager& m_entityManager;
-        sf::Clock& m_worldClock;
-        size_t& m_frameNo;
-        float& m_playerRespawnTimeSeconds;
 
         static constexpr float PI_FULL_CIRCLE = std::numbers::pi_v<float> * 2;
 };

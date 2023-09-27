@@ -32,16 +32,13 @@
 #include "entity_spawn_system.h"
 #include "transform_system.h"
 #include "collision_system.h"
+#include "lifespan_system.h"
+#include "render_system.h"
 
 static constexpr std::string_view WINDOW_TITLE = "primitive-wars";
 static const bool USE_VERTICAL_SYNC = true;
 static const uint32_t APP_FRAME_RATE = 60;
-static const std::string BACKGROUND_IMAGE_PATH = "resources/assets/board.png";
-static const std::string FONT_PATH = "resources/fonts/calibri.ttf";
-
-static const sf::String& PAUSED_TEXT = "GAME PAUSED";
-static const sf::Vector2<float>& CENTRE_SCREEN_POSITION = sf::Vector2f(WINDOW_WIDTH / 2 - 496, WINDOW_HEIGHT / 2 - 96);
-static const uint8_t SPECIAL_ATTACK_COOLDOWN_OFFSET = 5;
+static const uint8_t SPECIAL_ATTACK_COOLDOWN_OFFSET = 3;
 
 class Engine
 {
@@ -56,19 +53,8 @@ class Engine
 
     private:
         static inline void createGameWindow();
-        static void configureTextRendering();
-
-        static bool isCollidingAABB(
-                const std::shared_ptr<CRender>& renderComponentForEntity,
-                const std::shared_ptr<CRender>& renderComponentForEnemy);
-        static void checkForWindowCollision(const std::shared_ptr<Entity>& e);
-
-        static void drawText(sf::Text& text, const sf::Color& fillColour, uint8_t characterSize,
-                sf::Vector2f position);
 
         static void userInputSystem();
-        static void lifeSpanSystem();
-        static void renderSystem();
 
     private:
 
@@ -77,23 +63,20 @@ class Engine
         static inline sf::Clock worldClock;
         static inline size_t frameNo;
 
-        static inline sf::Texture textureSprite;
-        static inline sf::Sprite backgroundSprite;
+        static inline float specialAttackCoolDownSeconds = worldClock.getElapsedTime().asSeconds();
         static inline size_t score = 0;
         static inline size_t totalDeaths;
-
         static inline float playerRespawnTimeSeconds = worldClock.getElapsedTime().asSeconds();
-        static inline float specialAttackCoolDownSeconds = worldClock.getElapsedTime().asSeconds();
+        static inline bool hasPaused;
 
         static inline TransformSystem m_transformSystem{m_entityManager};
-        static inline EntitySpawnSystem m_entitySpawnerSystem{m_entityManager, worldClock, frameNo, playerRespawnTimeSeconds};
-        static inline CollisionSystem m_collisionSystem{m_entityManager, worldClock, score, playerRespawnTimeSeconds, totalDeaths};
+        static inline EntitySpawnSystem m_entitySpawnerSystem{m_entityManager};
+        static inline CollisionSystem m_collisionSystem{m_entityManager};
+        static inline LifespanSystem m_lifespanSystem{m_entityManager};
 
-        static inline sf::Text gameOverlayText;
-        static inline sf::Text respawnText;
-        static inline sf::Text pauseText;
-        static inline bool hasPaused;
-        static inline sf::Font m_font;
+        static inline RenderSystem m_renderSystem{m_window, m_entityManager, worldClock, specialAttackCoolDownSeconds,
+                                                  score, totalDeaths, playerRespawnTimeSeconds, hasPaused};
+
 };
 
 #endif //PRIMITIVE_WARS_ENGINE_H

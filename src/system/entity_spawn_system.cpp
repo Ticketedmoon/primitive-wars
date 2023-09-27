@@ -1,30 +1,14 @@
 #include "entity_spawn_system.h"
 
-EntitySpawnSystem::EntitySpawnSystem(EntityManager& entityManager, sf::Clock& worldClock, size_t& frameNo,
-        float& playerRespawnTimeSeconds)
-        : m_entityManager(entityManager), m_worldClock(worldClock), m_frameNo(frameNo),
-        m_playerRespawnTimeSeconds(playerRespawnTimeSeconds)
+EntitySpawnSystem::EntitySpawnSystem(EntityManager& entityManager)
+        : m_entityManager(entityManager)
 {
     spawnPlayer();
 }
 
 void EntitySpawnSystem::execute()
 {
-    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
-    if (isPlayerDead)
-    {
-        m_frameNo = 1;
-        if (m_worldClock.getElapsedTime().asSeconds() > m_playerRespawnTimeSeconds)
-        {
-            spawnPlayer();
-        }
-    }
 
-    if (m_frameNo % 100 == 0)
-    {
-        // spawn enemy
-        spawnEnemy();
-    }
     std::vector<std::shared_ptr<Entity>>& enemies = m_entityManager.getEntitiesByType(Entity::Type::ENEMY);
     for (const auto& enemy: enemies)
     {

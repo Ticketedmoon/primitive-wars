@@ -60,3 +60,11 @@ std::shared_ptr<Entity>& EntityManager::getEntityByType(Entity::Type type)
 {
     return m_entitiesByType[type].front();
 }
+
+std::vector<std::shared_ptr<Entity>> EntityManager::getDestroyedEntities()
+{
+    std::ranges::filter_view filteredEntities = m_entities | std::ranges::views::filter([](std::shared_ptr<Entity>& e) {
+        return !e->isAlive();
+    });
+    return {filteredEntities.begin(), filteredEntities.end()};
+}
