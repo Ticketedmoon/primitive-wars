@@ -1,13 +1,38 @@
 #include "entity_spawn_system.h"
 
-EntitySpawnSystem::EntitySpawnSystem(EntityManager& entityManager)
-        : m_entityManager(entityManager)
+EntitySpawnSystem::EntitySpawnSystem(EntityManager& entityManager, sf::Clock& worldClock, GuiProperties& guiProperties)
+        : m_entityManager(entityManager), m_worldClock(worldClock), m_guiProperties(guiProperties)
 {
     spawnPlayer();
 }
 
 void EntitySpawnSystem::execute()
 {
+    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
+    float worldTimeSeconds = m_worldClock.getElapsedTime().asSeconds();
+
+    if (m_guiProperties.hasPaused)
+    {
+        enemyRespawnTimeSeconds = (worldTimeSeconds + ENEMY_SPAWN_RATE_SECONDS);
+        return;
+    }
+
+    if (isPlayerDead)
+    {
+        enemyRespawnTimeSeconds = (worldTimeSeconds + ENEMY_SPAWN_RATE_SECONDS);
+        if (worldTimeSeconds > m_guiProperties.playerRespawnTimeSeconds)
+        {
+            m_guiProperties.totalScore = 0;
+            spawnPlayer();
+        }
+        return;
+    }
+
+    if (worldTimeSeconds > enemyRespawnTimeSeconds)
+    {
+        spawnEnemy();
+        enemyRespawnTimeSeconds = (worldTimeSeconds + ENEMY_SPAWN_RATE_SECONDS);
+    }
 
     std::vector<std::shared_ptr<Entity>>& enemies = m_entityManager.getEntitiesByType(Entity::Type::ENEMY);
     for (const auto& enemy: enemies)
@@ -19,7 +44,6 @@ void EntitySpawnSystem::execute()
             spawnEntityAnimation(enemy, SpawnProperties(totalVertices, Entity::Type::ENEMY, false, sf::Vector2f(2.0f, 2.0f)));
         }
     }
-
 }
 
 void EntitySpawnSystem::spawnPlayer()

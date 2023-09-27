@@ -3,15 +3,20 @@
 Engine::Engine()
 {
     createGameWindow();
+
+    bool isFileLoaded = textureSprite.loadFromFile(BACKGROUND_IMAGE_PATH);
+    assert(isFileLoaded);
+    backgroundSprite = sf::Sprite(textureSprite);
 }
 
 void Engine::startGameLoop()
 {
     while (m_window.isOpen())
     {
+        deltaClock.restart();
+
         update();
         render();
-        frameNo++;
     }
 }
 
@@ -20,50 +25,14 @@ void Engine::update()
     m_entityManager.update();
 
     userInputSystem();
-    if (hasPaused)
+    m_collisionSystem.execute();
+    m_entitySpawnerSystem.execute();
+
+    if (guiProperties.hasPaused)
     {
-        playerRespawnTimeSeconds = (worldClock.getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
         return;
     }
 
-    m_collisionSystem.execute();
-
-    // FIXME Move system(s)?
-    bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
-    if (isPlayerDead)
-    {
-        frameNo = 1;
-        if (worldClock.getElapsedTime().asSeconds() > playerRespawnTimeSeconds)
-        {
-            m_entitySpawnerSystem.spawnPlayer();
-        }
-    }
-
-    // FIXME Move system(s)?
-    if (frameNo % 100 == 0)
-    {
-        m_entitySpawnerSystem.spawnEnemy();
-    }
-
-    // FIXME Move system(s)?
-    std::vector<std::shared_ptr<Entity>> destroyedEntities = m_entityManager.getDestroyedEntities();
-    for (const auto& e: destroyedEntities)
-    {
-        if (e->getType() == Entity::Type::PLAYER)
-        {
-            playerRespawnTimeSeconds = (worldClock.getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
-            totalDeaths++;
-        }
-
-        if (e->getType() == Entity::Type::ENEMY)
-        {
-            std::shared_ptr<CRender> renderComponent = std::static_pointer_cast<CRender>(
-                    e->getComponentByType(Component::Type::RENDER));
-            score += (100 * renderComponent->m_shape.getPointCount());
-        }
-    }
-
-    m_entitySpawnerSystem.execute();
     m_lifespanSystem.execute();
     m_transformSystem.execute();
 }
@@ -71,8 +40,16 @@ void Engine::update()
 void Engine::render()
 {
     m_window.clear();
+    m_window.draw(backgroundSprite);
+
+    if (guiProperties.hasPaused)
+    {
+        guiProperties.playerRespawnTimeSeconds += deltaClock.getElapsedTime().asSeconds();
+        guiProperties.specialAttackCoolDownSeconds += deltaClock.getElapsedTime().asSeconds();
+    }
 
     m_renderSystem.execute();
+    m_guiSystem.execute();
 
     m_window.display();
 }
@@ -94,11 +71,11 @@ void Engine::userInputSystem()
         {
             if (event.key.code == sf::Keyboard::Key::P)
             {
-                hasPaused = !hasPaused;
+                guiProperties.hasPaused = !guiProperties.hasPaused;
             }
         }
 
-        if (hasPaused)
+        if (guiProperties.hasPaused)
         {
             return;
         }
@@ -133,13 +110,13 @@ void Engine::userInputSystem()
                 }
                 if (event.mouseButton.button == sf::Mouse::Right)
                 {
-                    if (specialAttackCoolDownSeconds > worldClock.getElapsedTime().asSeconds())
+                    if (guiProperties.specialAttackCoolDownSeconds > worldClock.getElapsedTime().asSeconds())
                     {
                         return;
                     }
 
                     m_entitySpawnerSystem.spawnEntityAnimation(e, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(7.5f, 7.5f)));
-                    specialAttackCoolDownSeconds = (worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
+                    guiProperties.specialAttackCoolDownSeconds = (worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
                 }
             }
         }

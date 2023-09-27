@@ -21,6 +21,7 @@
 #include "c_render.h"
 #include "c_lifespan.h"
 #include "system.h"
+#include "gui_system.h"
 
 struct SpawnProperties
 {
@@ -33,7 +34,7 @@ struct SpawnProperties
 class EntitySpawnSystem : public System
 {
     public:
-        explicit EntitySpawnSystem(EntityManager& entityManager);
+        explicit EntitySpawnSystem(EntityManager& entityManager, sf::Clock& worldClock, GuiProperties& guiProperties);
 
         void execute() override;
 
@@ -60,9 +61,14 @@ class EntitySpawnSystem : public System
         bool isNearPlayer(sf::FloatRect enemyBoundingBox);
 
     private:
-        EntityManager& m_entityManager;
-
         static constexpr float PI_FULL_CIRCLE = std::numbers::pi_v<float> * 2;
+        static constexpr float ENEMY_SPAWN_RATE_SECONDS = 1.0f;
+
+        EntityManager& m_entityManager;
+        sf::Clock& m_worldClock;
+        GuiProperties& m_guiProperties;
+
+        float enemyRespawnTimeSeconds{m_worldClock.getElapsedTime().asSeconds() + ENEMY_SPAWN_RATE_SECONDS};
 };
 
 

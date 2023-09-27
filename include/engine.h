@@ -34,6 +34,7 @@
 #include "collision_system.h"
 #include "lifespan_system.h"
 #include "render_system.h"
+#include "gui_system.h"
 
 static constexpr std::string_view WINDOW_TITLE = "primitive-wars";
 static const bool USE_VERTICAL_SYNC = true;
@@ -47,7 +48,6 @@ class Engine
         static void startGameLoop();
 
     private:
-        // Game loop logic
         static void update();
         static void render();
 
@@ -57,26 +57,25 @@ class Engine
         static void userInputSystem();
 
     private:
+        static const inline std::string BACKGROUND_IMAGE_PATH = "resources/assets/board.png";
 
         static inline sf::RenderWindow m_window;
         static inline EntityManager m_entityManager;
         static inline sf::Clock worldClock;
-        static inline size_t frameNo;
+        static inline sf::Clock deltaClock;
 
-        static inline float specialAttackCoolDownSeconds = worldClock.getElapsedTime().asSeconds();
-        static inline size_t score = 0;
-        static inline size_t totalDeaths;
-        static inline float playerRespawnTimeSeconds = worldClock.getElapsedTime().asSeconds();
-        static inline bool hasPaused;
+        static inline sf::Texture textureSprite;
+        static inline sf::Sprite backgroundSprite;
+
+        static inline GuiProperties guiProperties{false, 0, 0, worldClock.getElapsedTime().asSeconds(),
+                                                  worldClock.getElapsedTime().asSeconds()};
 
         static inline TransformSystem m_transformSystem{m_entityManager};
-        static inline EntitySpawnSystem m_entitySpawnerSystem{m_entityManager};
+        static inline EntitySpawnSystem m_entitySpawnerSystem{m_entityManager, worldClock, guiProperties};
         static inline CollisionSystem m_collisionSystem{m_entityManager};
         static inline LifespanSystem m_lifespanSystem{m_entityManager};
-
-        static inline RenderSystem m_renderSystem{m_window, m_entityManager, worldClock, specialAttackCoolDownSeconds,
-                                                  score, totalDeaths, playerRespawnTimeSeconds, hasPaused};
-
+        static inline RenderSystem m_renderSystem{m_window, m_entityManager};
+        static inline GuiSystem m_guiSystem{m_window, m_entityManager, worldClock, guiProperties};
 };
 
 #endif //PRIMITIVE_WARS_ENGINE_H
