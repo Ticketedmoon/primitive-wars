@@ -35,11 +35,11 @@
 #include "lifespan_system.h"
 #include "render_system.h"
 #include "gui_system.h"
+#include "user_input_system.h"
 
 static constexpr std::string_view WINDOW_TITLE = "primitive-wars";
 static const bool USE_VERTICAL_SYNC = true;
 static const uint32_t APP_FRAME_RATE = 60;
-static const uint8_t SPECIAL_ATTACK_COOLDOWN_OFFSET = 3;
 
 class Engine
 {
@@ -53,8 +53,6 @@ class Engine
 
     private:
         static inline void createGameWindow();
-
-        static void userInputSystem();
 
     private:
         static const inline std::string BACKGROUND_IMAGE_PATH = "resources/assets/board.png";
@@ -70,6 +68,7 @@ class Engine
         static inline GuiProperties guiProperties{false, 0, 0, worldClock.getElapsedTime().asSeconds(),
                                                   worldClock.getElapsedTime().asSeconds()};
 
+        static inline UserInputSystem m_userInputSystem{m_entityManager, m_window, worldClock, guiProperties};
         static inline TransformSystem m_transformSystem{m_entityManager};
         static inline EntitySpawnSystem m_entitySpawnerSystem{m_entityManager, worldClock, guiProperties};
         static inline CollisionSystem m_collisionSystem{m_entityManager};

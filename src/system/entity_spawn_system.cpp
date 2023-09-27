@@ -44,6 +44,26 @@ void EntitySpawnSystem::execute()
             spawnEntityAnimation(enemy, SpawnProperties(totalVertices, Entity::Type::ENEMY, false, sf::Vector2f(2.0f, 2.0f)));
         }
     }
+
+    std::shared_ptr<Entity>& player = m_entityManager.getEntityByType(Entity::Type::PLAYER);
+    std::shared_ptr<CUserInput> userInputComponent
+        = std::static_pointer_cast<CUserInput>(player->getComponentByType(Component::Type::USER_INPUT));
+    if (userInputComponent->mouseLeftClicked)
+    {
+        std::shared_ptr<CTransform> transformComponentForEntity = std::static_pointer_cast<CTransform> (player->getComponentByType(Component::Type::TRANSFORM));
+        float h = userInputComponent->mouseClickPosition.y - transformComponentForEntity->m_position.y;
+        float a = userInputComponent->mouseClickPosition.x - transformComponentForEntity->m_position.x;
+        double shotAngle = atan2(h, a);
+        spawnBullet(transformComponentForEntity->m_position, shotAngle);
+        userInputComponent->mouseLeftClicked = false;
+    }
+    if (userInputComponent->mouseRightClicked)
+    {
+        spawnEntityAnimation(player, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(7.5f, 7.5f)));
+        m_guiProperties.specialAttackCoolDownSeconds = (m_worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
+
+        userInputComponent->mouseRightClicked = false;
+    }
 }
 
 void EntitySpawnSystem::spawnPlayer()

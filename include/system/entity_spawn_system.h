@@ -63,6 +63,7 @@ class EntitySpawnSystem : public System
     private:
         static constexpr float PI_FULL_CIRCLE = std::numbers::pi_v<float> * 2;
         static constexpr float ENEMY_SPAWN_RATE_SECONDS = 1.0f;
+        static const uint8_t SPECIAL_ATTACK_COOLDOWN_OFFSET = 3;
 
         EntityManager& m_entityManager;
         sf::Clock& m_worldClock;
