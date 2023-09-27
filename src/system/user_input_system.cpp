@@ -1,8 +1,8 @@
 #include "user_input_system.h"
 
-UserInputSystem::UserInputSystem(EntityManager& entityManager, sf::RenderWindow& renderWindow, sf::Clock& worldClock,
-        GuiProperties& guiProperties) : m_entityManager(entityManager), m_renderWindow(renderWindow),
-        m_worldClock(worldClock), m_guiProperties(guiProperties)
+UserInputSystem::UserInputSystem(sf::RenderWindow& renderWindow, EntityManager& entityManager, sf::Clock& worldClock,
+        GameProperties& gameProperties) : m_renderWindow(renderWindow), m_entityManager(entityManager),
+                                          m_worldClock(worldClock), m_gameProperties(gameProperties)
 {
 
 }
@@ -22,11 +22,11 @@ void UserInputSystem::execute()
         {
             if (event.key.code == sf::Keyboard::Key::P)
             {
-                m_guiProperties.hasPaused = !m_guiProperties.hasPaused;
+                m_gameProperties.hasPaused = !m_gameProperties.hasPaused;
             }
         }
 
-        if (m_guiProperties.hasPaused)
+        if (m_gameProperties.hasPaused)
         {
             return;
         }
@@ -53,7 +53,7 @@ void UserInputSystem::execute()
             {
                 userInputComponentForEntity->mouseLeftClicked = event.mouseButton.button == sf::Mouse::Left;
 
-                if (m_guiProperties.specialAttackCoolDownSeconds <= m_worldClock.getElapsedTime().asSeconds())
+                if (m_gameProperties.specialAttackCoolDownSeconds <= m_worldClock.getElapsedTime().asSeconds())
                 {
                     userInputComponentForEntity->mouseRightClicked = event.mouseButton.button == sf::Mouse::Right;
                 }
@@ -63,4 +63,9 @@ void UserInputSystem::execute()
             }
         }
     }
+}
+
+bool UserInputSystem::shouldApply(GameProperties gameProperties)
+{
+    return true;
 }

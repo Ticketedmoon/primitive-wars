@@ -32,6 +32,11 @@ void TransformSystem::execute()
     }
 }
 
+bool TransformSystem::shouldApply(GameProperties gameProperties)
+{
+    return !gameProperties.hasPaused;
+}
+
 void TransformSystem::updateEntityTransformByUserInput(const std::shared_ptr<Entity>& e,
         std::shared_ptr<CTransform>& transformComponent, const std::shared_ptr<CCollision>& collisionComponent)
 {

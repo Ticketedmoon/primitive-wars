@@ -61,6 +61,11 @@ void CollisionSystem::execute()
     }
 }
 
+bool CollisionSystem::shouldApply(GameProperties gameProperties)
+{
+    return true;
+}
+
 void CollisionSystem::checkForWindowCollision(const std::shared_ptr<Entity>& e)
 {
     std::shared_ptr<CTransform> transformComponentForEntity = std::static_pointer_cast<CTransform>(e->getComponentByType(Component::Type::TRANSFORM));

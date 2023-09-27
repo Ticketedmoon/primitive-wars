@@ -19,6 +19,7 @@ class TransformSystem : public System
         explicit TransformSystem(EntityManager& entityManager);
 
         void execute() override;
+        bool shouldApply(GameProperties gameProperties) override;
 
     private:
         static void updateEntityTransformByUserInput(const std::shared_ptr<Entity>& e,

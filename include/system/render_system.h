@@ -22,6 +22,7 @@ class RenderSystem : public System
         explicit RenderSystem(sf::RenderWindow& window, EntityManager& entityManager);
 
         void execute() override;
+        bool shouldApply(GameProperties gameProperties) override;
 
     private:
         sf::RenderWindow& m_renderWindow;

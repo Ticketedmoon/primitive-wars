@@ -36,6 +36,7 @@
 #include "render_system.h"
 #include "gui_system.h"
 #include "user_input_system.h"
+#include "system_manager.h"
 
 static constexpr std::string_view WINDOW_TITLE = "primitive-wars";
 static const bool USE_VERTICAL_SYNC = true;
@@ -59,22 +60,16 @@ class Engine
 
         static inline sf::RenderWindow m_window;
         static inline EntityManager m_entityManager;
+        static inline SystemManager m_systemManager;
+
         static inline sf::Clock worldClock;
         static inline sf::Clock deltaClock;
 
         static inline sf::Texture textureSprite;
         static inline sf::Sprite backgroundSprite;
 
-        static inline GuiProperties guiProperties{false, 0, 0, worldClock.getElapsedTime().asSeconds(),
-                                                  worldClock.getElapsedTime().asSeconds()};
-
-        static inline UserInputSystem m_userInputSystem{m_entityManager, m_window, worldClock, guiProperties};
-        static inline TransformSystem m_transformSystem{m_entityManager};
-        static inline EntitySpawnSystem m_entitySpawnerSystem{m_entityManager, worldClock, guiProperties};
-        static inline CollisionSystem m_collisionSystem{m_entityManager};
-        static inline LifespanSystem m_lifespanSystem{m_entityManager};
-        static inline RenderSystem m_renderSystem{m_window, m_entityManager};
-        static inline GuiSystem m_guiSystem{m_window, m_entityManager, worldClock, guiProperties};
+        static inline GameProperties gameProperties{false, 0, 0, worldClock.getElapsedTime().asSeconds(),
+                                                    worldClock.getElapsedTime().asSeconds()};
 };
 
 #endif //PRIMITIVE_WARS_ENGINE_H

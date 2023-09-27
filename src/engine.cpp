@@ -7,6 +7,15 @@ Engine::Engine()
     bool isFileLoaded = textureSprite.loadFromFile(BACKGROUND_IMAGE_PATH);
     assert(isFileLoaded);
     backgroundSprite = sf::Sprite(textureSprite);
+
+    m_systemManager.registerSystem(std::make_shared<UserInputSystem>(m_window, m_entityManager, worldClock, gameProperties), SystemManager::SystemType::UPDATE);
+    m_systemManager.registerSystem(std::make_shared<CollisionSystem>(m_entityManager), SystemManager::SystemType::UPDATE);
+    m_systemManager.registerSystem(std::make_shared<EntitySpawnSystem>(m_entityManager, worldClock, gameProperties), SystemManager::SystemType::UPDATE);
+    m_systemManager.registerSystem(std::make_shared<LifespanSystem>(m_entityManager), SystemManager::SystemType::UPDATE);
+    m_systemManager.registerSystem(std::make_shared<TransformSystem>(m_entityManager), SystemManager::SystemType::UPDATE);
+
+    m_systemManager.registerSystem(std::make_shared<RenderSystem>(m_window, m_entityManager), SystemManager::SystemType::RENDER);
+    m_systemManager.registerSystem(std::make_shared<GuiSystem>(m_window, m_entityManager, worldClock, gameProperties), SystemManager::SystemType::RENDER);
 }
 
 void Engine::startGameLoop()
@@ -23,18 +32,7 @@ void Engine::startGameLoop()
 void Engine::update()
 {
     m_entityManager.update();
-
-    m_userInputSystem.execute();
-    m_collisionSystem.execute();
-    m_entitySpawnerSystem.execute();
-
-    if (guiProperties.hasPaused)
-    {
-        return;
-    }
-
-    m_lifespanSystem.execute();
-    m_transformSystem.execute();
+    m_systemManager.update(gameProperties);
 }
 
 void Engine::render()
@@ -42,14 +40,13 @@ void Engine::render()
     m_window.clear();
     m_window.draw(backgroundSprite);
 
-    if (guiProperties.hasPaused)
+    if (gameProperties.hasPaused)
     {
-        guiProperties.playerRespawnTimeSeconds += deltaClock.getElapsedTime().asSeconds();
-        guiProperties.specialAttackCoolDownSeconds += deltaClock.getElapsedTime().asSeconds();
+        gameProperties.playerRespawnTimeSeconds += deltaClock.getElapsedTime().asSeconds();
+        gameProperties.specialAttackCoolDownSeconds += deltaClock.getElapsedTime().asSeconds();
     }
 
-    m_renderSystem.execute();
-    m_guiSystem.execute();
+    m_systemManager.render(gameProperties);
 
     m_window.display();
 }

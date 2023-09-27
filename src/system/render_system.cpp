@@ -21,3 +21,8 @@ void RenderSystem::execute()
         m_renderWindow.draw(drawable);
     }
 }
+
+bool RenderSystem::shouldApply(GameProperties gameProperties)
+{
+    return true;
+}

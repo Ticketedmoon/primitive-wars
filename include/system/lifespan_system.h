@@ -17,6 +17,7 @@ class LifespanSystem : public System
     public:
         explicit LifespanSystem(EntityManager& entityManager);
         void execute() override;
+        bool shouldApply(GameProperties gameProperties) override;
 
     private:
         EntityManager& m_entityManager;

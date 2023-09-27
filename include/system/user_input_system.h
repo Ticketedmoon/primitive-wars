@@ -16,17 +16,18 @@
 class UserInputSystem : public System
 {
     public:
-        explicit UserInputSystem(EntityManager& entityManager, sf::RenderWindow& renderWindow, sf::Clock& worldClock,
-                GuiProperties& guiProperties);
+        explicit UserInputSystem(sf::RenderWindow& renderWindow, EntityManager& entityManager, sf::Clock& worldClock,
+                GameProperties& gameProperties);
 
         void execute() override;
+        bool shouldApply(GameProperties gameProperties) override;
 
     private:
-        EntityManager& m_entityManager;
         sf::RenderWindow& m_renderWindow;
+        EntityManager& m_entityManager;
 
         sf::Clock& m_worldClock;
-        GuiProperties& m_guiProperties;
+        GameProperties& m_gameProperties;
 };
 
 

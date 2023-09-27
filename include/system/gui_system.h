@@ -13,22 +13,15 @@
 #include "system.h"
 #include "entity_manager.h"
 #include "common_constants.h"
-
-struct GuiProperties
-{
-    bool hasPaused;
-    size_t totalScore;
-    size_t totalDeaths;
-    float playerRespawnTimeSeconds;
-    float specialAttackCoolDownSeconds;
-};
+#include "game_properties.h"
 
 class GuiSystem : public System
 {
     public:
         explicit GuiSystem(sf::RenderWindow& renderWindow, EntityManager& entityManager, sf::Clock& worldClock,
-                GuiProperties& guiProperties);
+                GameProperties& gameProperties);
         void execute() override;
+        bool shouldApply(GameProperties gameProperties) override;
 
     private:
         void updateGuiData();
@@ -45,7 +38,7 @@ class GuiSystem : public System
         sf::RenderWindow& m_window;
         EntityManager& m_entityManager;
         sf::Clock& m_worldClock;
-        GuiProperties& m_guiProperties;
+        GameProperties& m_gameProperties;
 
         static inline sf::Text gameOverlayText;
         static inline sf::Text respawnText;

@@ -1,7 +1,7 @@
 #include "entity_spawn_system.h"
 
-EntitySpawnSystem::EntitySpawnSystem(EntityManager& entityManager, sf::Clock& worldClock, GuiProperties& guiProperties)
-        : m_entityManager(entityManager), m_worldClock(worldClock), m_guiProperties(guiProperties)
+EntitySpawnSystem::EntitySpawnSystem(EntityManager& entityManager, sf::Clock& worldClock, GameProperties& gameProperties)
+        : m_entityManager(entityManager), m_worldClock(worldClock), m_gameProperties(gameProperties)
 {
     spawnPlayer();
 }
@@ -11,7 +11,7 @@ void EntitySpawnSystem::execute()
     bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
     float worldTimeSeconds = m_worldClock.getElapsedTime().asSeconds();
 
-    if (m_guiProperties.hasPaused)
+    if (m_gameProperties.hasPaused)
     {
         enemyRespawnTimeSeconds = (worldTimeSeconds + ENEMY_SPAWN_RATE_SECONDS);
         return;
@@ -20,9 +20,9 @@ void EntitySpawnSystem::execute()
     if (isPlayerDead)
     {
         enemyRespawnTimeSeconds = (worldTimeSeconds + ENEMY_SPAWN_RATE_SECONDS);
-        if (worldTimeSeconds > m_guiProperties.playerRespawnTimeSeconds)
+        if (worldTimeSeconds > m_gameProperties.playerRespawnTimeSeconds)
         {
-            m_guiProperties.totalScore = 0;
+            m_gameProperties.totalScore = 0;
             spawnPlayer();
         }
         return;
@@ -60,10 +60,15 @@ void EntitySpawnSystem::execute()
     if (userInputComponent->mouseRightClicked)
     {
         spawnEntityAnimation(player, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(7.5f, 7.5f)));
-        m_guiProperties.specialAttackCoolDownSeconds = (m_worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
+        m_gameProperties.specialAttackCoolDownSeconds = (m_worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
 
         userInputComponent->mouseRightClicked = false;
     }
+}
+
+bool EntitySpawnSystem::shouldApply(GameProperties gameProperties)
+{
+    return true;
 }
 
 void EntitySpawnSystem::spawnPlayer()
