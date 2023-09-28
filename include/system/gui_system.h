@@ -27,7 +27,11 @@ class GuiSystem : public System
         void updateGuiData();
         void drawGuiData();
 
-        void configureTextRendering();
+        void renderCooldownText();
+        void renderTextOnPlayerDeath(bool isPlayerDead);
+        [[nodiscard]] bool isPlayerWaitingOnRespawnTime() const;
+
+        static void configureTextRendering();
         void drawText(sf::Text& text, const sf::Color& fillColour, uint8_t characterSize, sf::Vector2f position);
 
     private:
