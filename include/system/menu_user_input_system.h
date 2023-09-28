@@ -28,11 +28,16 @@ class MenuUserInputSystem : public System
         bool shouldApply(GameProperties gameProperties) override;
 
     private:
+        void handleMouseClick();
+        void onHover(sf::Text& text, sf::Color color, sf::Cursor::Type cursorTypeOnHover);
+
+    private:
         GameEngine& gameEngine;
         EntityManager& m_entityManager;
         sf::Text& startGameTextualButton;
         sf::Text& exitTextualButton;
         sf::Cursor cursor;
+        void handleMouseHover();
 };
 
 
