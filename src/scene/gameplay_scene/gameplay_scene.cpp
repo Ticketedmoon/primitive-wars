@@ -53,7 +53,7 @@ void GameplayScene::render()
     gameEngine.window.display();
 }
 
-void GameplayScene::performAction()
+void GameplayScene::performAction(Action& action)
 {
 
 }

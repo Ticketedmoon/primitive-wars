@@ -16,7 +16,7 @@ class MenuScene : public Scene
 
         void update() override;
         void render() override;
-        void performAction() override;
+        void performAction(Action& action) override;
 
     private:
         static const inline std::string FONT_PATH = "resources/fonts/calibri.ttf";
@@ -29,7 +29,8 @@ class MenuScene : public Scene
         sf::Text startGameTextualButton;
         sf::Text exitTextualButton;
 
-
+        void createTextElement(sf::Text& text, const std::string& value, uint16_t characterSize, sf::Color fillColor,
+                sf::Color outlineColor, float outlineThickness, sf::Vector2f position);
 };
 
 #endif //PRIMITIVE_WARS_MENU_SCENE_H

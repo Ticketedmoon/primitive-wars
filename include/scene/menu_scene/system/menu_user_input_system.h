@@ -34,8 +34,8 @@ class MenuUserInputSystem : public System
     private:
         GameEngine& gameEngine;
         EntityManager& m_entityManager;
-        sf::Text& startGameTextualButton;
-        sf::Text& exitTextualButton;
+        std::pair<sf::Color, sf::Text&> startGameTextualButtonPair;
+        std::pair<sf::Color, sf::Text&> exitTextualButtonPair;
         sf::Cursor cursor;
         void handleMouseHover();
 };

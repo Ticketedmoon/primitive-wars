@@ -31,6 +31,7 @@ class GameEngine
         void render();
 
         void createGameWindow();
+        void handleInput();
 
 
     public:

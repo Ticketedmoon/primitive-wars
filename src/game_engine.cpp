@@ -34,6 +34,15 @@ void GameEngine::render()
     gameScenes[currentScene]->render();
 }
 
+void GameEngine::handleInput()
+{
+    // Get the keyboard input
+    // pass it down to scenes internal mapping of keys to ACTION
+    // let scene do what it needs to do in performAction();
+
+    //gameScenes[currentScene]->performAction();
+}
+
 void GameEngine::createGameWindow()
 {
     window.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE.data());

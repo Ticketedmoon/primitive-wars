@@ -22,7 +22,7 @@ class GameplayScene : public Scene
 
         void update() override;
         void render() override;
-        void performAction() override;
+        void performAction(Action& action) override;
 
     private:
         static const inline std::string BACKGROUND_IMAGE_PATH = "resources/assets/board.png";

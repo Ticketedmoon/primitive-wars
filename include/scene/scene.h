@@ -3,6 +3,8 @@
 #ifndef PRIMITIVE_WARS_SCENE_H
 #define PRIMITIVE_WARS_SCENE_H
 
+#include "action.h"
+
 // Forward-declaration
 class GameEngine;
 
@@ -20,7 +22,7 @@ class Scene
 
         virtual void update() = 0;
         virtual void render() = 0;
-        virtual void performAction() = 0;
+        virtual void performAction(Action& action) = 0;
 
     protected:
         GameEngine& gameEngine;

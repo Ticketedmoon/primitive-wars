@@ -2,8 +2,9 @@
 
 MenuUserInputSystem::MenuUserInputSystem(GameEngine& gameEngine, EntityManager& entityManager,
         sf::Text& startGameTextualButton, sf::Text& exitTextualButton)
-        : gameEngine(gameEngine), m_entityManager(entityManager), startGameTextualButton(startGameTextualButton),
-        exitTextualButton(exitTextualButton)
+        : gameEngine(gameEngine), m_entityManager(entityManager),
+        startGameTextualButtonPair{startGameTextualButton.getFillColor(), startGameTextualButton},
+        exitTextualButtonPair{exitTextualButton.getFillColor(), exitTextualButton}
 {
 
 }
@@ -40,13 +41,15 @@ void MenuUserInputSystem::handleMouseClick()
     sf::Vector2i mousePos = sf::Mouse::getPosition(gameEngine.window);
     sf::Vector2f mousePosF(static_cast<float>( mousePos.x ), static_cast<float>( mousePos.y ));
 
-    if (exitTextualButton.getGlobalBounds().contains(mousePosF))
+    auto& [exitColor, exitTextButton] = exitTextualButtonPair;
+    if (exitTextButton.getGlobalBounds().contains(mousePosF))
     {
         gameEngine.window.close();
         return;
     }
 
-    if (startGameTextualButton.getGlobalBounds().contains(mousePosF))
+    auto& [startColor, startTextButton] = startGameTextualButtonPair;
+    if (startTextButton.getGlobalBounds().contains(mousePosF))
     {
         const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine);
         gameEngine.changeScene(Scene::Type::GAMEPLAY_SCENE, nextScene);
@@ -59,19 +62,22 @@ void MenuUserInputSystem::handleMouseHover()
     sf::Vector2i mousePos = sf::Mouse::getPosition(gameEngine.window);
     sf::Vector2f mousePosF(static_cast<float>( mousePos.x ), static_cast<float>( mousePos.y ));
 
-    if (startGameTextualButton.getGlobalBounds().contains(mousePosF))
+    auto& [originalStartTextButtonColor, startTextButton] = startGameTextualButtonPair;
+    if (startTextButton.getGlobalBounds().contains(mousePosF))
     {
-        onHover(startGameTextualButton, sf::Color{0, 255, 255}, sf::Cursor::Hand);
+        onHover(startTextButton, sf::Color{0, 255, 255}, sf::Cursor::Hand);
+        return;
     }
-    else if (exitTextualButton.getGlobalBounds().contains(mousePosF))
+
+    auto& [originalExitTextButtonColor, exitTextButton] = exitTextualButtonPair;
+    if (exitTextButton.getGlobalBounds().contains(mousePosF))
     {
-        onHover(exitTextualButton, sf::Color{0, 255, 255}, sf::Cursor::Hand);
+        onHover(exitTextButton, sf::Color{0, 255, 255}, sf::Cursor::Hand);
+        return;
     }
-    else
-    {
-        onHover(startGameTextualButton, sf::Color{255, 255, 255}, sf::Cursor::Arrow);
-        onHover(exitTextualButton, sf::Color{255, 255, 255}, sf::Cursor::Arrow);
-    }
+
+    onHover(startTextButton, originalStartTextButtonColor, sf::Cursor::Arrow);
+    onHover(exitTextButton, originalExitTextButtonColor, sf::Cursor::Arrow);
 }
 
 void MenuUserInputSystem::onHover(sf::Text& text, sf::Color color, sf::Cursor::Type cursorTypeOnHover)
