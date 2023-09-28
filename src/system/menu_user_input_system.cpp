@@ -26,21 +26,28 @@ void MenuUserInputSystem::execute()
                 
                 if (startGameTextualButton.getGlobalBounds().contains(mousePosF))
                 {
-                    startGameTextualButton.setFillColor(sf::Color(250, 20, 20));
+                    if (cursor.loadFromSystem(sf::Cursor::Hand))
+                    {
+                        gameEngine.window.setMouseCursor(cursor);
+                    }
+                    startGameTextualButton.setFillColor(sf::Color(0, 255, 255));
                 }
-                else
+                else if (exitTextualButton.getGlobalBounds().contains(mousePosF))
                 {
-                    // FIXME
-                    startGameTextualButton.setFillColor(sf::Color(255, 255, 255));
-                }
-                
-                if (exitTextualButton.getGlobalBounds().contains(mousePosF))
-                {
+                    if (cursor.loadFromSystem(sf::Cursor::Hand))
+                    {
+                        gameEngine.window.setMouseCursor(cursor);
+                    }
                     exitTextualButton.setFillColor(sf::Color(250, 20, 20));
                 }
                 else
                 {
+                    if (cursor.loadFromSystem(sf::Cursor::Arrow))
+                    {
+                        gameEngine.window.setMouseCursor(cursor);
+                    }
                     // FIXME
+                    startGameTextualButton.setFillColor(sf::Color(255, 255, 255));
                     exitTextualButton.setFillColor(sf::Color(255, 255, 255));
                 }
             }

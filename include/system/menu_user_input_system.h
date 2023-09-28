@@ -32,6 +32,7 @@ class MenuUserInputSystem : public System
         EntityManager& m_entityManager;
         sf::Text& startGameTextualButton;
         sf::Text& exitTextualButton;
+        sf::Cursor cursor;
 };
 
 

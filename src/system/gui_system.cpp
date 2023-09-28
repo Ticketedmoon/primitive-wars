@@ -25,7 +25,7 @@ void GuiSystem::drawGuiData()
     {
         drawText(pauseText, sf::Color::Green, 128, PAUSED_TEXT_SCREEN_POSITION);
     }
-    else if (players.empty())
+    else if (players.empty() && m_gameProperties.playerRespawnTimeSeconds > 0)
     {
         uint8_t respawnTime = (m_gameProperties.playerRespawnTimeSeconds - m_worldClock.getElapsedTime().asSeconds()) + 1;
         respawnText.setString("Respawn Time: " + std::to_string(respawnTime));

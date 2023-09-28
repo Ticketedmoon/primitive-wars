@@ -25,6 +25,7 @@ class MenuScene : public Scene
         static inline EntityManager m_entityManager;
 
         sf::Font m_font;
+        sf::Text gameTitleText;
         sf::Text startGameTextualButton;
         sf::Text exitTextualButton;
 
