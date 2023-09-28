@@ -1,9 +1,9 @@
-#include "../include/engine.h"
+#include "../include/game_engine.h"
 
 int main()
 {
     std::cout << "Setting up application..." << '\n';
-    Engine engine;
+    GameEngine engine;
     engine.startGameLoop();
 
     return 0;

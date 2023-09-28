@@ -34,12 +34,13 @@ endif ()
 file(GLOB CORE_GAME_SOURCES "src/*.cpp")
 file(GLOB COMPONENT_SOURCES "src/component/*.cpp")
 file(GLOB SYSTEM_SOURCES "src/system/*.cpp")
+file(GLOB SCENE_SOURCES "src/scene/*.cpp")
 file(COPY resources DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
-add_executable(${PROJECT_NAME} ${CORE_GAME_SOURCES} ${COMPONENT_SOURCES} ${SYSTEM_SOURCES})
+add_executable(${PROJECT_NAME} ${CORE_GAME_SOURCES} ${COMPONENT_SOURCES} ${SYSTEM_SOURCES} ${SCENE_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${PROJECT_BINARY_DIR}")
-target_include_directories(${PROJECT_NAME} PRIVATE include include/component include/system)
+target_include_directories(${PROJECT_NAME} PRIVATE include include/component include/system include/scene)
 
 # Detect and add SFML
 find_package(SFML 2.5.1 COMPONENTS system window graphics network audio REQUIRED)

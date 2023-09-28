@@ -64,6 +64,8 @@ void GuiSystem::updateGuiData()
     }
 }
 
+// TODO move to engine for inter-scene text drawing?
+
 void GuiSystem::drawText(sf::Text& text, const sf::Color& fillColour, const uint8_t characterSize, sf::Vector2f position)
 {
     text.setFillColor(fillColour);
