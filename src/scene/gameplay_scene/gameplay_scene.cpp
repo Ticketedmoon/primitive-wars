@@ -1,4 +1,4 @@
-#include "scene/gameplay_scene.h"
+#include "scene/gameplay_scene/gameplay_scene.h"
 
 GameplayScene::GameplayScene(GameEngine& engine) : Scene(engine)
 {

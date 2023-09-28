@@ -1,4 +1,4 @@
-#include "render_system.h"
+#include "scene/gameplay_scene/system/render_system.h"
 
 RenderSystem::RenderSystem(sf::RenderWindow& window, EntityManager& entityManager)
     : m_renderWindow(window), m_entityManager(entityManager)

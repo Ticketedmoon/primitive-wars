@@ -1,4 +1,4 @@
-#include "lifespan_system.h"
+#include "scene/gameplay_scene/system/lifespan_system.h"
 
 LifespanSystem::LifespanSystem(EntityManager& entityManager) : m_entityManager(entityManager)
 {

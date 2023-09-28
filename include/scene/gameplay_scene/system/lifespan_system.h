@@ -6,11 +6,11 @@
 #include <ranges>
 #include <memory>
 
-#include "entity.h"
+#include "entity/entity.h"
 #include "c_lifespan.h"
 #include "c_render.h"
 #include "system.h"
-#include "entity_manager.h"
+#include "entity/entity_manager.h"
 
 class LifespanSystem : public System
 {

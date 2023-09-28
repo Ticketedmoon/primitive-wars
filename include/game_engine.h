@@ -10,10 +10,10 @@
 #include <memory>
 #include <iostream>
 
-#include "game_properties.h"
+#include "core/game_properties.h"
 #include "scene.h"
-#include "scene/gameplay_scene.h"
-#include "scene/menu_scene.h"
+#include "scene/gameplay_scene/gameplay_scene.h"
+#include "scene/menu_scene/menu_scene.h"
 
 static constexpr std::string_view WINDOW_TITLE = "primitive-wars";
 static const bool USE_VERTICAL_SYNC = true;

@@ -1,4 +1,4 @@
-#include "scene/menu_scene.h"
+#include "scene/menu_scene/menu_scene.h"
 
 MenuScene::MenuScene(GameEngine& gameEngine) : Scene(gameEngine)
 {

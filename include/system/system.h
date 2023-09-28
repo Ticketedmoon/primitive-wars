@@ -3,12 +3,12 @@
 #ifndef PRIMITIVE_WARS_SYSTEM_H
 #define PRIMITIVE_WARS_SYSTEM_H
 
-#include "game_properties.h"
+#include "core/game_properties.h"
 
 class System
 {
     public:
-        virtual ~System() {};
+        virtual ~System() = default;
         virtual void execute() = 0;
         virtual bool shouldApply(GameProperties gameProperties) = 0;
 };

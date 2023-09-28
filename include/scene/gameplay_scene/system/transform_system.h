@@ -6,8 +6,8 @@
 #include <vector>
 #include <memory>
 
-#include "entity.h"
-#include "entity_manager.h"
+#include "entity/entity.h"
+#include "entity/entity_manager.h"
 #include "c_transform.h"
 #include "c_collision.h"
 #include "c_user_input.h"

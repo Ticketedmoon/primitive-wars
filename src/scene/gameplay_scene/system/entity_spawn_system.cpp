@@ -1,4 +1,4 @@
-#include "entity_spawn_system.h"
+#include "scene/gameplay_scene/system/entity_spawn_system.h"
 
 EntitySpawnSystem::EntitySpawnSystem(EntityManager& entityManager, sf::Clock& worldClock, GameProperties& gameProperties)
         : m_entityManager(entityManager), m_worldClock(worldClock), m_gameProperties(gameProperties)

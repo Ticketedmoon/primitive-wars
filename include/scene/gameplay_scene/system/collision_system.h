@@ -7,9 +7,9 @@
 #include <memory>
 
 #include "system.h"
-#include "entity_manager.h"
+#include "entity/entity_manager.h"
 #include "c_render.h"
-#include "entity.h"
+#include "entity/entity.h"
 #include "c_render.h"
 #include "c_transform.h"
 #include "c_collision.h"

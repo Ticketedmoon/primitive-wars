@@ -1,4 +1,4 @@
-#include "gui_system.h"
+#include "scene/gameplay_scene/system/gui_system.h"
 
 GuiSystem::GuiSystem(sf::RenderWindow& renderWindow, EntityManager& entityManager, sf::Clock& worldClock, GameProperties& gameProperties)
     : m_window(renderWindow), m_entityManager(entityManager), m_worldClock(worldClock), m_gameProperties(gameProperties)

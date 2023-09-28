@@ -1,4 +1,4 @@
-#include "menu_user_input_system.h"
+#include "scene/menu_scene/system/menu_user_input_system.h"
 
 MenuUserInputSystem::MenuUserInputSystem(GameEngine& gameEngine, EntityManager& entityManager,
         sf::Text& startGameTextualButton, sf::Text& exitTextualButton)

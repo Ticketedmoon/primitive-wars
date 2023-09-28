@@ -13,9 +13,9 @@
 #include <SFML/System/Time.hpp>
 
 #include "c_transform.h"
-#include "common_constants.h"
-#include "entity.h"
-#include "entity_manager.h"
+#include "core/common_constants.h"
+#include "entity/entity.h"
+#include "entity/entity_manager.h"
 #include "c_collision.h"
 #include "c_user_input.h"
 #include "c_render.h"

@@ -11,9 +11,9 @@
 
 #include "c_render.h"
 #include "system.h"
-#include "entity_manager.h"
-#include "common_constants.h"
-#include "game_properties.h"
+#include "entity/entity_manager.h"
+#include "core/common_constants.h"
+#include "core/game_properties.h"
 
 class GuiSystem : public System
 {

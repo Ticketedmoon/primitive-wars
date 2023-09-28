@@ -5,7 +5,7 @@
 
 #include <SFML/Graphics/RectangleShape.hpp>
 
-#include "menu_user_input_system.h"
+#include "scene/menu_scene/system/menu_user_input_system.h"
 #include "game_engine.h"
 #include "scene.h"
 

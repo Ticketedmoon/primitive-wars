@@ -1,4 +1,4 @@
-#include "user_input_system.h"
+#include "scene/gameplay_scene/system/user_input_system.h"
 
 UserInputSystem::UserInputSystem(sf::RenderWindow& renderWindow, EntityManager& entityManager, sf::Clock& worldClock,
         GameProperties& gameProperties) : m_renderWindow(renderWindow), m_entityManager(entityManager),

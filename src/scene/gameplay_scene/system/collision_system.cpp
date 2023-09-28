@@ -1,5 +1,5 @@
-#include "collision_system.h"
-#include "common_constants.h"
+#include "scene/gameplay_scene/system/collision_system.h"
+#include "core/common_constants.h"
 
 CollisionSystem::CollisionSystem(EntityManager& entityManager) : m_entityManager(entityManager)
 {

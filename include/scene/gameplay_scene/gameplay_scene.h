@@ -3,13 +3,13 @@
 #ifndef PRIMITIVE_WARS_GAMEPLAY_SCENE_H
 #define PRIMITIVE_WARS_GAMEPLAY_SCENE_H
 
-#include "user_input_system.h"
-#include "collision_system.h"
-#include "entity_spawn_system.h"
-#include "lifespan_system.h"
-#include "transform_system.h"
-#include "render_system.h"
-#include "gui_system.h"
+#include "scene/gameplay_scene/system/user_input_system.h"
+#include "scene/gameplay_scene/system/collision_system.h"
+#include "scene/gameplay_scene/system/entity_spawn_system.h"
+#include "scene/gameplay_scene/system/lifespan_system.h"
+#include "scene/gameplay_scene/system/transform_system.h"
+#include "scene/gameplay_scene/system/render_system.h"
+#include "scene/gameplay_scene/system/gui_system.h"
 #include "system_manager.h"
 
 #include "game_engine.h"

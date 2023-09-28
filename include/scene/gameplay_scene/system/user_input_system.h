@@ -5,7 +5,7 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include "system.h"
-#include "entity_manager.h"
+#include "entity/entity_manager.h"
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Event.hpp>
 #include <valarray>

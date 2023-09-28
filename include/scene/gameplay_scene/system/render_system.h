@@ -11,10 +11,10 @@
 #include <SFML/Graphics/Sprite.hpp>
 
 #include "system.h"
-#include "entity_manager.h"
+#include "entity/entity_manager.h"
 #include "c_render.h"
 #include "c_transform.h"
-#include "common_constants.h"
+#include "core/common_constants.h"
 
 class RenderSystem : public System
 {
