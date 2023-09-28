@@ -24,7 +24,7 @@ void SystemManager::render(GameProperties& properties)
     }
 }
 
-void SystemManager::registerSystem(std::shared_ptr<System> system, SystemType type)
+void SystemManager::registerSystem(const std::shared_ptr<System>& system, SystemType type)
 {
     if (type == SystemType::UPDATE)
     {

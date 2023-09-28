@@ -20,7 +20,7 @@ class SystemManager
         void update(GameProperties& properties);
         void render(GameProperties& properties);
 
-        void registerSystem(std::shared_ptr<System> system, SystemType type);
+        void registerSystem(const std::shared_ptr<System>& system, SystemType type);
 
     private:
         std::vector<std::shared_ptr<System>> m_systemsToUpdate;
