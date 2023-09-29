@@ -13,11 +13,11 @@ MenuScene::MenuScene(GameEngine& gameEngine) : Scene(gameEngine)
     bool isFontLoaded = m_font.loadFromFile(FONT_PATH);
     assert(isFontLoaded);
 
-    gameTitleTextPair = createTextElementPair("Primitive Wars", 96, sf::Color::Yellow, sf::Color::Black, 3.0f,
+    gameTitleTextPair = createTextElementPair("Primitive Wars", 96, TITLE_TEXT_COLOUR, sf::Color::Black, 3.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 250));
-    startGameTextualButtonPair = createTextElementPair("Start Game", 72, sf::Color::White, sf::Color::Black, 2.0f,
+    startGameTextualButtonPair = createTextElementPair("Start Game", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 2.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 50));
-    exitTextualButtonPair = createTextElementPair("Quit Game", 72, sf::Color::White, sf::Color::Black, 2.0f,
+    exitTextualButtonPair = createTextElementPair("Quit Game", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 2.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150));
 }
 

@@ -34,5 +34,5 @@ void LifespanSystem::execute()
 
 bool LifespanSystem::shouldApply(GameProperties gameProperties)
 {
-    return true;
+    return !gameProperties.hasPaused;
 }

@@ -27,8 +27,10 @@ class MenuScene : public Scene
 
     private:
         static inline const std::string FONT_PATH = "resources/fonts/calibri.ttf";
-        static inline const sf::Color& BACKGROUND_COLOR = sf::Color{30, 30, 30, 255};
-        static inline const sf::Color& BUTTON_HIGHLIGHT_COLOR = sf::Color{0, 0, 200};
+        static inline const sf::Color& BACKGROUND_COLOR = sf::Color{70, 0, 0, 255};
+        static inline const sf::Color& TITLE_TEXT_COLOUR = sf::Color::Red;
+        static inline const sf::Color& BUTTON_DEFAULT_COLOR = sf::Color::White;
+        static inline const sf::Color& BUTTON_HIGHLIGHT_COLOR = sf::Color{0, 150, 200};
 
         sf::Font m_font;
         uint8_t currentSelectItem = 0;

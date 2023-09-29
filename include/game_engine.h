@@ -37,7 +37,7 @@ class GameEngine
         sf::RenderWindow window;
         sf::Clock worldClock;
         sf::Clock deltaClock;
-        GameProperties gameProperties{false, 0, 0, worldClock, worldClock.getElapsedTime().asSeconds(), worldClock.getElapsedTime().asSeconds()};
+        GameProperties gameProperties{false, 0, worldClock, 0, 0};
 
     private:
         Scene::Type currentScene = Scene::Type::MENU_SCENE;

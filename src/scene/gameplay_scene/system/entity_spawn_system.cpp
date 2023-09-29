@@ -22,7 +22,6 @@ void EntitySpawnSystem::execute()
         enemyRespawnTimeSeconds = (worldTimeSeconds + ENEMY_SPAWN_RATE_SECONDS);
         if (worldTimeSeconds > m_gameProperties.playerRespawnTimeSeconds)
         {
-            m_gameProperties.totalScore = 0;
             spawnPlayer();
         }
         return;
@@ -81,6 +80,7 @@ void EntitySpawnSystem::spawnPlayer()
     player->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
     player->m_components[Component::Type::USER_INPUT] = std::make_shared<CAction>();
     player->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
+    player->m_components[Component::Type::SCORE] = std::make_shared<CScore>();
 }
 
 void EntitySpawnSystem::spawnEnemy()
@@ -104,6 +104,7 @@ void EntitySpawnSystem::spawnEnemy()
             sf::Vector2f(std::experimental::randint(1, 3), std::experimental::randint(1, 3)), sf::Vector2f(1, 1));
     enemy->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
     enemy->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
+    enemy->m_components[Component::Type::SCORE] = std::make_shared<CScore>(shape.getPointCount() * ENEMY_SCORE_MULTIPLIER);
 }
 
 void EntitySpawnSystem::spawnEntityClone(const std::shared_ptr<Entity>& existingEntity, const SpawnProperties& spawnProperties,

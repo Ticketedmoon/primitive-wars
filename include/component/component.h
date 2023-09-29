@@ -15,7 +15,8 @@ class Component
             COLLISION = 2,
             LIFESPAN = 3,
             RENDER = 4,
-            COUNT = 5
+            SCORE = 5,
+            COUNT = 6
         };
 };
 

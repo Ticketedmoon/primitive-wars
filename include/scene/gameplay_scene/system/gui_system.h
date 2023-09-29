@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cmath>
 
+#include "c_score.h"
 #include "c_render.h"
 #include "system.h"
 #include "entity/entity_manager.h"
@@ -27,8 +28,8 @@ class GuiSystem : public System
         void updateGuiData();
         void drawGuiData();
 
-        void renderCooldownText();
-        void renderTextOnPlayerDeath(bool isPlayerDead);
+        void renderCooldownText(std::shared_ptr<Entity>& player);
+        void renderTextOnPlayerDeath();
         [[nodiscard]] bool isPlayerWaitingOnRespawnTime() const;
 
         static void configureTextRendering();

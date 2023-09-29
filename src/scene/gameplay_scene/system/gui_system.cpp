@@ -22,33 +22,38 @@ void GuiSystem::drawGuiData()
     std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
     bool isPlayerDead = players.empty();
 
-    renderCooldownText();
-
     if (m_gameProperties.hasPaused)
     {
         drawText(pauseText, sf::Color::Green, 128, PAUSED_TEXT_SCREEN_POSITION);
         return;
     }
 
-    renderTextOnPlayerDeath(isPlayerDead);
-}
-void GuiSystem::renderTextOnPlayerDeath(bool isPlayerDead)
-{
     if (isPlayerDead && isPlayerWaitingOnRespawnTime())
     {
-        uint8_t respawnTime =
-                (m_gameProperties.playerRespawnTimeSeconds - m_worldClock.getElapsedTime().asSeconds()) + 1;
-        respawnText.setString("Respawn Time: " + std::to_string(respawnTime));
-        drawText(respawnText, sf::Color::Yellow, 72, sf::Vector2f(WINDOW_WIDTH / 2 - 256, WINDOW_HEIGHT / 2 - 64));
-        return;
+        renderTextOnPlayerDeath();
+    }
+    else
+    {
+        renderCooldownText(players.front());
     }
 }
-void GuiSystem::renderCooldownText()
+
+void GuiSystem::renderTextOnPlayerDeath()
 {
+    uint8_t respawnTime =
+            (m_gameProperties.playerRespawnTimeSeconds - m_worldClock.getElapsedTime().asSeconds()) + 1;
+    respawnText.setString("Respawn Time: " + std::to_string(respawnTime));
+    drawText(respawnText, sf::Color::Yellow, 72, sf::Vector2f(WINDOW_WIDTH / 2 - 256, WINDOW_HEIGHT / 2 - 64));
+}
+
+void GuiSystem::renderCooldownText(std::shared_ptr<Entity>& player)
+{
+    std::shared_ptr<CScore> scoreComponent = std::static_pointer_cast<CScore> (player->getComponentByType(Component::Type::SCORE));
+
     uint8_t coolDownSeconds = m_worldClock.getElapsedTime().asSeconds() > m_gameProperties.specialAttackCoolDownSeconds
             ? 0.0f
             : std::ceil(m_gameProperties.specialAttackCoolDownSeconds - m_worldClock.getElapsedTime().asSeconds());
-    const std::string text = "Score: " + std::to_string(m_gameProperties.totalScore) + "\n"
+    const std::string text = "Score: " + std::to_string(scoreComponent->getScore()) + "\n"
             + "Deaths: " + std::to_string(m_gameProperties.totalDeaths) + "\n"
             + "Special Attack Cooldown: " + std::to_string(coolDownSeconds);
     gameOverlayText.setString(text);
@@ -62,8 +67,14 @@ bool GuiSystem::isPlayerWaitingOnRespawnTime() const
 
 void GuiSystem::updateGuiData()
 {
-    std::vector<std::shared_ptr<Entity>> destroyedEntities = m_entityManager
-            .getDestroyedEntitiesByComponentTypes({Component::COLLISION});
+    std::vector<std::shared_ptr<Entity>> destroyedEntities = m_entityManager.getDestroyedEntitiesByComponentTypes({Component::COLLISION});
+    std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
+    if (players.empty())
+    {
+        return;
+    }
+
+    std::shared_ptr<CScore> playerScoreComponent = std::static_pointer_cast<CScore> (players.front()->getComponentByType(Component::Type::SCORE));
     for (const auto& e: destroyedEntities)
     {
         if (e->getType() == Entity::Type::PLAYER)
@@ -74,15 +85,14 @@ void GuiSystem::updateGuiData()
 
         if (e->getType() == Entity::Type::ENEMY)
         {
-            std::shared_ptr<CRender> renderComponent = std::static_pointer_cast<CRender>(
-                    e->getComponentByType(Component::RENDER));
-            m_gameProperties.totalScore += (100 * renderComponent->m_shape.getPointCount());
+            std::shared_ptr<CScore> enemyScoreComponent = std::static_pointer_cast<CScore>(
+                    e->getComponentByType(Component::SCORE));
+            playerScoreComponent->addToScore(enemyScoreComponent->getScore());
         }
     }
 }
 
 // TODO move to engine for inter-scene text drawing?
-
 void GuiSystem::drawText(sf::Text& text, const sf::Color& fillColour, const uint8_t characterSize, sf::Vector2f position)
 {
     text.setFillColor(fillColour);

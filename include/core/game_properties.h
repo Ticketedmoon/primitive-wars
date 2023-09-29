@@ -10,7 +10,6 @@ class GameProperties
 {
     public:
         bool hasPaused;
-        size_t totalScore;
         size_t totalDeaths;
         sf::Clock worldClock;
         float playerRespawnTimeSeconds;
