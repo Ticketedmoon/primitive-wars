@@ -19,6 +19,8 @@ MenuScene::MenuScene(GameEngine& gameEngine) : Scene(gameEngine)
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 50));
     exitTextualButtonPair = createTextElementPair("Quit Game", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 2.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150));
+
+    m_audioManager.playMusic(static_cast<uint8_t>(Scene::Type::MENU_SCENE), 30.0f);
 }
 
 void MenuScene::update()

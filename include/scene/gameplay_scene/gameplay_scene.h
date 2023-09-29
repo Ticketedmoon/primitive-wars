@@ -13,6 +13,7 @@
 
 #include "game_engine.h"
 #include "scene.h"
+#include "audio_manager.h"
 
 class GameplayScene : public Scene
 {
@@ -27,10 +28,11 @@ class GameplayScene : public Scene
         static void registerSystems(GameEngine& engine);
 
     private:
-        static const inline std::string BACKGROUND_IMAGE_PATH = "resources/assets/board.png";
+        static const inline std::string BACKGROUND_IMAGE_PATH = "resources/assets/texture/board.png";
 
         static inline SystemManager m_systemManager;
         static inline EntityManager m_entityManager;
+        static inline AudioManager m_audioManager;
 
         static inline sf::Texture textureSprite;
         static inline sf::Sprite backgroundSprite;
