@@ -31,7 +31,8 @@ endif ()
 #  our project's major and minor version number. CMake reads config.h.in to produce this header file:
 # configure_file(config.h.in config.h)
 
-file(GLOB CORE_GAME_SOURCES "src/*.cpp")
+file(GLOB ROOT_GAME_SOURCES "src/*.cpp")
+file(GLOB CORE_GAME_SOURCES "src/core/*.cpp")
 file(GLOB SCENE_SOURCES "src/scene/*.cpp")
 file(GLOB ENTITY_SOURCES "src/entity/*.cpp")
 file(GLOB SYSTEM_SOURCES "src/system/*.cpp")
@@ -46,7 +47,7 @@ file(GLOB GAMEPLAY_SCENE_SYSTEM_SOURCES "src/scene/gameplay_scene/system/*.cpp")
 
 file(COPY resources DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 
-add_executable(${PROJECT_NAME} ${CORE_GAME_SOURCES} ${SCENE_SOURCES} ${ENTITY_SOURCES} ${SYSTEM_SOURCES}
+add_executable(${PROJECT_NAME} ${ROOT_GAME_SOURCES} ${CORE_GAME_SOURCES} ${SCENE_SOURCES} ${ENTITY_SOURCES} ${SYSTEM_SOURCES}
         ${MENU_SCENE_ROOT_COMPONENT_SOURCES} ${MENU_SCENE_COMPONENT_SOURCES} ${MENU_SCENE_SYSTEM_SOURCES}
         ${GAMEPLAY_SCENE_ROOT_COMPONENT_SOURCES} ${GAMEPLAY_SCENE_COMPONENT_SOURCES} ${GAMEPLAY_SCENE_SYSTEM_SOURCES})
 

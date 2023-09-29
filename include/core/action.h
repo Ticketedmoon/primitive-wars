@@ -14,11 +14,24 @@ class Action
                 MOVE_DOWN = 3,
                 SHOOT = 4,
                 SPECIAL_ATTACK = 5,
-                PAUSE = 6
+                SELECT = 6,
+                CURSOR_MOVE = 7,
+                CURSOR_SELECT = 8,
+                PAUSE = 9
+        };
+        enum class Mode
+        {
+                PRESS,
+                RELEASE
         };
 
+        Action(Type type, Mode mode);
+        Type getType();
+        Mode getMode();
+
     private:
-        Type type;
+        Type m_type;
+        Mode m_mode;
 
 };
 

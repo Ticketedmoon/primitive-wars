@@ -3,7 +3,6 @@
 #ifndef PRIMITIVE_WARS_GAMEPLAY_SCENE_H
 #define PRIMITIVE_WARS_GAMEPLAY_SCENE_H
 
-#include "scene/gameplay_scene/system/user_input_system.h"
 #include "scene/gameplay_scene/system/collision_system.h"
 #include "scene/gameplay_scene/system/entity_spawn_system.h"
 #include "scene/gameplay_scene/system/lifespan_system.h"
@@ -23,6 +22,9 @@ class GameplayScene : public Scene
         void update() override;
         void render() override;
         void performAction(Action& action) override;
+
+    private:
+        static void registerSystems(GameEngine& engine);
 
     private:
         static const inline std::string BACKGROUND_IMAGE_PATH = "resources/assets/board.png";

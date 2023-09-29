@@ -10,7 +10,7 @@
 #include "entity/entity_manager.h"
 #include "c_transform.h"
 #include "c_collision.h"
-#include "c_user_input.h"
+#include "c_action.h"
 #include "system.h"
 
 class TransformSystem : public System

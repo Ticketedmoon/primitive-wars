@@ -37,11 +37,6 @@ void EntityManager::removeDeadEntities(std::vector<std::shared_ptr<Entity>>& ent
     entities.erase(callback, entities.end());
 }
 
-std::vector<std::shared_ptr<Entity>>& EntityManager::getEntities()
-{
-    return m_entities;
-}
-
 std::vector<std::shared_ptr<Entity>> EntityManager::getEntitiesByComponentTypes(const std::vector<Component::Type>& componentTypes)
 {
     std::ranges::filter_view filteredEntities = m_entities | std::ranges::views::filter([componentTypes](std::shared_ptr<Entity>& e) {

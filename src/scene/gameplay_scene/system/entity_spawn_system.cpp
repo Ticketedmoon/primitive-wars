@@ -46,23 +46,22 @@ void EntitySpawnSystem::execute()
     }
 
     std::shared_ptr<Entity>& player = m_entityManager.getEntityByType(Entity::Type::PLAYER);
-    std::shared_ptr<CUserInput> userInputComponent
-        = std::static_pointer_cast<CUserInput>(player->getComponentByType(Component::Type::USER_INPUT));
-    if (userInputComponent->mouseLeftClicked)
+    std::shared_ptr<CAction> userActionComponent
+        = std::static_pointer_cast<CAction>(player->getComponentByType(Component::Type::USER_INPUT));
+    if (userActionComponent->isShooting)
     {
         std::shared_ptr<CTransform> transformComponentForEntity = std::static_pointer_cast<CTransform> (player->getComponentByType(Component::Type::TRANSFORM));
-        float h = userInputComponent->mouseClickPosition.y - transformComponentForEntity->m_position.y;
-        float a = userInputComponent->mouseClickPosition.x - transformComponentForEntity->m_position.x;
+        float h = userActionComponent->projectileDestination.y - transformComponentForEntity->m_position.y;
+        float a = userActionComponent->projectileDestination.x - transformComponentForEntity->m_position.x;
         double shotAngle = atan2(h, a);
         spawnBullet(transformComponentForEntity->m_position, shotAngle);
-        userInputComponent->mouseLeftClicked = false;
+        userActionComponent->isShooting = false;
     }
-    if (userInputComponent->mouseRightClicked)
+    if (userActionComponent->isPerformingSpecialAttack)
     {
         spawnEntityAnimation(player, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(7.5f, 7.5f)));
         m_gameProperties.specialAttackCoolDownSeconds = (m_worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
-
-        userInputComponent->mouseRightClicked = false;
+        userActionComponent->isPerformingSpecialAttack = false;
     }
 }
 
@@ -80,7 +79,7 @@ void EntitySpawnSystem::spawnPlayer()
 
     player->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(sf::Vector2f(WINDOW_WIDTH/2, WINDOW_HEIGHT/2), position);
     player->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
-    player->m_components[Component::Type::USER_INPUT] = std::make_shared<CUserInput>();
+    player->m_components[Component::Type::USER_INPUT] = std::make_shared<CAction>();
     player->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
 }
 

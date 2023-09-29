@@ -17,7 +17,7 @@
 #include "entity/entity.h"
 #include "entity/entity_manager.h"
 #include "c_collision.h"
-#include "c_user_input.h"
+#include "c_action.h"
 #include "c_render.h"
 #include "c_lifespan.h"
 #include "system.h"

@@ -27,18 +27,17 @@ class GameEngine
         void changeScene(Scene::Type sceneType, const std::shared_ptr<Scene>& scene);
 
     private:
+        void handleInput();
         void update();
         void render();
 
         void createGameWindow();
-        void handleInput();
-
 
     public:
         sf::RenderWindow window;
         sf::Clock worldClock;
         sf::Clock deltaClock;
-        GameProperties gameProperties{false, 0, 0, worldClock.getElapsedTime().asSeconds(), worldClock.getElapsedTime().asSeconds()};
+        GameProperties gameProperties{false, 0, 0, worldClock, worldClock.getElapsedTime().asSeconds(), worldClock.getElapsedTime().asSeconds()};
 
     private:
         Scene::Type currentScene = Scene::Type::MENU_SCENE;
