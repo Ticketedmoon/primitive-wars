@@ -36,9 +36,10 @@ void GameplayScene::update()
 {
     if (levelClock.getElapsedTime().asSeconds() > gameProperties.timeRemainingBeforeVictory)
     {
-        const std::shared_ptr<MenuScene>& nextScene = std::make_shared<MenuScene>(gameEngine);
-        // FIXME temporary
-        gameEngine.changeScene(Scene::Type::MENU_SCENE, nextScene);
+        // Bit hacky here, improve?
+        m_audioManager->stopActiveMusic();
+        const std::shared_ptr<GameOverScene>& nextScene = std::make_shared<GameOverScene>(gameEngine);
+        gameEngine.changeScene(Scene::Type::VICTORY_SCENE, nextScene);
     }
     m_entityManager.update();
     m_systemManager.update(gameProperties);
@@ -93,7 +94,7 @@ void GameplayScene::performAction(Action& action)
         {
             if (action.getMode() == Action::Mode::PRESS)
             {
-                m_audioManager->playSound(actionType, 5.0f);
+                m_audioManager->playSound(AudioManager::AudioType::SHOOT, 5.0f);
             }
             actionComponent->projectileDestination = gameEngine.window.mapPixelToCoords(
                     sf::Mouse::getPosition(gameEngine.window));
@@ -103,7 +104,7 @@ void GameplayScene::performAction(Action& action)
         {
             if (gameProperties.specialAttackCoolDownSeconds <= gameProperties.worldClock.getElapsedTime().asSeconds())
             {
-                m_audioManager->playSound(actionType, 5.0f);
+                m_audioManager->playSound(AudioManager::AudioType::SPECIAL_ATTACK, 5.0f);
                 actionComponent->projectileDestination = gameEngine.window
                         .mapPixelToCoords(sf::Mouse::getPosition(gameEngine.window));
                 actionComponent->isPerformingSpecialAttack = action.getMode() == Action::Mode::PRESS;

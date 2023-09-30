@@ -2,13 +2,16 @@
 
 AudioManager::AudioManager()
 {
-    m_soundBufferMap[Action::Type::SHOOT] = sf::SoundBuffer();
-    m_soundBufferMap[Action::Type::SPECIAL_ATTACK] = sf::SoundBuffer();
+    m_soundBufferMap[AudioType::SHOOT] = sf::SoundBuffer();
+    m_soundBufferMap[AudioType::SPECIAL_ATTACK] = sf::SoundBuffer();
+    m_soundBufferMap[AudioType::GAME_OVER] = sf::SoundBuffer();
 
-    m_soundMap[Action::Type::SHOOT] = sf::Sound(m_soundBufferMap[Action::Type::SHOOT]);
-    m_soundMap[Action::Type::SPECIAL_ATTACK] = sf::Sound(m_soundBufferMap[Action::Type::SPECIAL_ATTACK]);
-    assert(m_soundBufferMap[Action::Type::SHOOT].loadFromFile(SHOOT_SFX_PATH));
-    assert(m_soundBufferMap[Action::Type::SPECIAL_ATTACK].loadFromFile(SPECIAL_ATTACK_SFX_PATH));
+    m_soundMap[AudioType::SHOOT] = sf::Sound(m_soundBufferMap[AudioType::SHOOT]);
+    m_soundMap[AudioType::SPECIAL_ATTACK] = sf::Sound(m_soundBufferMap[AudioType::SPECIAL_ATTACK]);
+    m_soundMap[AudioType::GAME_OVER] = sf::Sound(m_soundBufferMap[AudioType::GAME_OVER]);
+    assert(m_soundBufferMap[AudioType::SHOOT].loadFromFile(SHOOT_SFX_PATH));
+    assert(m_soundBufferMap[AudioType::SPECIAL_ATTACK].loadFromFile(SPECIAL_ATTACK_SFX_PATH));
+    assert(m_soundBufferMap[AudioType::GAME_OVER].loadFromFile(GAME_OVER_SFX_PATH));
 
     auto* menuTheme = new sf::Music();
     auto* levelOneTheme = new sf::Music();
@@ -43,7 +46,7 @@ AudioManager* AudioManager::getInstance()
     return m_audioManager;
 }
 
-void AudioManager::playSound(Action::Type actionType, float volume)
+void AudioManager::playSound(AudioType actionType, float volume)
 {
     sf::Sound& sound = m_soundMap[actionType];
     sound.setVolume(volume);
@@ -52,8 +55,7 @@ void AudioManager::playSound(Action::Type actionType, float volume)
 
 void AudioManager::playMusic(uint8_t sceneIndex, float volume, bool shouldLoop)
 {
-    sf::Music& currentMusic = *m_sceneMusic[currentSceneIndex];
-    currentMusic.stop();
+    stopActiveMusic();
 
     sf::Music& nextMusic = *m_sceneMusic[sceneIndex];
     nextMusic.setVolume(volume);
@@ -61,6 +63,12 @@ void AudioManager::playMusic(uint8_t sceneIndex, float volume, bool shouldLoop)
     nextMusic.play();
 
     currentSceneIndex = sceneIndex;
+}
+
+void AudioManager::stopActiveMusic()
+{
+    sf::Music& currentMusic = *m_sceneMusic[currentSceneIndex];
+    currentMusic.stop();
 }
 
 sf::Time AudioManager::getCurrentMusicDuration()

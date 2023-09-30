@@ -1,6 +1,6 @@
-#include "scene/menu_scene/menu_scene.h"
+#include "scene/game_over_scene/game_over_scene.h"
 
-MenuScene::MenuScene(GameEngine& gameEngine) : Scene(gameEngine)
+GameOverScene::GameOverScene(GameEngine& gameEngine) : Scene(gameEngine)
 {
     registerCursorActionType(sf::Event::EventType::MouseEntered, Action::Type::CURSOR_MOVE);
     registerCursorActionType(sf::Event::EventType::MouseMoved, Action::Type::CURSOR_MOVE);
@@ -13,52 +13,38 @@ MenuScene::MenuScene(GameEngine& gameEngine) : Scene(gameEngine)
     bool isFontLoaded = m_font.loadFromFile(FONT_PATH);
     assert(isFontLoaded);
 
-    gameTitleTextPair = createTextElementPair("Primitive Wars", 96, TITLE_TEXT_COLOUR, sf::Color::Black, 3.0f,
+    gameOverText = createTextElementPair("Game Over!", 96, TITLE_TEXT_COLOUR, sf::Color::Black, 3.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 250));
-    startGameTextualButtonPair = createTextElementPair("Start Game", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 2.0f,
+
+    menuReturnTextButton = createTextElementPair("Game Statistics:", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 2.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 50));
-    exitTextualButtonPair = createTextElementPair("Quit Game", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 2.0f,
-            sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150));
 
-    m_audioManager->playMusic(static_cast<uint8_t>(Scene::Type::MENU_SCENE), 30.0f, true);
+    menuReturnTextButton = createTextElementPair("Return to Menu", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 2.0f,
+            sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 50));
+
+    m_audioManager->playSound(AudioManager::AudioType::GAME_OVER, 30.0f);
 }
 
-void MenuScene::update()
+void GameOverScene::update()
 {
-    if (currentSelectItem == 0)
-    {
-        exitTextualButtonPair.second.setFillColor(exitTextualButtonPair.first);
-        startGameTextualButtonPair.second.setFillColor(BUTTON_HIGHLIGHT_COLOR);
-    }
-    else if (currentSelectItem == 1)
-    {
-        startGameTextualButtonPair.second.setFillColor(startGameTextualButtonPair.first);
-        exitTextualButtonPair.second.setFillColor(BUTTON_HIGHLIGHT_COLOR);
-    }
+    // NOOP
 }
 
-void MenuScene::render()
+void GameOverScene::render()
 {
     gameEngine.window.clear(BACKGROUND_COLOR);
 
-    gameEngine.window.draw(gameTitleTextPair.second);
-    gameEngine.window.draw(startGameTextualButtonPair.second);
-    gameEngine.window.draw(exitTextualButtonPair.second);
+    gameEngine.window.draw(gameOverText.second);
+    gameEngine.window.draw(menuReturnTextButton.second);
+    gameEngine.window.draw(gameStatsText.second);
 
     gameEngine.window.display();
 }
 
-void MenuScene::performAction(Action& action)
+void GameOverScene::performAction(Action& action)
 {
     switch (action.getType())
     {
-        case Action::Type::MOVE_DOWN:
-        case Action::Type::MOVE_UP:
-            if (action.getMode() == Action::Mode::PRESS)
-            {
-                currentSelectItem = (currentSelectItem + 1) % 2;
-            }
-            break;
         case Action::Type::CURSOR_MOVE:
         {
             handleMouseHover();
@@ -66,23 +52,11 @@ void MenuScene::performAction(Action& action)
         }
         case Action::Type::SELECT:
         {
-            if (currentSelectItem == 0)
-            {
-                const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine);
-                gameEngine.changeScene(Scene::Type::GAMEPLAY_SCENE, nextScene);
-            }
-            else if (currentSelectItem == 1)
-            {
-                gameEngine.window.close();
-                return;
-            }
+            changeToMenuScene();
         }
         case Action::Type::CURSOR_SELECT:
         {
-            if (action.getMode() == Action::Mode::PRESS)
-            {
-                handleMouseClick();
-            }
+            handleMouseClick();
             break;
         }
         default:
@@ -90,44 +64,41 @@ void MenuScene::performAction(Action& action)
     }
 }
 
-void MenuScene::handleMouseClick()
+void GameOverScene::handleMouseClick()
 {
     sf::Vector2i mousePos = sf::Mouse::getPosition(gameEngine.window);
     sf::Vector2f mousePosF(static_cast<float>( mousePos.x ), static_cast<float>( mousePos.y ));
 
-    auto& [exitColor, exitTextButton] = exitTextualButtonPair;
+    auto& [exitColor, exitTextButton] = gameStatsText;
     if (exitTextButton.getGlobalBounds().contains(mousePosF))
     {
         gameEngine.window.close();
         return;
     }
 
-    auto& [startColor, startTextButton] = startGameTextualButtonPair;
+    auto& [startColor, startTextButton] = menuReturnTextButton;
     if (startTextButton.getGlobalBounds().contains(mousePosF))
     {
-        const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine);
-        gameEngine.changeScene(Scene::Type::GAMEPLAY_SCENE, nextScene);
+        changeToMenuScene();
         return;
     }
 
 }
-void MenuScene::handleMouseHover()
+void GameOverScene::handleMouseHover()
 {
     sf::Vector2i mousePos = sf::Mouse::getPosition(gameEngine.window);
     sf::Vector2f mousePosF(static_cast<float>( mousePos.x ), static_cast<float>( mousePos.y ));
 
-    auto& [originalStartTextButtonColor, startTextButton] = startGameTextualButtonPair;
+    auto& [originalStartTextButtonColor, startTextButton] = menuReturnTextButton;
     if (startTextButton.getGlobalBounds().contains(mousePosF))
     {
-        currentSelectItem = -1;
         onHover(startTextButton, BUTTON_HIGHLIGHT_COLOR, sf::Cursor::Hand);
         return;
     }
 
-    auto& [originalExitTextButtonColor, exitTextButton] = exitTextualButtonPair;
+    auto& [originalExitTextButtonColor, exitTextButton] = gameStatsText;
     if (exitTextButton.getGlobalBounds().contains(mousePosF))
     {
-        currentSelectItem = -1;
         onHover(exitTextButton, BUTTON_HIGHLIGHT_COLOR, sf::Cursor::Hand);
         return;
     }
@@ -136,13 +107,19 @@ void MenuScene::handleMouseHover()
     onHover(exitTextButton, originalExitTextButtonColor, sf::Cursor::Arrow);
 }
 
-void MenuScene::onHover(sf::Text& text, sf::Color color, sf::Cursor::Type cursorTypeOnHover)
+void GameOverScene::onHover(sf::Text& text, sf::Color color, sf::Cursor::Type cursorTypeOnHover)
 {
     if (cursor.loadFromSystem(cursorTypeOnHover))
     {
         gameEngine.window.setMouseCursor(cursor);
     }
     text.setFillColor(color);
+}
+
+void GameOverScene::changeToMenuScene()
+{
+    const std::shared_ptr<MenuScene>& nextScene = std::make_shared<MenuScene>(gameEngine);
+    gameEngine.changeScene(Type::MENU_SCENE, nextScene);
 }
 
 /**
@@ -157,7 +134,7 @@ void MenuScene::onHover(sf::Text& text, sf::Color color, sf::Cursor::Type cursor
  * @param position The position of the text
  * @return A text element pairing from the original text color to the sf::Text object.
  */
-std::pair<sf::Color, sf::Text> MenuScene::createTextElementPair(const std::string& value, uint16_t characterSize,
+std::pair<sf::Color, sf::Text> GameOverScene::createTextElementPair(const std::string& value, uint16_t characterSize,
         sf::Color fillColor, sf::Color outlineColor, float outlineThickness, sf::Vector2f position)
 {
     sf::Text text;
