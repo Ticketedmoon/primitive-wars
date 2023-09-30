@@ -55,7 +55,7 @@ void GuiSystem::renderGameOverlayText(std::shared_ptr<Entity>& player)
             : std::ceil(m_gameProperties.specialAttackCoolDownSeconds - m_worldClock.getElapsedTime().asSeconds());
 
     const std::string text = "Score: " + std::to_string(scoreComponent->getScore()) + "\n"
-            + "Deaths: " + std::to_string(m_gameProperties.totalDeaths) + "\n"
+            + "Total Lives: " + std::to_string(m_gameProperties.totalLives) + "\n"
             + "Time remaining: " + std::to_string(m_gameProperties.timeRemainingBeforeVictory - m_worldClock.getElapsedTime().asSeconds()) + "\n"
             + "Special Attack Cooldown: " + std::to_string(coolDownSeconds);
     m_gameOverlayText.setString(text);
@@ -82,7 +82,7 @@ void GuiSystem::updateGuiData()
         if (e->getType() == Entity::Type::PLAYER)
         {
             m_gameProperties.playerRespawnTimeSeconds = (m_worldClock.getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
-            m_gameProperties.totalDeaths++;
+            m_gameProperties.totalLives--;
         }
 
         if (e->getType() == Entity::Type::ENEMY)

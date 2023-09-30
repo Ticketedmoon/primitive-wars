@@ -10,7 +10,8 @@ GameplayScene::GameplayScene(GameEngine& engine) : Scene(engine)
 
     float timeRemainingBeforeLevelComplete = levelClock.getElapsedTime().asSeconds() +
             AudioManager::getInstance()->getCurrentMusicDuration().asSeconds();
-    gameProperties = {false, 0, levelClock, 0, 0, timeRemainingBeforeLevelComplete};
+    uint8_t TOTAL_PLAYER_LIVES = 3;
+    gameProperties = {false, TOTAL_PLAYER_LIVES, levelClock, 0, 0, timeRemainingBeforeLevelComplete};
 
     // mouse
     registerActionType(CursorButton::CURSOR_LEFT, Action::Type::SHOOT);
@@ -36,11 +37,17 @@ void GameplayScene::update()
 {
     if (levelClock.getElapsedTime().asSeconds() > gameProperties.timeRemainingBeforeVictory)
     {
+        return;
+    }
+    if (gameProperties.totalLives == 0)
+    {
         // Bit hacky here, improve?
         m_audioManager->stopActiveMusic();
         const std::shared_ptr<GameOverScene>& nextScene = std::make_shared<GameOverScene>(gameEngine);
-        gameEngine.changeScene(Scene::Type::VICTORY_SCENE, nextScene);
+        gameEngine.changeScene(Scene::Type::GAME_OVER_SCENE, nextScene);
+        return;
     }
+
     m_entityManager.update();
     m_systemManager.update(gameProperties);
 }
