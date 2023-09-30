@@ -66,6 +66,7 @@ class EntitySpawnSystem : public System
         static constexpr float ENEMY_SPAWN_RATE_SECONDS = 1.0f;
         static const uint8_t SPECIAL_ATTACK_COOLDOWN_OFFSET = 3;
         static constexpr uint8_t ENEMY_SCORE_MULTIPLIER = 100;
+        static constexpr uint16_t ENEMY_SPAWN_OFFSET = 512;
 
         EntityManager& m_entityManager;
         sf::Clock& m_worldClock;

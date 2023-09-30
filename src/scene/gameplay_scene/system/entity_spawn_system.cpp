@@ -175,11 +175,10 @@ bool EntitySpawnSystem::isNearPlayer(sf::FloatRect enemyBoundingBox)
             m_entityManager.getEntityByType(Entity::Type::PLAYER)->getComponentByType(Component::Type::RENDER));
 
     // Make player rect larger for this calculation so enemies are not 'near'
-    int offsetPx = 512;
     sf::FloatRect playerBoundingBox = renderComponentForPlayer->m_shape.getGlobalBounds();
-    playerBoundingBox.left = (playerBoundingBox.left - offsetPx) < 0 ? 0 : (playerBoundingBox.left - offsetPx);
-    playerBoundingBox.top = (playerBoundingBox.top - offsetPx) < 0 ? 0 : (playerBoundingBox.top - offsetPx);
-    playerBoundingBox.width = playerBoundingBox.width + offsetPx;
-    playerBoundingBox.height = playerBoundingBox.height + offsetPx;
+    playerBoundingBox.left = (playerBoundingBox.left - ENEMY_SPAWN_OFFSET) < 0 ? 0 : (playerBoundingBox.left - ENEMY_SPAWN_OFFSET);
+    playerBoundingBox.top = (playerBoundingBox.top - ENEMY_SPAWN_OFFSET) < 0 ? 0 : (playerBoundingBox.top - ENEMY_SPAWN_OFFSET);
+    playerBoundingBox.width = playerBoundingBox.width + ENEMY_SPAWN_OFFSET;
+    playerBoundingBox.height = playerBoundingBox.height + ENEMY_SPAWN_OFFSET;
     return playerBoundingBox.contains(sf::Vector2f(enemyBoundingBox.left, enemyBoundingBox.top));
 }
