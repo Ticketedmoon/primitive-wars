@@ -7,6 +7,7 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Event.hpp>
 #include "action.h"
+#include "audio_manager.h"
 
 // Forward-declaration
 class GameEngine;
@@ -27,7 +28,7 @@ class Scene
         };
 
         explicit Scene(GameEngine& gameEngine);
-        virtual ~Scene() = default;
+        virtual ~Scene();
 
         virtual void update() = 0;
         virtual void render() = 0;
@@ -43,6 +44,7 @@ class Scene
 
     protected:
         GameEngine& gameEngine;
+        AudioManager* m_audioManager = AudioManager::getInstance();
 
     private:
         std::unordered_map<int, Action::Type> m_actionMap;

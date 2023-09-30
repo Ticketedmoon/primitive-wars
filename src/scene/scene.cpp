@@ -5,6 +5,11 @@ Scene::Scene(GameEngine& gameEngine) : gameEngine(gameEngine)
 
 }
 
+Scene::~Scene()
+{
+    delete m_audioManager;
+}
+
 void Scene::registerActionType(int inputCode, Action::Type actionType)
 {
     m_actionMap[inputCode] = actionType;

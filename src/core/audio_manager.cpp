@@ -2,8 +2,13 @@
 
 AudioManager::AudioManager()
 {
-    assert(soundBuffer.loadFromFile(SHOOT_SFX_PATH));
-    m_soundMap[Action::Type::SHOOT] = sf::Sound(soundBuffer);
+    m_soundBufferMap[Action::Type::SHOOT] = sf::SoundBuffer();
+    m_soundBufferMap[Action::Type::SPECIAL_ATTACK] = sf::SoundBuffer();
+
+    m_soundMap[Action::Type::SHOOT] = sf::Sound(m_soundBufferMap[Action::Type::SHOOT]);
+    m_soundMap[Action::Type::SPECIAL_ATTACK] = sf::Sound(m_soundBufferMap[Action::Type::SPECIAL_ATTACK]);
+    assert(m_soundBufferMap[Action::Type::SHOOT].loadFromFile(SHOOT_SFX_PATH));
+    assert(m_soundBufferMap[Action::Type::SPECIAL_ATTACK].loadFromFile(SPECIAL_ATTACK_SFX_PATH));
 
     auto* menuTheme = new sf::Music();
     auto* levelOneTheme = new sf::Music();
@@ -33,7 +38,7 @@ AudioManager* AudioManager::getInstance()
     }
 
     m_audioManager = new AudioManager();
-    currentSceneIndex = static_cast<uint8_t>(Scene::Type::MENU_SCENE);
+    currentSceneIndex = static_cast<uint8_t>(0);
 
     return m_audioManager;
 }

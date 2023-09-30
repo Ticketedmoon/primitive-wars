@@ -7,7 +7,6 @@
 
 #include "game_engine.h"
 #include "scene.h"
-#include "audio_manager.h"
 
 class MenuScene : public Scene
 {
@@ -32,8 +31,6 @@ class MenuScene : public Scene
         static inline const sf::Color& TITLE_TEXT_COLOUR = sf::Color::Red;
         static inline const sf::Color& BUTTON_DEFAULT_COLOR = sf::Color::White;
         static inline const sf::Color& BUTTON_HIGHLIGHT_COLOR = sf::Color{0, 150, 200};
-
-        static inline AudioManager* m_audioManager = AudioManager::getInstance();
 
         sf::Font m_font;
         uint8_t currentSelectItem = 0;

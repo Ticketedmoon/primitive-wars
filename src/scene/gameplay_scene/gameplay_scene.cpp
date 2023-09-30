@@ -91,6 +91,7 @@ void GameplayScene::performAction(Action& action)
         {
             if (gameEngine.gameProperties.specialAttackCoolDownSeconds <= gameEngine.gameProperties.worldClock.getElapsedTime().asSeconds())
             {
+                m_audioManager->playSound(actionType, 5.0f);
                 actionComponent->projectileDestination = gameEngine.window
                         .mapPixelToCoords(sf::Mouse::getPosition(gameEngine.window));
                 actionComponent->isPerformingSpecialAttack = action.getMode() == Action::Mode::PRESS;

@@ -13,7 +13,6 @@
 
 #include "game_engine.h"
 #include "scene.h"
-#include "audio_manager.h"
 
 class GameplayScene : public Scene
 {
@@ -32,7 +31,6 @@ class GameplayScene : public Scene
 
         static inline SystemManager m_systemManager;
         static inline EntityManager m_entityManager;
-        static inline AudioManager* m_audioManager = AudioManager::getInstance();
 
         static inline sf::Texture textureSprite;
         static inline sf::Sprite backgroundSprite;

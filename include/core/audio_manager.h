@@ -6,12 +6,13 @@
 #include <SFML/Audio.hpp>
 
 #include <cassert>
+#include <iostream>
 
-#include "scene.h"
 #include "action.h"
 
 class AudioManager {
     public:
+        ~AudioManager();
         AudioManager(AudioManager& audioManager) = delete;
         void operator=(const AudioManager&) = delete;
 
@@ -21,16 +22,16 @@ class AudioManager {
 
     private:
         AudioManager();
-        ~AudioManager();
 
     private:
         static const inline std::string SHOOT_SFX_PATH = "resources/assets/sound/sfx/laser_shoot.wav";
+        static const inline std::string SPECIAL_ATTACK_SFX_PATH = "resources/assets/sound/sfx/laser_special_attack.wav";
         static const inline std::string MENU_THEME_PATH = "resources/assets/sound/music/menu_theme.wav";
         static const inline std::string LEVEL_ONE_PATH = "resources/assets/sound/music/level_1.wav";
 
         static inline AudioManager* m_audioManager;
 
-        static inline sf::SoundBuffer soundBuffer;
+        static inline std::unordered_map<Action::Type, sf::SoundBuffer> m_soundBufferMap;
         static inline std::unordered_map<Action::Type, sf::Sound> m_soundMap;
         static inline std::vector<sf::Music*> m_sceneMusic;
         static inline uint8_t currentSceneIndex;
