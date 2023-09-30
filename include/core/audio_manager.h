@@ -26,6 +26,7 @@ class AudioManager {
         static AudioManager* getInstance();
         void playSound(AudioType audioType, float volume);
         void playMusic(uint8_t sceneIndex, float volume, bool shouldLoop);
+        bool isMusicPlaying();
         void stopActiveMusic();
         sf::Time getCurrentMusicDuration();
 

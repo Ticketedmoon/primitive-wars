@@ -37,11 +37,18 @@ void GameplayScene::update()
 {
     if (levelClock.getElapsedTime().asSeconds() > gameProperties.timeRemainingBeforeVictory)
     {
+        // Return to level screen [DONE]
+        // Show snackbar or something that you cleared the level [UNFINISHED]
+        // Show tick icon or similar next to level indicating victory [DONE]
+        m_audioManager->stopActiveMusic();
+        const std::shared_ptr<LevelSelectScene>& nextScene = std::make_shared<LevelSelectScene>(gameEngine,
+                LevelSelectScene::LevelClearStatus(true, false, false));
+        gameEngine.changeScene(Scene::Type::LEVEL_SELECT_SCENE, nextScene);
         return;
     }
     if (gameProperties.totalLives == 0)
     {
-        // Bit hacky here, improve?
+        // FIXME Not very clean here, improve
         m_audioManager->stopActiveMusic();
         const std::shared_ptr<GameOverScene>& nextScene = std::make_shared<GameOverScene>(gameEngine);
         gameEngine.changeScene(Scene::Type::GAME_OVER_SCENE, nextScene);

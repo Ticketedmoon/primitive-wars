@@ -56,7 +56,7 @@ void MenuScene::performAction(Action& action)
         case Action::Type::MOVE_UP:
             if (action.getMode() == Action::Mode::PRESS)
             {
-                currentSelectItem = (currentSelectItem + 1) % 2;
+                currentSelectItem = (currentSelectItem + 1) % TOTAL_TEXT_BUTTONS;
             }
             break;
         case Action::Type::CURSOR_MOVE:
@@ -68,8 +68,7 @@ void MenuScene::performAction(Action& action)
         {
             if (currentSelectItem == 0)
             {
-                const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine);
-                gameEngine.changeScene(Scene::Type::GAMEPLAY_SCENE, nextScene);
+                changeToLevelSelectScene();
             }
             else if (currentSelectItem == 1)
             {
@@ -90,6 +89,13 @@ void MenuScene::performAction(Action& action)
     }
 }
 
+void MenuScene::changeToLevelSelectScene()
+{
+    const std::shared_ptr<LevelSelectScene>& nextScene = std::make_shared<LevelSelectScene>(gameEngine,
+            LevelSelectScene::LevelClearStatus(false, false, false));
+    gameEngine.changeScene(Type::LEVEL_SELECT_SCENE, nextScene);
+}
+
 void MenuScene::handleMouseClick()
 {
     sf::Vector2i mousePos = sf::Mouse::getPosition(gameEngine.window);
@@ -105,8 +111,7 @@ void MenuScene::handleMouseClick()
     auto& [startColor, startTextButton] = startGameTextualButtonPair;
     if (startTextButton.getGlobalBounds().contains(mousePosF))
     {
-        const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine);
-        gameEngine.changeScene(Scene::Type::GAMEPLAY_SCENE, nextScene);
+        changeToLevelSelectScene();
         return;
     }
 

@@ -19,6 +19,7 @@ AudioManager::AudioManager()
     assert(levelOneTheme->openFromFile(LEVEL_ONE_PATH));
 
     m_sceneMusic.emplace_back(menuTheme);
+    m_sceneMusic.emplace_back(menuTheme);
     m_sceneMusic.emplace_back(levelOneTheme);
 }
 
@@ -63,6 +64,12 @@ void AudioManager::playMusic(uint8_t sceneIndex, float volume, bool shouldLoop)
     nextMusic.play();
 
     currentSceneIndex = sceneIndex;
+}
+
+bool AudioManager::isMusicPlaying()
+{
+    sf::Music& currentMusic = *m_sceneMusic[currentSceneIndex];
+    return currentMusic.getStatus() == sf::SoundSource::Playing;
 }
 
 void AudioManager::stopActiveMusic()

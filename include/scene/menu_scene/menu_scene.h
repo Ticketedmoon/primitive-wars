@@ -5,6 +5,7 @@
 
 #include <SFML/Graphics/RectangleShape.hpp>
 
+#include "level_select_scene/level_select_scene.h"
 #include "game_engine.h"
 #include "scene.h"
 
@@ -21,6 +22,7 @@ class MenuScene : public Scene
         void handleMouseHover();
         void handleMouseClick();
         void onHover(sf::Text& text, sf::Color color, sf::Cursor::Type cursorTypeOnHover);
+        void changeToLevelSelectScene();
 
         std::pair<sf::Color, sf::Text> createTextElementPair(const std::string& value, uint16_t characterSize,
                 sf::Color fillColor, sf::Color outlineColor, float outlineThickness, sf::Vector2f position);
@@ -28,6 +30,7 @@ class MenuScene : public Scene
     private:
         static inline const std::string FONT_PATH = "resources/fonts/calibri.ttf";
         static inline const sf::Color& BACKGROUND_COLOR = sf::Color{70, 0, 0, 255};
+        static inline const uint8_t TOTAL_TEXT_BUTTONS = 2;
         static inline const sf::Color& TITLE_TEXT_COLOUR = sf::Color::Red;
         static inline const sf::Color& BUTTON_DEFAULT_COLOR = sf::Color::White;
         static inline const sf::Color& BUTTON_HIGHLIGHT_COLOR = sf::Color{0, 150, 200};

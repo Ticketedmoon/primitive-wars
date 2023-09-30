@@ -18,8 +18,9 @@ class Scene
         enum class Type
         {
             MENU_SCENE = 0,
-            GAMEPLAY_SCENE = 1,
-            GAME_OVER_SCENE = 2
+            LEVEL_SELECT_SCENE = 1,
+            GAMEPLAY_SCENE = 2,
+            GAME_OVER_SCENE = 3
         };
         enum CursorButton
         {
