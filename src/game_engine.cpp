@@ -6,6 +6,11 @@ GameEngine::GameEngine()
     gameScenes[currentScene] = std::make_shared<MenuScene>(*this);
 }
 
+GameEngine::~GameEngine()
+{
+    delete m_audioManager;
+}
+
 void GameEngine::startGameLoop()
 {
     while (window.isOpen())
@@ -26,7 +31,6 @@ void GameEngine::changeScene(Scene::Type sceneType, const std::shared_ptr<Scene>
 
 void GameEngine::update()
 {
-    //gameScenes[currentScene]->performAction(); // ??
     gameScenes[currentScene]->update();
 }
 
@@ -35,12 +39,13 @@ void GameEngine::render()
     gameScenes[currentScene]->render();
 }
 
+/* Get the keyboard input
+ * if keyboard input is not part of scene, skip!
+ * pass it down to scenes internal mapping of keys to ACTION
+ * let scene do what it needs to do in performAction();
+ */
 void GameEngine::handleInput()
 {
-    // Get the keyboard input
-    // if keyboard input is not part of scene, skip!
-    // pass it down to scenes internal mapping of keys to ACTION
-    // let scene do what it needs to do in performAction();
     sf::Event event{};
     while (window.pollEvent(event))
     {

@@ -23,6 +23,7 @@ class GameEngine
 {
     public:
         GameEngine();
+        ~GameEngine();
         void startGameLoop();
         void changeScene(Scene::Type sceneType, const std::shared_ptr<Scene>& scene);
 
@@ -35,9 +36,8 @@ class GameEngine
 
     public:
         sf::RenderWindow window;
-        sf::Clock worldClock;
         sf::Clock deltaClock;
-        GameProperties gameProperties{false, 0, worldClock, 0, 0};
+        AudioManager* m_audioManager = AudioManager::getInstance();
 
     private:
         Scene::Type currentScene = Scene::Type::MENU_SCENE;

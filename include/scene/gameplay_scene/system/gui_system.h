@@ -28,7 +28,7 @@ class GuiSystem : public System
         void updateGuiData();
         void drawGuiData();
 
-        void renderCooldownText(std::shared_ptr<Entity>& player);
+        void renderGameOverlayText(std::shared_ptr<Entity>& player);
         void renderTextOnPlayerDeath();
         [[nodiscard]] bool isPlayerWaitingOnRespawnTime() const;
 
@@ -45,9 +45,9 @@ class GuiSystem : public System
         sf::Clock& m_worldClock;
         GameProperties& m_gameProperties;
 
-        static inline sf::Text gameOverlayText;
-        static inline sf::Text respawnText;
-        static inline sf::Text pauseText;
+        static inline sf::Text m_gameOverlayText;
+        static inline sf::Text m_respawnText;
+        static inline sf::Text m_pauseText;
         static inline sf::Font m_font;
 };
 

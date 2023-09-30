@@ -24,16 +24,18 @@ class GameplayScene : public Scene
         void performAction(Action& action) override;
 
     private:
-        static void registerSystems(GameEngine& engine);
+        void registerSystems(GameEngine& engine);
 
     private:
-        static const inline std::string BACKGROUND_IMAGE_PATH = "resources/assets/texture/board.png";
+        const std::string BACKGROUND_IMAGE_PATH = "resources/assets/texture/board.png";
+        sf::Clock levelClock;
+        GameProperties gameProperties;
 
-        static inline SystemManager m_systemManager;
-        static inline EntityManager m_entityManager;
+        SystemManager m_systemManager;
+        EntityManager m_entityManager;
 
-        static inline sf::Texture textureSprite;
-        static inline sf::Sprite backgroundSprite;
+        sf::Texture textureSprite;
+        sf::Sprite backgroundSprite;
 };
 
 

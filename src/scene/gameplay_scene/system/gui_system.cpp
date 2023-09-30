@@ -24,7 +24,7 @@ void GuiSystem::drawGuiData()
 
     if (m_gameProperties.hasPaused)
     {
-        drawText(pauseText, sf::Color::Green, 128, PAUSED_TEXT_SCREEN_POSITION);
+        drawText(m_pauseText, sf::Color::Green, 128, PAUSED_TEXT_SCREEN_POSITION);
         return;
     }
 
@@ -34,7 +34,7 @@ void GuiSystem::drawGuiData()
     }
     else
     {
-        renderCooldownText(players.front());
+        renderGameOverlayText(players.front());
     }
 }
 
@@ -42,22 +42,24 @@ void GuiSystem::renderTextOnPlayerDeath()
 {
     uint8_t respawnTime =
             (m_gameProperties.playerRespawnTimeSeconds - m_worldClock.getElapsedTime().asSeconds()) + 1;
-    respawnText.setString("Respawn Time: " + std::to_string(respawnTime));
-    drawText(respawnText, sf::Color::Yellow, 72, sf::Vector2f(WINDOW_WIDTH / 2 - 256, WINDOW_HEIGHT / 2 - 64));
+    m_respawnText.setString("Respawn Time: " + std::to_string(respawnTime));
+    drawText(m_respawnText, sf::Color::Yellow, 72, sf::Vector2f(WINDOW_WIDTH / 2 - 256, WINDOW_HEIGHT / 2 - 64));
 }
 
-void GuiSystem::renderCooldownText(std::shared_ptr<Entity>& player)
+void GuiSystem::renderGameOverlayText(std::shared_ptr<Entity>& player)
 {
     std::shared_ptr<CScore> scoreComponent = std::static_pointer_cast<CScore> (player->getComponentByType(Component::Type::SCORE));
 
     uint8_t coolDownSeconds = m_worldClock.getElapsedTime().asSeconds() > m_gameProperties.specialAttackCoolDownSeconds
             ? 0.0f
             : std::ceil(m_gameProperties.specialAttackCoolDownSeconds - m_worldClock.getElapsedTime().asSeconds());
+
     const std::string text = "Score: " + std::to_string(scoreComponent->getScore()) + "\n"
             + "Deaths: " + std::to_string(m_gameProperties.totalDeaths) + "\n"
+            + "Time remaining: " + std::to_string(m_gameProperties.timeRemainingBeforeVictory - m_worldClock.getElapsedTime().asSeconds()) + "\n"
             + "Special Attack Cooldown: " + std::to_string(coolDownSeconds);
-    gameOverlayText.setString(text);
-    drawText(gameOverlayText, sf::Color::White, 20, sf::Vector2f(24, 12));
+    m_gameOverlayText.setString(text);
+    drawText(m_gameOverlayText, sf::Color::White, 20, sf::Vector2f(24, 12));
 }
 
 bool GuiSystem::isPlayerWaitingOnRespawnTime() const
@@ -111,7 +113,7 @@ void GuiSystem::configureTextRendering()
     bool isFontLoaded = m_font.loadFromFile(FONT_PATH);
     assert(isFontLoaded);
 
-    gameOverlayText = sf::Text("", m_font);
-    respawnText = sf::Text("", m_font);
-    pauseText = sf::Text(PAUSED_TEXT, m_font);
+    m_gameOverlayText = sf::Text("", m_font);
+    m_respawnText = sf::Text("", m_font);
+    m_pauseText = sf::Text(PAUSED_TEXT, m_font);
 }

@@ -14,6 +14,7 @@ class GameProperties
         sf::Clock worldClock;
         float playerRespawnTimeSeconds;
         float specialAttackCoolDownSeconds;
+        float timeRemainingBeforeVictory;
 };
 
 #endif //PRIMITIVE_WARS_GAME_PROPERTIES_H

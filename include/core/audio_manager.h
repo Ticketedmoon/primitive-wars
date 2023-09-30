@@ -19,6 +19,7 @@ class AudioManager {
         static AudioManager* getInstance();
         void playSound(Action::Type actionType, float volume);
         void playMusic(uint8_t sceneIndex, float volume, bool shouldLoop);
+        sf::Time getCurrentMusicDuration();
 
     private:
         AudioManager();

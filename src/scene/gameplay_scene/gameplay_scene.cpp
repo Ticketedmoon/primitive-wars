@@ -2,6 +2,16 @@
 
 GameplayScene::GameplayScene(GameEngine& engine) : Scene(engine)
 {
+    bool isFileLoaded = textureSprite.loadFromFile(BACKGROUND_IMAGE_PATH);
+    assert(isFileLoaded);
+    backgroundSprite = sf::Sprite(textureSprite);
+
+    m_audioManager->playMusic(static_cast<uint8_t>(Scene::Type::GAMEPLAY_SCENE), 30.0f, false);
+
+    float timeRemainingBeforeLevelComplete = levelClock.getElapsedTime().asSeconds() +
+            AudioManager::getInstance()->getCurrentMusicDuration().asSeconds();
+    gameProperties = {false, 0, levelClock, 0, 0, timeRemainingBeforeLevelComplete};
+
     // mouse
     registerActionType(CursorButton::CURSOR_LEFT, Action::Type::SHOOT);
     registerActionType(CursorButton::CURSOR_RIGHT, Action::Type::SPECIAL_ATTACK);
@@ -20,19 +30,18 @@ GameplayScene::GameplayScene(GameEngine& engine) : Scene(engine)
     registerActionType(sf::Keyboard::Key::P, Action::Type::PAUSE);
 
     registerSystems(engine);
-
-    bool isFileLoaded = textureSprite.loadFromFile(BACKGROUND_IMAGE_PATH);
-    assert(isFileLoaded);
-    backgroundSprite = sf::Sprite(textureSprite);
-
-    m_audioManager->playMusic(static_cast<uint8_t>(Scene::Type::GAMEPLAY_SCENE), 30.0f, false);
 }
 
 void GameplayScene::update()
 {
-
+    if (levelClock.getElapsedTime().asSeconds() > gameProperties.timeRemainingBeforeVictory)
+    {
+        const std::shared_ptr<MenuScene>& nextScene = std::make_shared<MenuScene>(gameEngine);
+        // FIXME temporary
+        gameEngine.changeScene(Scene::Type::MENU_SCENE, nextScene);
+    }
     m_entityManager.update();
-    m_systemManager.update(gameEngine.gameProperties);
+    m_systemManager.update(gameProperties);
 }
 
 void GameplayScene::render()
@@ -40,13 +49,13 @@ void GameplayScene::render()
     gameEngine.window.clear();
     gameEngine.window.draw(backgroundSprite);
 
-    if (gameEngine.gameProperties.hasPaused)
+    if (gameProperties.hasPaused)
     {
-        gameEngine.gameProperties.playerRespawnTimeSeconds += gameEngine.deltaClock.getElapsedTime().asSeconds();
-        gameEngine.gameProperties.specialAttackCoolDownSeconds += gameEngine.deltaClock.getElapsedTime().asSeconds();
+        gameProperties.playerRespawnTimeSeconds += gameEngine.deltaClock.getElapsedTime().asSeconds();
+        gameProperties.specialAttackCoolDownSeconds += gameEngine.deltaClock.getElapsedTime().asSeconds();
     }
 
-    m_systemManager.render(gameEngine.gameProperties);
+    m_systemManager.render(gameProperties);
 
     gameEngine.window.display();
 }
@@ -56,7 +65,7 @@ void GameplayScene::performAction(Action& action)
     Action::Type actionType = action.getType();
     if (actionType == Action::Type::PAUSE && action.getMode() == Action::Mode::PRESS)
     {
-        gameEngine.gameProperties.hasPaused = !gameEngine.gameProperties.hasPaused;
+        gameProperties.hasPaused = !gameProperties.hasPaused;
     }
 
     std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
@@ -82,14 +91,17 @@ void GameplayScene::performAction(Action& action)
         }
         if (actionType == Action::Type::SHOOT)
         {
-            m_audioManager->playSound(actionType, 5.0f);
+            if (action.getMode() == Action::Mode::PRESS)
+            {
+                m_audioManager->playSound(actionType, 5.0f);
+            }
             actionComponent->projectileDestination = gameEngine.window.mapPixelToCoords(
                     sf::Mouse::getPosition(gameEngine.window));
             actionComponent->isShooting = action.getMode() == Action::Mode::PRESS;
         }
         if (actionType == Action::Type::SPECIAL_ATTACK)
         {
-            if (gameEngine.gameProperties.specialAttackCoolDownSeconds <= gameEngine.gameProperties.worldClock.getElapsedTime().asSeconds())
+            if (gameProperties.specialAttackCoolDownSeconds <= gameProperties.worldClock.getElapsedTime().asSeconds())
             {
                 m_audioManager->playSound(actionType, 5.0f);
                 actionComponent->projectileDestination = gameEngine.window
@@ -105,15 +117,16 @@ void GameplayScene::registerSystems(GameEngine& engine)
     m_systemManager.registerSystem(std::make_shared<CollisionSystem>(m_entityManager),
             SystemManager::SystemType::UPDATE);
     m_systemManager.registerSystem(
-            std::make_shared<EntitySpawnSystem>(m_entityManager, engine.worldClock, engine.gameProperties),
+            std::make_shared<EntitySpawnSystem>(m_entityManager, levelClock, gameProperties),
             SystemManager::SystemType::UPDATE);
     m_systemManager.registerSystem(std::make_shared<LifespanSystem>(m_entityManager),
             SystemManager::SystemType::UPDATE);
     m_systemManager.registerSystem(std::make_shared<TransformSystem>(m_entityManager),
             SystemManager::SystemType::UPDATE);
+    
     m_systemManager.registerSystem(std::make_shared<RenderSystem>(engine.window, m_entityManager),
             SystemManager::SystemType::RENDER);
     m_systemManager.registerSystem(
-            std::make_shared<GuiSystem>(engine.window, m_entityManager, engine.worldClock, engine.gameProperties),
+            std::make_shared<GuiSystem>(engine.window, m_entityManager, levelClock, gameProperties),
             SystemManager::SystemType::RENDER);
 }

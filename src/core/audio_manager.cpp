@@ -38,7 +38,7 @@ AudioManager* AudioManager::getInstance()
     }
 
     m_audioManager = new AudioManager();
-    currentSceneIndex = static_cast<uint8_t>(0);
+    currentSceneIndex = 0;
 
     return m_audioManager;
 }
@@ -61,4 +61,10 @@ void AudioManager::playMusic(uint8_t sceneIndex, float volume, bool shouldLoop)
     nextMusic.play();
 
     currentSceneIndex = sceneIndex;
+}
+
+sf::Time AudioManager::getCurrentMusicDuration()
+{
+    sf::Music& currentMusic = *m_sceneMusic[currentSceneIndex];
+    return currentMusic.getDuration();
 }
