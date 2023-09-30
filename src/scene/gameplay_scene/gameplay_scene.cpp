@@ -25,7 +25,7 @@ GameplayScene::GameplayScene(GameEngine& engine) : Scene(engine)
     assert(isFileLoaded);
     backgroundSprite = sf::Sprite(textureSprite);
 
-    m_audioManager.playMusic(static_cast<uint8_t>(Scene::Type::GAMEPLAY_SCENE), 30.0f);
+    m_audioManager->playMusic(static_cast<uint8_t>(Scene::Type::GAMEPLAY_SCENE), 30.0f, false);
 }
 
 void GameplayScene::update()
@@ -62,38 +62,38 @@ void GameplayScene::performAction(Action& action)
     std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
     for (std::shared_ptr<Entity>& player : players)
     {
-        std::shared_ptr<CAction> userActionComponent = std::static_pointer_cast<CAction>(
+        std::shared_ptr<CAction> actionComponent = std::static_pointer_cast<CAction>(
                 player->getComponentByType(Component::Type::USER_INPUT));
         if (actionType == Action::Type::MOVE_LEFT)
         {
-            userActionComponent->isMovingLeft = action.getMode() == Action::Mode::PRESS;
+            actionComponent->isMovingLeft = action.getMode() == Action::Mode::PRESS;
         }
         if (actionType == Action::Type::MOVE_RIGHT)
         {
-            userActionComponent->isMovingRight = action.getMode() == Action::Mode::PRESS;
+            actionComponent->isMovingRight = action.getMode() == Action::Mode::PRESS;
         }
         if (actionType == Action::Type::MOVE_UP)
         {
-            userActionComponent->isMovingUp = action.getMode() == Action::Mode::PRESS;
+            actionComponent->isMovingUp = action.getMode() == Action::Mode::PRESS;
         }
         if (actionType == Action::Type::MOVE_DOWN)
         {
-            userActionComponent->isMovingDown = action.getMode() == Action::Mode::PRESS;
+            actionComponent->isMovingDown = action.getMode() == Action::Mode::PRESS;
         }
         if (actionType == Action::Type::SHOOT)
         {
-            userActionComponent->projectileDestination = gameEngine.window.mapPixelToCoords(
+            m_audioManager->playSound(actionType, 5.0f);
+            actionComponent->projectileDestination = gameEngine.window.mapPixelToCoords(
                     sf::Mouse::getPosition(gameEngine.window));
-            userActionComponent->isShooting = action.getMode() == Action::Mode::PRESS;
-            m_audioManager.playSound(actionType, 5.0f);
+            actionComponent->isShooting = action.getMode() == Action::Mode::PRESS;
         }
         if (actionType == Action::Type::SPECIAL_ATTACK)
         {
             if (gameEngine.gameProperties.specialAttackCoolDownSeconds <= gameEngine.gameProperties.worldClock.getElapsedTime().asSeconds())
             {
-                userActionComponent->projectileDestination = gameEngine.window
+                actionComponent->projectileDestination = gameEngine.window
                         .mapPixelToCoords(sf::Mouse::getPosition(gameEngine.window));
-                userActionComponent->isPerformingSpecialAttack = action.getMode() == Action::Mode::PRESS;
+                actionComponent->isPerformingSpecialAttack = action.getMode() == Action::Mode::PRESS;
             }
         }
     }

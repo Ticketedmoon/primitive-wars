@@ -45,22 +45,22 @@ void EntitySpawnSystem::execute()
     }
 
     std::shared_ptr<Entity>& player = m_entityManager.getEntityByType(Entity::Type::PLAYER);
-    std::shared_ptr<CAction> userActionComponent
+    std::shared_ptr<CAction> actionComponent
         = std::static_pointer_cast<CAction>(player->getComponentByType(Component::Type::USER_INPUT));
-    if (userActionComponent->isShooting)
+    if (actionComponent->isShooting)
     {
         std::shared_ptr<CTransform> transformComponentForEntity = std::static_pointer_cast<CTransform> (player->getComponentByType(Component::Type::TRANSFORM));
-        float h = userActionComponent->projectileDestination.y - transformComponentForEntity->m_position.y;
-        float a = userActionComponent->projectileDestination.x - transformComponentForEntity->m_position.x;
+        float h = actionComponent->projectileDestination.y - transformComponentForEntity->m_position.y;
+        float a = actionComponent->projectileDestination.x - transformComponentForEntity->m_position.x;
         double shotAngle = atan2(h, a);
         spawnBullet(transformComponentForEntity->m_position, shotAngle);
-        userActionComponent->isShooting = false;
+        actionComponent->isShooting = false;
     }
-    if (userActionComponent->isPerformingSpecialAttack)
+    if (actionComponent->isPerformingSpecialAttack)
     {
         spawnEntityAnimation(player, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(7.5f, 7.5f)));
         m_gameProperties.specialAttackCoolDownSeconds = (m_worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
-        userActionComponent->isPerformingSpecialAttack = false;
+        actionComponent->isPerformingSpecialAttack = false;
     }
 }
 

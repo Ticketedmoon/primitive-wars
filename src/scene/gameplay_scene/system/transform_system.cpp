@@ -40,24 +40,24 @@ bool TransformSystem::shouldApply(GameProperties gameProperties)
 void TransformSystem::updateEntityTransformByUserInput(const std::shared_ptr<Entity>& e,
         std::shared_ptr<CTransform>& transformComponent, const std::shared_ptr<CCollision>& collisionComponent)
 {
-    std::shared_ptr<CAction> userActionComponent = std::static_pointer_cast<CAction>(e->getComponentByType(
+    std::shared_ptr<CAction> actionComponent = std::static_pointer_cast<CAction>(e->getComponentByType(
             Component::USER_INPUT));
 
     if (!collisionComponent->isCollidingLeft)
     {
-        transformComponent->m_position.x -= userActionComponent->isMovingLeft ? transformComponent->m_speed.x : 0;
+        transformComponent->m_position.x -= actionComponent->isMovingLeft ? transformComponent->m_speed.x : 0;
     }
     if (!collisionComponent->isCollidingRight)
     {
-        transformComponent->m_position.x += userActionComponent->isMovingRight ? transformComponent->m_speed.x : 0;
+        transformComponent->m_position.x += actionComponent->isMovingRight ? transformComponent->m_speed.x : 0;
     }
     if (!collisionComponent->isCollidingUp)
     {
-        transformComponent->m_position.y -= userActionComponent->isMovingUp ? transformComponent->m_speed.y : 0;
+        transformComponent->m_position.y -= actionComponent->isMovingUp ? transformComponent->m_speed.y : 0;
     }
     if (!collisionComponent->isCollidingDown)
     {
-        transformComponent->m_position.y += userActionComponent->isMovingDown ? transformComponent->m_speed.y : 0;
+        transformComponent->m_position.y += actionComponent->isMovingDown ? transformComponent->m_speed.y : 0;
     }
 }
 

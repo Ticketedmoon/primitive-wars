@@ -7,30 +7,33 @@
 
 #include <cassert>
 
+#include "scene.h"
 #include "action.h"
 
-// TODO make me a singleton
 class AudioManager {
     public:
+        AudioManager(AudioManager& audioManager) = delete;
+        void operator=(const AudioManager&) = delete;
+
+        static AudioManager* getInstance();
+        void playSound(Action::Type actionType, float volume);
+        void playMusic(uint8_t sceneIndex, float volume, bool shouldLoop);
+
+    private:
         AudioManager();
         ~AudioManager();
-
-        void playSound(Action::Type actionType, float volume);
-        void playMusic(uint8_t sceneIndex, float volume);
 
     private:
         static const inline std::string SHOOT_SFX_PATH = "resources/assets/sound/sfx/laser_shoot.wav";
         static const inline std::string MENU_THEME_PATH = "resources/assets/sound/music/menu_theme.wav";
         static const inline std::string LEVEL_ONE_PATH = "resources/assets/sound/music/level_1.wav";
 
-        sf::SoundBuffer m_shootLaserSoundBuffer;
+        static inline AudioManager* m_audioManager;
 
-        std::unordered_map<Action::Type, sf::Sound> m_soundMap;
-        std::vector<sf::Music> m_sceneMusic;
-
-        // FIXME temporary
-        sf::Music menuTheme;
-        sf::Music levelOneTheme;
+        static inline sf::SoundBuffer soundBuffer;
+        static inline std::unordered_map<Action::Type, sf::Sound> m_soundMap;
+        static inline std::vector<sf::Music*> m_sceneMusic;
+        static inline uint8_t currentSceneIndex;
 };
 
 

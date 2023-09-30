@@ -32,7 +32,7 @@ class GameplayScene : public Scene
 
         static inline SystemManager m_systemManager;
         static inline EntityManager m_entityManager;
-        static inline AudioManager m_audioManager;
+        static inline AudioManager* m_audioManager = AudioManager::getInstance();
 
         static inline sf::Texture textureSprite;
         static inline sf::Sprite backgroundSprite;
