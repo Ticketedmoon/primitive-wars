@@ -38,10 +38,10 @@ class AudioManager {
         static const inline std::string SPECIAL_ATTACK_SFX_PATH = "resources/assets/sound/sfx/laser_special_attack.wav";
         static const inline std::string GAME_OVER_SFX_PATH = "resources/assets/sound/sfx/game_over.wav";
 
-        static const inline std::string MENU_THEME_PATH = "resources/assets/sound/music/menu_theme.wav";
-        static const inline std::string LEVEL_ONE_PATH = "resources/assets/sound/music/level_1.wav";
-        static const inline std::string LEVEL_TWO_PATH = "resources/assets/sound/music/level_2.wav";
-        static const inline std::string LEVEL_THREE_PATH = "resources/assets/sound/music/level_3.wav";
+        static const inline std::string MENU_THEME_PATH = "resources/assets/sound/music/menu_theme.ogg";
+        static const inline std::string LEVEL_ONE_PATH = "resources/assets/sound/music/level_1.ogg";
+        static const inline std::string LEVEL_TWO_PATH = "resources/assets/sound/music/level_2.ogg";
+        static const inline std::string LEVEL_THREE_PATH = "resources/assets/sound/music/level_3.ogg";
 
         static inline AudioManager* m_audioManager;
 
