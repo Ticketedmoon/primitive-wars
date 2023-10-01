@@ -18,7 +18,7 @@
 class GameplayScene : public Scene
 {
     public:
-        explicit GameplayScene(GameEngine& gameEngine);
+        explicit GameplayScene(GameEngine& gameEngine, GameProperties& gameProperties);
 
         void update() override;
         void render() override;
@@ -28,9 +28,11 @@ class GameplayScene : public Scene
         void registerSystems(GameEngine& engine);
 
     private:
-        const std::string BACKGROUND_IMAGE_PATH = "resources/assets/texture/board.png";
+        const std::string LEVEL_ONE_BACKGROUND_IMAGE_PATH = "resources/assets/texture/level_easy.png";
+        const std::string LEVEL_TWO_BACKGROUND_IMAGE_PATH = "resources/assets/texture/level_medium.png";
+        const std::string LEVEL_THREE_BACKGROUND_IMAGE_PATH = "resources/assets/texture/level_hard.png";
         sf::Clock levelClock;
-        GameProperties gameProperties;
+        GameProperties m_gameProperties;
 
         SystemManager m_systemManager;
         EntityManager m_entityManager;

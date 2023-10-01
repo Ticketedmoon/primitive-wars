@@ -19,8 +19,10 @@ class Scene
         {
             MENU_SCENE = 0,
             LEVEL_SELECT_SCENE = 1,
-            GAMEPLAY_SCENE = 2,
-            GAME_OVER_SCENE = 3
+            LEVEL_ONE_GAMEPLAY_SCENE = 2,
+            LEVEL_TWO_GAMEPLAY_SCENE = 3,
+            LEVEL_THREE_GAMEPLAY_SCENE = 4,
+            GAME_OVER_SCENE = 5
         };
         enum CursorButton
         {

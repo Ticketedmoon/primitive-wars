@@ -63,7 +63,6 @@ class EntitySpawnSystem : public System
 
     private:
         static constexpr float PI_FULL_CIRCLE = std::numbers::pi_v<float> * 2;
-        static constexpr float ENEMY_SPAWN_RATE_SECONDS = 1.0f;
         static const uint8_t SPECIAL_ATTACK_COOLDOWN_OFFSET = 3;
         static constexpr uint8_t ENEMY_SCORE_MULTIPLIER = 100;
         static constexpr uint16_t ENEMY_SPAWN_OFFSET = 512;
@@ -72,7 +71,7 @@ class EntitySpawnSystem : public System
         sf::Clock& m_worldClock;
         GameProperties& m_gameProperties;
 
-        float enemyRespawnTimeSeconds{m_worldClock.getElapsedTime().asSeconds() + ENEMY_SPAWN_RATE_SECONDS};
+        float enemyRespawnTimeSeconds{m_worldClock.getElapsedTime().asSeconds() + m_gameProperties.enemySpawnRateSeconds};
 };
 
 

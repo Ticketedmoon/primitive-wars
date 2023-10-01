@@ -13,13 +13,13 @@ void EntitySpawnSystem::execute()
 
     if (m_gameProperties.hasPaused)
     {
-        enemyRespawnTimeSeconds = (worldTimeSeconds + ENEMY_SPAWN_RATE_SECONDS);
+        enemyRespawnTimeSeconds = (worldTimeSeconds + m_gameProperties.enemySpawnRateSeconds);
         return;
     }
 
     if (isPlayerDead)
     {
-        enemyRespawnTimeSeconds = (worldTimeSeconds + ENEMY_SPAWN_RATE_SECONDS);
+        enemyRespawnTimeSeconds = (worldTimeSeconds + m_gameProperties.enemySpawnRateSeconds);
         if (worldTimeSeconds > m_gameProperties.playerRespawnTimeSeconds)
         {
             spawnPlayer();
@@ -30,7 +30,7 @@ void EntitySpawnSystem::execute()
     if (worldTimeSeconds > enemyRespawnTimeSeconds)
     {
         spawnEnemy();
-        enemyRespawnTimeSeconds = (worldTimeSeconds + ENEMY_SPAWN_RATE_SECONDS);
+        enemyRespawnTimeSeconds = (worldTimeSeconds + m_gameProperties.enemySpawnRateSeconds);
     }
 
     std::vector<std::shared_ptr<Entity>>& enemies = m_entityManager.getEntitiesByType(Entity::Type::ENEMY);
@@ -101,7 +101,8 @@ void EntitySpawnSystem::spawnEnemy()
     sf::CircleShape shape = createShape({static_cast<float>(radius), totalVertices, position, fillColor, sf::Color::White, 3.0f});
 
     enemy->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(shape.getPosition(),
-            sf::Vector2f(std::experimental::randint(1, 3), std::experimental::randint(1, 3)), sf::Vector2f(1, 1));
+            sf::Vector2f(std::experimental::randint(1, 3), std::experimental::randint(1, 3)),
+            sf::Vector2f(m_gameProperties.enemySpeed, m_gameProperties.enemySpeed));
     enemy->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
     enemy->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
     enemy->m_components[Component::Type::SCORE] = std::make_shared<CScore>(shape.getPointCount() * ENEMY_SCORE_MULTIPLIER);

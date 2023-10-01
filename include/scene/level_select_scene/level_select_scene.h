@@ -27,7 +27,11 @@ class LevelSelectScene : public Scene
     private:
         void handleMouseHover();
         void handleMouseClick();
+        void handleButtonSelect();
         void onHover(sf::Text& text, sf::Color color, sf::Cursor::Type cursorTypeOnHover);
+
+        void createTextElements(const LevelClearStatus& updatedLevelClearStatus);
+        void changeToLevelWithProperties(Difficulty difficulty, float enemySpawnRateSeconds, float enemySpeed);
 
         std::pair<sf::Color, sf::Text> createTextElementPair(const std::string& value, uint16_t characterSize,
                 sf::Color fillColor, sf::Color outlineColor, float outlineThickness, sf::Vector2f position);
@@ -40,6 +44,7 @@ class LevelSelectScene : public Scene
         static inline const sf::Color& LEVEL_TWO_TEXT_COLOR = sf::Color::Blue;
         static inline const sf::Color& LEVEL_THREE_TEXT_COLOR = sf::Color::Red;
         static inline const sf::Color& BUTTON_HIGHLIGHT_COLOR = sf::Color{255, 255, 255};
+        static inline const uint8_t BUTTON_FONT_SIZE = 64;
 
         static inline LevelClearStatus levelClearStatus;
 
@@ -49,7 +54,6 @@ class LevelSelectScene : public Scene
         std::pair<sf::Color, sf::Text> levelTwoTextButton;
         std::pair<sf::Color, sf::Text> levelThreeTextButton;
         sf::Cursor cursor;
-        void createTextElements(const LevelClearStatus& updatedLevelClearStatus);
 };
 
 #endif //PRIMITIVE_WARS_LEVEL_SELECT_SCENE_H

@@ -81,24 +81,7 @@ void LevelSelectScene::performAction(Action& action)
             {
                 return;
             }
-
-            if (currentSelectItem == 0)
-            {
-                const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine);
-                gameEngine.changeScene(Scene::Type::GAMEPLAY_SCENE, nextScene);
-            }
-            else if (currentSelectItem == 1)
-            {
-                const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine);
-                gameEngine.changeScene(Scene::Type::GAMEPLAY_SCENE, nextScene);
-                return;
-            }
-            else if (currentSelectItem == 2)
-            {
-                const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine);
-                gameEngine.changeScene(Scene::Type::GAMEPLAY_SCENE, nextScene);
-                return;
-            }
+            handleButtonSelect();
         }
         case Action::Type::CURSOR_SELECT:
         {
@@ -106,14 +89,27 @@ void LevelSelectScene::performAction(Action& action)
             {
                 return;
             }
-            if (action.getMode() == Action::Mode::PRESS)
-            {
-                handleMouseClick();
-            }
+            handleMouseClick();
             break;
         }
         default:
             break;
+    }
+}
+
+void LevelSelectScene::handleButtonSelect()
+{
+    if (currentSelectItem == 0)
+    {
+        changeToLevelWithProperties(Difficulty::EASY, 1.0f, 1.0f);
+    }
+    else if (currentSelectItem == 1)
+    {
+        changeToLevelWithProperties(Difficulty::MEDIUM, 0.5f, 1.25f);
+    }
+    else if (currentSelectItem == 2)
+    {
+        changeToLevelWithProperties(Difficulty::HARD, 0.25f, 1.5f);
     }
 }
 
@@ -124,26 +120,27 @@ void LevelSelectScene::handleMouseClick()
 
     if (levelOneTextButton.second.getGlobalBounds().contains(mousePosF))
     {
-        const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine);
-        gameEngine.changeScene(Scene::Type::GAMEPLAY_SCENE, nextScene);
+        currentSelectItem = 0;
+        handleButtonSelect();
         return;
     }
 
     if (levelTwoTextButton.second.getGlobalBounds().contains(mousePosF))
     {
-        const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine);
-        gameEngine.changeScene(Scene::Type::GAMEPLAY_SCENE, nextScene);
+        currentSelectItem = 1;
+        handleButtonSelect();
         return;
     }
 
     if (levelThreeTextButton.second.getGlobalBounds().contains(mousePosF))
     {
-        const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine);
-        gameEngine.changeScene(Scene::Type::GAMEPLAY_SCENE, nextScene);
+        currentSelectItem = 2;
+        handleButtonSelect();
         return;
     }
 
 }
+
 void LevelSelectScene::handleMouseHover()
 {
     sf::Vector2i mousePos = sf::Mouse::getPosition(gameEngine.window);
@@ -187,6 +184,21 @@ void LevelSelectScene::onHover(sf::Text& text, sf::Color color, sf::Cursor::Type
     text.setFillColor(color);
 }
 
+void LevelSelectScene::changeToLevelWithProperties(Difficulty difficulty, float enemySpawnRateSeconds, float enemySpeed)
+{
+    GameProperties gameProperties;
+    gameProperties.difficulty = difficulty;
+    gameProperties.enemySpawnRateSeconds = enemySpawnRateSeconds;
+    gameProperties.enemySpeed = enemySpeed;
+    const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine, gameProperties);
+    const Scene::Type sceneType = difficulty == Difficulty::EASY
+            ? Scene::Type::LEVEL_ONE_GAMEPLAY_SCENE
+            : difficulty == Difficulty::MEDIUM
+                ? Scene::Type::LEVEL_TWO_GAMEPLAY_SCENE
+                : Scene::Type::LEVEL_THREE_GAMEPLAY_SCENE;
+    gameEngine.changeScene(sceneType, nextScene);
+}
+
 void LevelSelectScene::createTextElements(const LevelSelectScene::LevelClearStatus& updatedLevelClearStatus)
 {
     levelClearStatus.levelOneCleared = (updatedLevelClearStatus.levelOneCleared || levelClearStatus.levelOneCleared);
@@ -197,12 +209,12 @@ void LevelSelectScene::createTextElements(const LevelSelectScene::LevelClearStat
     std::string levelTwoTextValue = levelClearStatus.levelTwoCleared ? "Level 2 [CLEAR]" : "Level 2 [X]";
     std::string levelThreeTextValue = levelClearStatus.levelThreeCleared ? "Level 3 [CLEAR]" : "Level 3 [X]";
 
-    levelOneTextButton = createTextElementPair(levelOneTextValue, 32, LEVEL_ONE_TEXT_COLOR, sf::Color::Black, 3.0f,
+    levelOneTextButton = createTextElementPair(levelOneTextValue, BUTTON_FONT_SIZE, LEVEL_ONE_TEXT_COLOR, sf::Color::Black, 3.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 250));
-    levelTwoTextButton = createTextElementPair(levelTwoTextValue, 32, LEVEL_TWO_TEXT_COLOR, sf::Color::Black, 2.0f,
-            sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 150));
-    levelThreeTextButton = createTextElementPair(levelThreeTextValue, 32, LEVEL_THREE_TEXT_COLOR, sf::Color::Black, 2.0f,
+    levelTwoTextButton = createTextElementPair(levelTwoTextValue, BUTTON_FONT_SIZE, LEVEL_TWO_TEXT_COLOR, sf::Color::Black, 2.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 50));
+    levelThreeTextButton = createTextElementPair(levelThreeTextValue, BUTTON_FONT_SIZE, LEVEL_THREE_TEXT_COLOR, sf::Color::Black, 2.0f,
+            sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150));
 }
 
 /**

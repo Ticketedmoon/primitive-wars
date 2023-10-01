@@ -1,17 +1,34 @@
 #include "scene/gameplay_scene/gameplay_scene.h"
 
-GameplayScene::GameplayScene(GameEngine& engine) : Scene(engine)
+GameplayScene::GameplayScene(GameEngine& engine, GameProperties& gameProperties) : Scene(engine), m_gameProperties(gameProperties)
 {
-    bool isFileLoaded = textureSprite.loadFromFile(BACKGROUND_IMAGE_PATH);
+    const std::string backgroundImagePath = m_gameProperties.difficulty == Difficulty::EASY
+            ? LEVEL_ONE_BACKGROUND_IMAGE_PATH
+            : m_gameProperties.difficulty == Difficulty::MEDIUM ? LEVEL_TWO_BACKGROUND_IMAGE_PATH : LEVEL_THREE_BACKGROUND_IMAGE_PATH;
+
+    bool isFileLoaded = textureSprite.loadFromFile(backgroundImagePath);
     assert(isFileLoaded);
     backgroundSprite = sf::Sprite(textureSprite);
 
-    m_audioManager->playMusic(static_cast<uint8_t>(Scene::Type::GAMEPLAY_SCENE), 30.0f, false);
+    // FIXME hacky
+    const Scene::Type sceneType = m_gameProperties.difficulty == Difficulty::EASY
+            ? Scene::Type::LEVEL_ONE_GAMEPLAY_SCENE
+            : m_gameProperties.difficulty == Difficulty::MEDIUM
+                    ? Scene::Type::LEVEL_TWO_GAMEPLAY_SCENE
+                    : Scene::Type::LEVEL_THREE_GAMEPLAY_SCENE;
+
+    m_audioManager->playMusic(static_cast<uint8_t>(sceneType), 30.0f, false);
 
     float timeRemainingBeforeLevelComplete = levelClock.getElapsedTime().asSeconds() +
             AudioManager::getInstance()->getCurrentMusicDuration().asSeconds();
-    uint8_t TOTAL_PLAYER_LIVES = 3;
-    gameProperties = {false, TOTAL_PLAYER_LIVES, levelClock, 0, 0, timeRemainingBeforeLevelComplete};
+
+    gameProperties.worldClock = levelClock;
+    gameProperties.hasPaused = false;
+    gameProperties.totalLives = 3;
+    gameProperties.playerRespawnTimeSeconds = 0;
+    gameProperties.specialAttackCoolDownSeconds = 0;
+    gameProperties.timeRemainingBeforeVictory = timeRemainingBeforeLevelComplete;
+    m_gameProperties = gameProperties;
 
     // mouse
     registerActionType(CursorButton::CURSOR_LEFT, Action::Type::SHOOT);
@@ -35,18 +52,20 @@ GameplayScene::GameplayScene(GameEngine& engine) : Scene(engine)
 
 void GameplayScene::update()
 {
-    if (levelClock.getElapsedTime().asSeconds() > gameProperties.timeRemainingBeforeVictory)
+    if (levelClock.getElapsedTime().asSeconds() > m_gameProperties.timeRemainingBeforeVictory)
     {
         // Return to level screen [DONE]
         // Show snackbar or something that you cleared the level [UNFINISHED]
         // Show tick icon or similar next to level indicating victory [DONE]
         m_audioManager->stopActiveMusic();
         const std::shared_ptr<LevelSelectScene>& nextScene = std::make_shared<LevelSelectScene>(gameEngine,
-                LevelSelectScene::LevelClearStatus(true, false, false));
+                LevelSelectScene::LevelClearStatus(m_gameProperties.difficulty == Difficulty::EASY,
+                        m_gameProperties.difficulty == Difficulty::MEDIUM,
+                        m_gameProperties.difficulty == Difficulty::HARD));
         gameEngine.changeScene(Scene::Type::LEVEL_SELECT_SCENE, nextScene);
         return;
     }
-    if (gameProperties.totalLives == 0)
+    if (m_gameProperties.totalLives == 0)
     {
         // FIXME Not very clean here, improve
         m_audioManager->stopActiveMusic();
@@ -56,7 +75,7 @@ void GameplayScene::update()
     }
 
     m_entityManager.update();
-    m_systemManager.update(gameProperties);
+    m_systemManager.update(m_gameProperties);
 }
 
 void GameplayScene::render()
@@ -64,13 +83,13 @@ void GameplayScene::render()
     gameEngine.window.clear();
     gameEngine.window.draw(backgroundSprite);
 
-    if (gameProperties.hasPaused)
+    if (m_gameProperties.hasPaused)
     {
-        gameProperties.playerRespawnTimeSeconds += gameEngine.deltaClock.getElapsedTime().asSeconds();
-        gameProperties.specialAttackCoolDownSeconds += gameEngine.deltaClock.getElapsedTime().asSeconds();
+        m_gameProperties.playerRespawnTimeSeconds += gameEngine.deltaClock.getElapsedTime().asSeconds();
+        m_gameProperties.specialAttackCoolDownSeconds += gameEngine.deltaClock.getElapsedTime().asSeconds();
     }
 
-    m_systemManager.render(gameProperties);
+    m_systemManager.render(m_gameProperties);
 
     gameEngine.window.display();
 }
@@ -80,7 +99,7 @@ void GameplayScene::performAction(Action& action)
     Action::Type actionType = action.getType();
     if (actionType == Action::Type::PAUSE && action.getMode() == Action::Mode::PRESS)
     {
-        gameProperties.hasPaused = !gameProperties.hasPaused;
+        m_gameProperties.hasPaused = !m_gameProperties.hasPaused;
     }
 
     std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
@@ -116,7 +135,7 @@ void GameplayScene::performAction(Action& action)
         }
         if (actionType == Action::Type::SPECIAL_ATTACK)
         {
-            if (gameProperties.specialAttackCoolDownSeconds <= gameProperties.worldClock.getElapsedTime().asSeconds())
+            if (m_gameProperties.specialAttackCoolDownSeconds <= m_gameProperties.worldClock.getElapsedTime().asSeconds())
             {
                 m_audioManager->playSound(AudioManager::AudioType::SPECIAL_ATTACK, 5.0f);
                 actionComponent->projectileDestination = gameEngine.window
@@ -132,7 +151,7 @@ void GameplayScene::registerSystems(GameEngine& engine)
     m_systemManager.registerSystem(std::make_shared<CollisionSystem>(m_entityManager),
             SystemManager::SystemType::UPDATE);
     m_systemManager.registerSystem(
-            std::make_shared<EntitySpawnSystem>(m_entityManager, levelClock, gameProperties),
+            std::make_shared<EntitySpawnSystem>(m_entityManager, levelClock, m_gameProperties),
             SystemManager::SystemType::UPDATE);
     m_systemManager.registerSystem(std::make_shared<LifespanSystem>(m_entityManager),
             SystemManager::SystemType::UPDATE);
@@ -142,6 +161,6 @@ void GameplayScene::registerSystems(GameEngine& engine)
     m_systemManager.registerSystem(std::make_shared<RenderSystem>(engine.window, m_entityManager),
             SystemManager::SystemType::RENDER);
     m_systemManager.registerSystem(
-            std::make_shared<GuiSystem>(engine.window, m_entityManager, levelClock, gameProperties),
+            std::make_shared<GuiSystem>(engine.window, m_entityManager, levelClock, m_gameProperties),
             SystemManager::SystemType::RENDER);
 }
