@@ -55,7 +55,7 @@ void GameplayScene::update()
     if (levelClock.getElapsedTime().asSeconds() > m_gameProperties.timeRemainingBeforeVictory)
     {
         // Return to level screen [DONE]
-        // Show snackbar or something that you cleared the level [UNFINISHED]
+        // TODO Show snackbar or something that you cleared the level [UNFINISHED]
         // Show tick icon or similar next to level indicating victory [DONE]
         m_audioManager->stopActiveMusic();
         const std::shared_ptr<LevelSelectScene>& nextScene = std::make_shared<LevelSelectScene>(gameEngine,
