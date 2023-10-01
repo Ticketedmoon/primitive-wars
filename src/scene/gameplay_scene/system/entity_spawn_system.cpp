@@ -49,7 +49,8 @@ void EntitySpawnSystem::execute()
         = std::static_pointer_cast<CAction>(player->getComponentByType(Component::Type::USER_INPUT));
     if (actionComponent->isShooting)
     {
-        std::shared_ptr<CTransform> transformComponentForEntity = std::static_pointer_cast<CTransform> (player->getComponentByType(Component::Type::TRANSFORM));
+        std::shared_ptr<CTransform> transformComponentForEntity = std::static_pointer_cast<CTransform>
+                (player->getComponentByType(Component::Type::TRANSFORM));
         float h = actionComponent->projectileDestination.y - transformComponentForEntity->m_position.y;
         float a = actionComponent->projectileDestination.x - transformComponentForEntity->m_position.x;
         double shotAngle = atan2(h, a);

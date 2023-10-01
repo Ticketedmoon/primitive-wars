@@ -23,12 +23,6 @@ void GameEngine::startGameLoop()
     }
 }
 
-void GameEngine::changeScene(Scene::Type sceneType, const std::shared_ptr<Scene>& scene)
-{
-    currentScene = sceneType;
-    gameScenes[currentScene] = scene;
-}
-
 void GameEngine::update()
 {
     gameScenes[currentScene]->update();
@@ -37,6 +31,12 @@ void GameEngine::update()
 void GameEngine::render()
 {
     gameScenes[currentScene]->render();
+}
+
+void GameEngine::changeScene(Scene::Type sceneType, const std::shared_ptr<Scene>& scene)
+{
+    currentScene = sceneType;
+    gameScenes[currentScene] = scene;
 }
 
 /* Get the keyboard input

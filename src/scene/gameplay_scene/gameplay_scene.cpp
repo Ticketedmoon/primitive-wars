@@ -125,22 +125,28 @@ void GameplayScene::performAction(Action& action)
         }
         if (actionType == Action::Type::SHOOT)
         {
-            if (action.getMode() == Action::Mode::PRESS)
+            if (action.getMode() == Action::Mode::RELEASE)
             {
-                m_audioManager->playSound(AudioManager::AudioType::SHOOT, 5.0f);
+                return;
             }
+            m_audioManager->playSound(AudioManager::AudioType::SHOOT, 5.0f);
             actionComponent->projectileDestination = gameEngine.window.mapPixelToCoords(
                     sf::Mouse::getPosition(gameEngine.window));
-            actionComponent->isShooting = action.getMode() == Action::Mode::PRESS;
+            actionComponent->isShooting = true;
         }
         if (actionType == Action::Type::SPECIAL_ATTACK)
         {
+            if (action.getMode() == Action::Mode::RELEASE)
+            {
+                return;
+            }
+
             if (m_gameProperties.specialAttackCoolDownSeconds <= m_gameProperties.worldClock.getElapsedTime().asSeconds())
             {
                 m_audioManager->playSound(AudioManager::AudioType::SPECIAL_ATTACK, 5.0f);
                 actionComponent->projectileDestination = gameEngine.window
                         .mapPixelToCoords(sf::Mouse::getPosition(gameEngine.window));
-                actionComponent->isPerformingSpecialAttack = action.getMode() == Action::Mode::PRESS;
+                actionComponent->isPerformingSpecialAttack = true;
             }
         }
     }
