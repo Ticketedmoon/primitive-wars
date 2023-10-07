@@ -49,7 +49,7 @@ A simple 2D game where you play as a rotating geometrical shape and must destroy
 ### Level 3 (Hard)
 ![Sat 07 Oct 2023 15:28:33 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/48cb0625-8a9c-4eed-8637-26d0daf42f07)
 
-### Gameover 
+### Game Over 
 ![Sat 07 Oct 2023 15:28:08 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/ee116873-2ca0-4aa6-8d69-8f623fab2489)
 
 ### Game Paused
