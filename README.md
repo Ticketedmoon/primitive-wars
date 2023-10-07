@@ -34,22 +34,26 @@ A simple 2D game where you play as a rotating geometrical shape and must destroy
 
 ### Dev Log
 
-##### fig 1.0 [Gameplay]:
-![Mon 25 Sep 2023 21:07:58 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/3bd55083-529e-4ff7-bd4c-6c2b75c1d529)
+### Main Menu
+![Sat 07 Oct 2023 15:26:58 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/0d99bbe1-455d-43ed-ae07-5499035f90e3)
 
----
+### Level Selection
+![Sat 07 Oct 2023 15:27:23 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/7b530eb9-e708-4119-8213-3687a7690984)
 
-##### fig 1.1 [Death/Respawn]:
-![Mon 25 Sep 2023 21:08:10 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/97f28e8a-7dcb-4153-ba04-90aa8b81226a)
+### Level 1 (Easy)
+![Sat 07 Oct 2023 15:27:41 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/dc8b9081-6293-4ddc-bc7c-c52abc31b628)
 
----
+### Level 2 (Medium)
+![Sat 07 Oct 2023 15:28:15 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/22c66836-1c7b-496b-a7a7-3721438703d9)
 
-##### fig 1.2 [Game Pause]:
-![Mon 25 Sep 2023 21:08:41 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/d92c723b-cd63-4f59-9e74-f382448fd4e1)
+### Level 3 (Hard)
+![Sat 07 Oct 2023 15:28:33 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/48cb0625-8a9c-4eed-8637-26d0daf42f07)
 
----
+### Gameover 
+![Sat 07 Oct 2023 15:28:08 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/ee116873-2ca0-4aa6-8d69-8f623fab2489)
 
-##### fig 1.3 [Menu]:
-![Fri 29 Sep 2023 13:37:40 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/b4c76a77-da82-49cc-892c-105cb9ce6654)
+### Game Paused
+![Sat 07 Oct 2023 15:29:04 IST](https://github.com/Ticketedmoon/primitive-wars/assets/21260839/ab499512-bc4a-4ff1-9e2d-966ca0d216c7)
+
 
 ---
