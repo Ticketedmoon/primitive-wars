@@ -53,7 +53,7 @@ void EntitySpawnSystem::execute()
                 (player->getComponentByType(Component::Type::TRANSFORM));
         float h = actionComponent->projectileDestination.y - transformComponentForEntity->m_position.y;
         float a = actionComponent->projectileDestination.x - transformComponentForEntity->m_position.x;
-        double shotAngle = atan2(h, a);
+        double shotAngle = std::atan2(h, a);
         spawnBullet(transformComponentForEntity->m_position, shotAngle);
         actionComponent->isShooting = false;
     }
