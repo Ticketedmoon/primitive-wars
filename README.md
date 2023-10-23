@@ -7,6 +7,9 @@ A simple 2D game where you play as a rotating geometrical shape and must destroy
 
 ### Controls
 
+**All Scenes**
+- Push `escape` to return to the previous scene, or if on the menu scene, exit the game.
+
 **Menu Scene**
 - Select menu item with `mouse-left`
 - Move up and down menu items with `arrow-up` or `arrow-down`
