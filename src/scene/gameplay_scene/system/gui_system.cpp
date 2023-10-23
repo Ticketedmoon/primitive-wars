@@ -1,12 +1,12 @@
 #include "scene/gameplay_scene/system/gui_system.h"
 
-GuiSystem::GuiSystem(sf::RenderWindow& renderWindow, EntityManager& entityManager, sf::Clock& worldClock, GameProperties& gameProperties)
-    : m_window(renderWindow), m_entityManager(entityManager), m_worldClock(worldClock), m_gameProperties(gameProperties)
+GuiSystem::GuiSystem(sf::RenderWindow& renderWindow, EntityManager& entityManager, GameProperties& gameProperties)
+    : m_window(renderWindow), m_entityManager(entityManager), m_gameProperties(gameProperties)
 {
     configureTextRendering();
 }
 
-void GuiSystem::execute()
+void GuiSystem::execute(GameProperties& gameProperties)
 {
     updateGuiData();
     drawGuiData();
@@ -22,7 +22,7 @@ void GuiSystem::drawGuiData()
     std::vector<std::shared_ptr<Entity>>& players = m_entityManager.getEntitiesByType(Entity::Type::PLAYER);
     bool isPlayerDead = players.empty();
 
-    if (m_gameProperties.hasPaused)
+    if (m_gameProperties.hasPaused())
     {
         drawText(m_pauseText, sf::Color::Green, 128, PAUSED_TEXT_SCREEN_POSITION);
         return;
@@ -41,7 +41,7 @@ void GuiSystem::drawGuiData()
 void GuiSystem::renderTextOnPlayerDeath()
 {
     uint8_t respawnTime =
-            (m_gameProperties.playerRespawnTimeSeconds - m_worldClock.getElapsedTime().asSeconds()) + 1;
+            (m_gameProperties.getPlayerRespawnTimeSeconds() - m_gameProperties.getLevelClock().getElapsedTime().asSeconds()) + 1;
     m_respawnText.setString("Respawn Time: " + std::to_string(respawnTime));
     drawText(m_respawnText, sf::Color::Yellow, 72, sf::Vector2f(WINDOW_WIDTH / 2 - 256, WINDOW_HEIGHT / 2 - 64));
 }
@@ -50,13 +50,14 @@ void GuiSystem::renderGameOverlayText(std::shared_ptr<Entity>& player)
 {
     std::shared_ptr<CScore> scoreComponent = std::static_pointer_cast<CScore> (player->getComponentByType(Component::Type::SCORE));
 
-    uint8_t coolDownSeconds = m_worldClock.getElapsedTime().asSeconds() > m_gameProperties.specialAttackCoolDownSeconds
+    uint8_t coolDownSeconds = m_gameProperties.getLevelClock().getElapsedTime().asSeconds() > m_gameProperties.getSpecialAttackCoolDownSeconds()
             ? 0.0f
-            : std::ceil(m_gameProperties.specialAttackCoolDownSeconds - m_worldClock.getElapsedTime().asSeconds());
+            : std::ceil(m_gameProperties.getSpecialAttackCoolDownSeconds() - m_gameProperties.getLevelClock().getElapsedTime().asSeconds());
 
+    float timeRemaining = m_gameProperties.getTimeRemainingBeforeVictory() - m_gameProperties.getLevelClock().getElapsedTime().asSeconds();
     const std::string text = "Score: " + std::to_string(scoreComponent->getScore()) + "\n"
-            + "Total Lives: " + std::to_string(m_gameProperties.totalLives) + "\n"
-            + "Time remaining: " + std::to_string(m_gameProperties.timeRemainingBeforeVictory - m_worldClock.getElapsedTime().asSeconds()) + "\n"
+            + "Total Lives: " + std::to_string(m_gameProperties.getTotalLives()) + "\n"
+            + "Time remaining: " + std::to_string(timeRemaining) + "\n"
             + "Special Attack Cooldown: " + std::to_string(coolDownSeconds);
     m_gameOverlayText.setString(text);
     drawText(m_gameOverlayText, sf::Color::White, 20, sf::Vector2f(24, 12));
@@ -64,7 +65,7 @@ void GuiSystem::renderGameOverlayText(std::shared_ptr<Entity>& player)
 
 bool GuiSystem::isPlayerWaitingOnRespawnTime() const
 {
-    return m_gameProperties.playerRespawnTimeSeconds > 0;
+    return m_gameProperties.getPlayerRespawnTimeSeconds() > 0;
 }
 
 void GuiSystem::updateGuiData()
@@ -81,8 +82,9 @@ void GuiSystem::updateGuiData()
     {
         if (e->getType() == Entity::Type::PLAYER)
         {
-            m_gameProperties.playerRespawnTimeSeconds = (m_worldClock.getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
-            m_gameProperties.totalLives--;
+            m_gameProperties.setPlayerRespawnTimeSeconds(
+                    m_gameProperties.getLevelClock().getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
+            m_gameProperties.setTotalLives(m_gameProperties.getTotalLives()-1);
         }
 
         if (e->getType() == Entity::Type::ENEMY)

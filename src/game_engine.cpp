@@ -3,7 +3,7 @@
 GameEngine::GameEngine()
 {
     createGameWindow();
-    gameScenes[currentScene] = std::make_shared<MenuScene>(*this);
+    gameScenes[currentScene] = std::make_shared<MenuScene>(*this, deltaClock);
 }
 
 GameEngine::~GameEngine()

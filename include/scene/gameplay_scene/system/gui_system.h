@@ -19,9 +19,8 @@
 class GuiSystem : public System
 {
     public:
-        explicit GuiSystem(sf::RenderWindow& renderWindow, EntityManager& entityManager, sf::Clock& worldClock,
-                GameProperties& gameProperties);
-        void execute() override;
+        explicit GuiSystem(sf::RenderWindow& renderWindow, EntityManager& entityManager, GameProperties& gameProperties);
+        void execute(GameProperties& gameProperties) override;
         bool shouldApply(GameProperties gameProperties) override;
 
     private:
@@ -42,7 +41,6 @@ class GuiSystem : public System
 
         sf::RenderWindow& m_window;
         EntityManager& m_entityManager;
-        sf::Clock& m_worldClock;
         GameProperties& m_gameProperties;
 
         static inline sf::Text m_gameOverlayText;

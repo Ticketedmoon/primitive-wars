@@ -5,7 +5,7 @@ RenderSystem::RenderSystem(sf::RenderWindow& window, EntityManager& entityManage
 {
 }
 
-void RenderSystem::execute()
+void RenderSystem::execute(GameProperties& gameProperties)
 {
     std::vector<std::shared_ptr<Entity>> entitiesToUpdate = m_entityManager
             .getEntitiesByComponentTypes({Component::Type::RENDER, Component::Type::TRANSFORM});

@@ -8,7 +8,7 @@ void SystemManager::update(GameProperties& properties)
     std::vector<std::shared_ptr<System>> systemsToUpdate = std::vector(view.begin(), view.end());
     for (std::shared_ptr<System>& system : systemsToUpdate)
     {
-        system->execute();
+        system->execute(properties);
     }
 }
 
@@ -20,7 +20,7 @@ void SystemManager::render(GameProperties& properties)
     std::vector<std::shared_ptr<System>> systemsToRender = std::vector(view.begin(), view.end());
     for (std::shared_ptr<System>& system : systemsToRender)
     {
-        system->execute();
+        system->execute(properties);
     }
 }
 

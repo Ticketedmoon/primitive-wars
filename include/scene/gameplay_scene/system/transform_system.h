@@ -18,15 +18,15 @@ class TransformSystem : public System
     public:
         explicit TransformSystem(EntityManager& entityManager);
 
-        void execute() override;
+        void execute(GameProperties& gameProperties) override;
         bool shouldApply(GameProperties gameProperties) override;
 
     private:
         static void updateEntityTransformByUserInput(const std::shared_ptr<Entity>& e,
                 std::shared_ptr<CTransform>& transformComponent,
-                const std::shared_ptr<CCollision>& collisionComponent);
+                const std::shared_ptr<CCollision>& collisionComponent, float dt);
         static void updateTransformOnWindowBorderCollision(std::shared_ptr<CTransform>& transformComponent,
-                const std::shared_ptr<CCollision>& collisionComponent) ;
+                const std::shared_ptr<CCollision>& collisionComponent);
 
     private:
         EntityManager& m_entityManager;

@@ -5,7 +5,7 @@ LifespanSystem::LifespanSystem(EntityManager& entityManager) : m_entityManager(e
 
 }
 
-void LifespanSystem::execute()
+void LifespanSystem::execute(GameProperties& gameProperties)
 {
     std::vector<std::shared_ptr<Entity>> entitiesToUpdate = m_entityManager
             .getEntitiesByComponentTypes({Component::Type::LIFESPAN, Component::Type::RENDER});
@@ -34,5 +34,5 @@ void LifespanSystem::execute()
 
 bool LifespanSystem::shouldApply(GameProperties gameProperties)
 {
-    return !gameProperties.hasPaused;
+    return !gameProperties.hasPaused();
 }

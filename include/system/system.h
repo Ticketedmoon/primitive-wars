@@ -9,7 +9,7 @@ class System
 {
     public:
         virtual ~System() = default;
-        virtual void execute() = 0;
+        virtual void execute(GameProperties& gameProperties) = 0;
         virtual bool shouldApply(GameProperties gameProperties) = 0;
 };
 

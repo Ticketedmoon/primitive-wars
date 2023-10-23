@@ -34,9 +34,9 @@ struct SpawnProperties
 class EntitySpawnSystem : public System
 {
     public:
-        explicit EntitySpawnSystem(EntityManager& entityManager, sf::Clock& worldClock, GameProperties& gameProperties);
+        explicit EntitySpawnSystem(EntityManager& entityManager, GameProperties& gameProperties);
 
-        void execute() override;
+        void execute(GameProperties& gameProperties) override;
         bool shouldApply(GameProperties gameProperties) override;
 
         // FIXME investigate moving these to be private
@@ -68,10 +68,10 @@ class EntitySpawnSystem : public System
         static constexpr uint16_t ENEMY_SPAWN_OFFSET = 512;
 
         EntityManager& m_entityManager;
-        sf::Clock& m_worldClock;
         GameProperties& m_gameProperties;
 
-        float enemyRespawnTimeSeconds{m_worldClock.getElapsedTime().asSeconds() + m_gameProperties.enemySpawnRateSeconds};
+        float enemyRespawnTimeSeconds{
+            m_gameProperties.getLevelClock().getElapsedTime().asSeconds() + m_gameProperties.getEnemySpawnRateSeconds()};
 };
 
 

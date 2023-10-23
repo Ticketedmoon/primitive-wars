@@ -1,6 +1,7 @@
 #include "scene/level_select_scene/level_select_scene.h"
 
-LevelSelectScene::LevelSelectScene(GameEngine& gameEngine, LevelClearStatus updatedLevelClearStatus) : Scene(gameEngine)
+LevelSelectScene::LevelSelectScene(GameEngine& gameEngine, sf::Clock& deltaClock,
+        LevelClearStatus updatedLevelClearStatus) : Scene(gameEngine), m_deltaClock(deltaClock)
 {
     registerActions();
     bool isFontLoaded = m_font.loadFromFile(FONT_PATH);
@@ -69,7 +70,7 @@ void LevelSelectScene::performAction(Action& action)
             {
                 return;
             }
-            const std::shared_ptr<MenuScene>& nextScene = std::make_shared<MenuScene>(gameEngine);
+            const std::shared_ptr<MenuScene>& nextScene = std::make_shared<MenuScene>(gameEngine, m_deltaClock);
             gameEngine.changeScene(Scene::Type::MENU_SCENE, nextScene);
             break;
         }
@@ -201,16 +202,17 @@ void LevelSelectScene::onHover(sf::Text& text, sf::Color color, sf::Cursor::Type
 
 void LevelSelectScene::changeToLevelWithProperties(Difficulty difficulty, float enemySpawnRateSeconds, float enemySpeed)
 {
-    GameProperties gameProperties;
-    gameProperties.difficulty = difficulty;
-    gameProperties.enemySpawnRateSeconds = enemySpawnRateSeconds;
-    gameProperties.enemySpeed = enemySpeed;
+    GameProperties gameProperties(m_deltaClock);
+    gameProperties.setLevelDifficulty(difficulty);
+    gameProperties.setEnemySpawnRateSeconds(enemySpawnRateSeconds);
+    gameProperties.setEnemySpeed(enemySpeed);
+
     const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine, gameProperties);
     const Scene::Type sceneType = difficulty == Difficulty::EASY
             ? Scene::Type::LEVEL_ONE_GAMEPLAY_SCENE
             : difficulty == Difficulty::MEDIUM
-                ? Scene::Type::LEVEL_TWO_GAMEPLAY_SCENE
-                : Scene::Type::LEVEL_THREE_GAMEPLAY_SCENE;
+                    ? Scene::Type::LEVEL_TWO_GAMEPLAY_SCENE
+                    : Scene::Type::LEVEL_THREE_GAMEPLAY_SCENE;
     gameEngine.changeScene(sceneType, nextScene);
 }
 
