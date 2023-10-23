@@ -17,7 +17,8 @@ class Action
                 SELECT = 6,
                 CURSOR_MOVE = 7,
                 CURSOR_SELECT = 8,
-                PAUSE = 9
+                PAUSE = 9,
+                EXIT_SCENE = 10
         };
         enum class Mode
         {

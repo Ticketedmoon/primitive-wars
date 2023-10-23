@@ -2,14 +2,7 @@
 
 LevelSelectScene::LevelSelectScene(GameEngine& gameEngine, LevelClearStatus updatedLevelClearStatus) : Scene(gameEngine)
 {
-    registerCursorActionType(sf::Event::EventType::MouseEntered, Action::Type::CURSOR_MOVE);
-    registerCursorActionType(sf::Event::EventType::MouseMoved, Action::Type::CURSOR_MOVE);
-
-    registerActionType(sf::Keyboard::Key::Up, Action::Type::MOVE_UP);
-    registerActionType(sf::Keyboard::Key::Down, Action::Type::MOVE_DOWN);
-    registerActionType(CursorButton::CURSOR_LEFT, Action::Type::CURSOR_SELECT);
-    registerActionType(sf::Keyboard::Key::Enter, Action::Type::SELECT);
-
+    registerActions();
     bool isFontLoaded = m_font.loadFromFile(FONT_PATH);
     assert(isFontLoaded);
 
@@ -54,10 +47,32 @@ void LevelSelectScene::render()
     gameEngine.window.display();
 }
 
+void LevelSelectScene::registerActions()
+{
+    registerCursorActionType(sf::Event::MouseEntered, Action::Type::CURSOR_MOVE);
+    registerCursorActionType(sf::Event::MouseMoved, Action::Type::CURSOR_MOVE);
+
+    registerActionType(sf::Keyboard::Up, Action::Type::MOVE_UP);
+    registerActionType(sf::Keyboard::Down, Action::Type::MOVE_DOWN);
+    registerActionType(CURSOR_LEFT, Action::Type::CURSOR_SELECT);
+    registerActionType(sf::Keyboard::Enter, Action::Type::SELECT);
+    registerActionType(sf::Keyboard::Escape, Action::Type::EXIT_SCENE);
+}
+
 void LevelSelectScene::performAction(Action& action)
 {
     switch (action.getType())
     {
+        case Action::Type::EXIT_SCENE:
+        {
+            if (action.getMode() == Action::Mode::RELEASE)
+            {
+                return;
+            }
+            const std::shared_ptr<MenuScene>& nextScene = std::make_shared<MenuScene>(gameEngine);
+            gameEngine.changeScene(Scene::Type::MENU_SCENE, nextScene);
+            break;
+        }
         case Action::Type::MOVE_DOWN:
             if (action.getMode() == Action::Mode::PRESS)
             {
@@ -199,7 +214,7 @@ void LevelSelectScene::changeToLevelWithProperties(Difficulty difficulty, float 
     gameEngine.changeScene(sceneType, nextScene);
 }
 
-void LevelSelectScene::createTextElements(const LevelSelectScene::LevelClearStatus& updatedLevelClearStatus)
+void LevelSelectScene::createTextElements(const LevelClearStatus& updatedLevelClearStatus)
 {
     levelClearStatus.levelOneCleared = (updatedLevelClearStatus.levelOneCleared || levelClearStatus.levelOneCleared);
     levelClearStatus.levelTwoCleared = (updatedLevelClearStatus.levelTwoCleared || levelClearStatus.levelTwoCleared);

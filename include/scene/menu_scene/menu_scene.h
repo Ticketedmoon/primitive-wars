@@ -26,6 +26,7 @@ class MenuScene : public Scene
 
         std::pair<sf::Color, sf::Text> createTextElementPair(const std::string& value, uint16_t characterSize,
                 sf::Color fillColor, sf::Color outlineColor, float outlineThickness, sf::Vector2f position);
+        void registerActions();
 
     private:
         static inline const std::string FONT_PATH = "resources/fonts/calibri.ttf";

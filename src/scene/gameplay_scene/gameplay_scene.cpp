@@ -30,23 +30,7 @@ GameplayScene::GameplayScene(GameEngine& engine, GameProperties& gameProperties)
     gameProperties.timeRemainingBeforeVictory = timeRemainingBeforeLevelComplete;
     m_gameProperties = gameProperties;
 
-    // mouse
-    registerActionType(CursorButton::CURSOR_LEFT, Action::Type::SHOOT);
-    registerActionType(CursorButton::CURSOR_RIGHT, Action::Type::SPECIAL_ATTACK);
-
-    // movement
-    registerActionType(sf::Keyboard::Key::Left, Action::Type::MOVE_LEFT);
-    registerActionType(sf::Keyboard::Key::Right, Action::Type::MOVE_RIGHT);
-    registerActionType(sf::Keyboard::Key::Up, Action::Type::MOVE_UP);
-    registerActionType(sf::Keyboard::Key::Down, Action::Type::MOVE_DOWN);
-    registerActionType(sf::Keyboard::Key::A, Action::Type::MOVE_LEFT);
-    registerActionType(sf::Keyboard::Key::D, Action::Type::MOVE_RIGHT);
-    registerActionType(sf::Keyboard::Key::W, Action::Type::MOVE_UP);
-    registerActionType(sf::Keyboard::Key::S, Action::Type::MOVE_DOWN);
-
-    // pause
-    registerActionType(sf::Keyboard::Key::P, Action::Type::PAUSE);
-
+    registerActions();
     registerSystems(engine);
 }
 
@@ -57,12 +41,11 @@ void GameplayScene::update()
         // Return to level screen [DONE]
         // TODO Show snackbar or something that you cleared the level [UNFINISHED]
         // Show tick icon or similar next to level indicating victory [DONE]
-        m_audioManager->stopActiveMusic();
-        const std::shared_ptr<LevelSelectScene>& nextScene = std::make_shared<LevelSelectScene>(gameEngine,
-                LevelSelectScene::LevelClearStatus(m_gameProperties.difficulty == Difficulty::EASY,
-                        m_gameProperties.difficulty == Difficulty::MEDIUM,
-                        m_gameProperties.difficulty == Difficulty::HARD));
-        gameEngine.changeScene(Scene::Type::LEVEL_SELECT_SCENE, nextScene);
+        const LevelClearStatus& levelClearStatus = LevelClearStatus(
+                m_gameProperties.difficulty == Difficulty::EASY,
+                m_gameProperties.difficulty == Difficulty::MEDIUM,
+                m_gameProperties.difficulty == Difficulty::HARD);
+        changeToLevelSelectScene(levelClearStatus);
         return;
     }
     if (m_gameProperties.totalLives == 0)
@@ -97,6 +80,17 @@ void GameplayScene::render()
 void GameplayScene::performAction(Action& action)
 {
     Action::Type actionType = action.getType();
+    if (action.getType() == Action::Type::EXIT_SCENE)
+    {
+        if (action.getMode() == Action::Mode::RELEASE)
+        {
+            return;
+        }
+
+        LevelClearStatus levelClearStatus{};
+        changeToLevelSelectScene(levelClearStatus);
+    }
+
     if (actionType == Action::Type::PAUSE && action.getMode() == Action::Mode::PRESS)
     {
         m_gameProperties.hasPaused = !m_gameProperties.hasPaused;
@@ -150,6 +144,33 @@ void GameplayScene::performAction(Action& action)
             }
         }
     }
+}
+void GameplayScene::changeToLevelSelectScene(LevelClearStatus levelClearStatus)
+{
+    m_audioManager->stopActiveMusic();
+    const std::shared_ptr<LevelSelectScene>& nextScene = std::make_shared<LevelSelectScene>(gameEngine, levelClearStatus);
+    gameEngine.changeScene(Type::LEVEL_SELECT_SCENE, nextScene);
+}
+
+void GameplayScene::registerActions()
+{
+    // mouse
+    registerActionType(CURSOR_LEFT, Action::Type::SHOOT);
+    registerActionType(CURSOR_RIGHT, Action::Type::SPECIAL_ATTACK);
+
+    // movement
+    registerActionType(sf::Keyboard::Left, Action::Type::MOVE_LEFT);
+    registerActionType(sf::Keyboard::Right, Action::Type::MOVE_RIGHT);
+    registerActionType(sf::Keyboard::Up, Action::Type::MOVE_UP);
+    registerActionType(sf::Keyboard::Down, Action::Type::MOVE_DOWN);
+    registerActionType(sf::Keyboard::A, Action::Type::MOVE_LEFT);
+    registerActionType(sf::Keyboard::D, Action::Type::MOVE_RIGHT);
+    registerActionType(sf::Keyboard::W, Action::Type::MOVE_UP);
+    registerActionType(sf::Keyboard::S, Action::Type::MOVE_DOWN);
+
+    // pause
+    registerActionType(sf::Keyboard::P, Action::Type::PAUSE);
+    registerActionType(sf::Keyboard::Escape, Action::Type::EXIT_SCENE);
 }
 
 void GameplayScene::registerSystems(GameEngine& engine)

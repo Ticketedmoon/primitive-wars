@@ -25,7 +25,9 @@ class GameplayScene : public Scene
         void performAction(Action& action) override;
 
     private:
+        void registerActions();
         void registerSystems(GameEngine& engine);
+        void changeToLevelSelectScene(LevelClearStatus levelClearStatus);
 
     private:
         const std::string LEVEL_ONE_BACKGROUND_IMAGE_PATH = "resources/assets/texture/level_easy.png";

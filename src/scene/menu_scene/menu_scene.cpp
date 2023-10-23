@@ -2,13 +2,7 @@
 
 MenuScene::MenuScene(GameEngine& gameEngine) : Scene(gameEngine)
 {
-    registerCursorActionType(sf::Event::EventType::MouseEntered, Action::Type::CURSOR_MOVE);
-    registerCursorActionType(sf::Event::EventType::MouseMoved, Action::Type::CURSOR_MOVE);
-
-    registerActionType(sf::Keyboard::Key::Up, Action::Type::MOVE_UP);
-    registerActionType(sf::Keyboard::Key::Down, Action::Type::MOVE_DOWN);
-    registerActionType(CursorButton::CURSOR_LEFT, Action::Type::CURSOR_SELECT);
-    registerActionType(sf::Keyboard::Key::Enter, Action::Type::SELECT);
+    registerActions();
 
     bool isFontLoaded = m_font.loadFromFile(FONT_PATH);
     assert(isFontLoaded);
@@ -20,7 +14,10 @@ MenuScene::MenuScene(GameEngine& gameEngine) : Scene(gameEngine)
     exitTextualButtonPair = createTextElementPair("Quit Game", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 2.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150));
 
-    m_audioManager->playMusic(static_cast<uint8_t>(Scene::Type::MENU_SCENE), 30.0f, true);
+    if (!m_audioManager->isMusicPlaying())
+    {
+        m_audioManager->playMusic(static_cast<uint8_t>(Scene::Type::MENU_SCENE), 30.0f, true);
+    }
 }
 
 void MenuScene::update()
@@ -50,8 +47,17 @@ void MenuScene::render()
 
 void MenuScene::performAction(Action& action)
 {
+    if (action.getMode() == Action::Mode::RELEASE)
+    {
+        return;
+    }
+
     switch (action.getType())
     {
+        case Action::Type::EXIT_SCENE:
+        {
+            gameEngine.window.close();
+        }
         case Action::Type::MOVE_DOWN:
         case Action::Type::MOVE_UP:
             if (action.getMode() == Action::Mode::PRESS)
@@ -89,10 +95,22 @@ void MenuScene::performAction(Action& action)
     }
 }
 
+void MenuScene::registerActions()
+{
+    registerCursorActionType(sf::Event::MouseEntered, Action::Type::CURSOR_MOVE);
+    registerCursorActionType(sf::Event::MouseMoved, Action::Type::CURSOR_MOVE);
+
+    registerActionType(sf::Keyboard::Up, Action::Type::MOVE_UP);
+    registerActionType(sf::Keyboard::Down, Action::Type::MOVE_DOWN);
+    registerActionType(CURSOR_LEFT, Action::Type::CURSOR_SELECT);
+    registerActionType(sf::Keyboard::Enter, Action::Type::SELECT);
+    registerActionType(sf::Keyboard::Escape, Action::Type::EXIT_SCENE);
+}
+
 void MenuScene::changeToLevelSelectScene()
 {
     const std::shared_ptr<LevelSelectScene>& nextScene = std::make_shared<LevelSelectScene>(gameEngine,
-            LevelSelectScene::LevelClearStatus(false, false, false));
+            LevelClearStatus(false, false, false));
     gameEngine.changeScene(Type::LEVEL_SELECT_SCENE, nextScene);
 }
 

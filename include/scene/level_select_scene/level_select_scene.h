@@ -11,13 +11,6 @@
 class LevelSelectScene : public Scene
 {
     public:
-        struct LevelClearStatus
-        {
-            bool levelOneCleared;
-            bool levelTwoCleared;
-            bool levelThreeCleared;
-        };
-
         explicit LevelSelectScene(GameEngine& gameEngine, LevelClearStatus updatedLevelClearStatus);
 
         void update() override;
@@ -35,6 +28,7 @@ class LevelSelectScene : public Scene
 
         std::pair<sf::Color, sf::Text> createTextElementPair(const std::string& value, uint16_t characterSize,
                 sf::Color fillColor, sf::Color outlineColor, float outlineThickness, sf::Vector2f position);
+        void registerActions();
 
     private:
         static inline const std::string FONT_PATH = "resources/fonts/calibri.ttf";
