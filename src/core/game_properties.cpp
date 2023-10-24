@@ -71,6 +71,11 @@ float GameProperties::getTimeRemainingBeforeVictory() const
     return m_timeRemainingBeforeVictory;
 }
 
+void GameProperties::setTimeRemainingBeforeVictory(float timeRemaining)
+{
+    m_timeRemainingBeforeVictory = timeRemaining;
+}
+
 uint8_t GameProperties::getTotalLives() const
 {
     return m_totalLives;

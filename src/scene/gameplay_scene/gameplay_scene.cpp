@@ -28,35 +28,9 @@ GameplayScene::GameplayScene(GameEngine& engine, GameProperties& gameProperties)
 
 void GameplayScene::update()
 {
-    if (levelClock.getElapsedTime().asSeconds() > m_gameProperties.getTimeRemainingBeforeVictory())
-    {
-        // Return to level screen [DONE]
-        // TODO Show snackbar or something that you cleared the level [UNFINISHED]
-        // Show tick icon or similar next to level indicating victory [DONE]
-        const LevelClearStatus& levelClearStatus = LevelClearStatus(
-                m_gameProperties.getSelectedDifficulty() == Difficulty::EASY,
-                m_gameProperties.getSelectedDifficulty() == Difficulty::MEDIUM,
-                m_gameProperties.getSelectedDifficulty() == Difficulty::HARD);
-        changeToLevelSelectScene(levelClearStatus);
-        return;
-    }
-    if (m_gameProperties.getTotalLives() == 0)
-    {
-        // FIXME Not very clean here, improve
-        m_audioManager->stopActiveMusic();
-        const std::shared_ptr<GameOverScene>& nextScene = std::make_shared<GameOverScene>(gameEngine);
-        gameEngine.changeScene(Scene::Type::GAME_OVER_SCENE, nextScene);
-        return;
-    }
-
+    checkForVictoryOrDefeat();
     m_entityManager.update();
     m_systemManager.update(m_gameProperties);
-
-    if (m_gameProperties.hasPaused())
-    {
-        m_gameProperties.setPlayerRespawnTimeSeconds(m_gameProperties.getPlayerRespawnTimeSeconds() + DT);
-        m_gameProperties.setSpecialAttackCoolDownSeconds(m_gameProperties.getSpecialAttackCoolDownSeconds() + DT);
-    }
 }
 
 void GameplayScene::render()
@@ -136,6 +110,26 @@ void GameplayScene::performAction(Action& action)
         }
     }
 }
+
+void GameplayScene::checkForVictoryOrDefeat()
+{
+    if (levelClock.getElapsedTime().asSeconds() > m_gameProperties.getTimeRemainingBeforeVictory())
+    {
+        const LevelClearStatus& levelClearStatus = LevelClearStatus(
+                m_gameProperties.getSelectedDifficulty() == Difficulty::EASY,
+                m_gameProperties.getSelectedDifficulty() == Difficulty::MEDIUM,
+                m_gameProperties.getSelectedDifficulty() == Difficulty::HARD);
+        changeToLevelSelectScene(levelClearStatus);
+    }
+    if (m_gameProperties.getTotalLives() == 0)
+    {
+        // FIXME Not very clean here, improve
+        m_audioManager->stopActiveMusic();
+        const std::shared_ptr<GameOverScene>& nextScene = std::make_shared<GameOverScene>(gameEngine);
+        gameEngine.changeScene(Type::GAME_OVER_SCENE, nextScene);
+    }
+}
+
 void GameplayScene::changeToLevelSelectScene(LevelClearStatus levelClearStatus)
 {
     m_audioManager->stopActiveMusic();

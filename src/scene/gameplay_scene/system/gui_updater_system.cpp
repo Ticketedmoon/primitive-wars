@@ -32,6 +32,13 @@ void GuiUpdaterSystem::execute(GameProperties& gameProperties)
             playerScoreComponent->addToScore(enemyScoreComponent->getScore());
         }
     }
+
+    if (m_gameProperties.hasPaused())
+    {
+        m_gameProperties.setPlayerRespawnTimeSeconds(m_gameProperties.getPlayerRespawnTimeSeconds() + DT);
+        m_gameProperties.setSpecialAttackCoolDownSeconds(m_gameProperties.getSpecialAttackCoolDownSeconds() + DT);
+        m_gameProperties.setTimeRemainingBeforeVictory(m_gameProperties.getTimeRemainingBeforeVictory() + DT);
+    }
 }
 
 bool GuiUpdaterSystem::shouldApply(GameProperties gameProperties)

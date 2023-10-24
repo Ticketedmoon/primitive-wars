@@ -39,8 +39,8 @@ class GameProperties
         void setTotalLives(uint8_t totalLives);
 
         [[nodiscard]] float getTimeRemainingBeforeVictory() const;
+        void setTimeRemainingBeforeVictory(float timeRemaining);
 
-        sf::Clock& getDeltaClock();
         sf::Clock& getLevelClock();
 
         [[nodiscard]] float getPlayerRespawnTimeSeconds() const;

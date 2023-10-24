@@ -47,11 +47,6 @@ void MenuScene::render()
 
 void MenuScene::performAction(Action& action)
 {
-    if (action.getMode() == Action::Mode::RELEASE)
-    {
-        return;
-    }
-
     switch (action.getType())
     {
         case Action::Type::EXIT_SCENE:
@@ -72,6 +67,10 @@ void MenuScene::performAction(Action& action)
         }
         case Action::Type::SELECT:
         {
+            if (action.getMode() == Action::Mode::RELEASE)
+            {
+                return;
+            }
             if (currentSelectItem == 0)
             {
                 changeToLevelSelectScene();
@@ -84,6 +83,7 @@ void MenuScene::performAction(Action& action)
         }
         case Action::Type::CURSOR_SELECT:
         {
+
             if (action.getMode() == Action::Mode::PRESS)
             {
                 handleMouseClick();
@@ -99,10 +99,10 @@ void MenuScene::registerActions()
 {
     registerCursorActionType(sf::Event::MouseEntered, Action::Type::CURSOR_MOVE);
     registerCursorActionType(sf::Event::MouseMoved, Action::Type::CURSOR_MOVE);
+    registerActionType(CURSOR_LEFT, Action::Type::CURSOR_SELECT);
 
     registerActionType(sf::Keyboard::Up, Action::Type::MOVE_UP);
     registerActionType(sf::Keyboard::Down, Action::Type::MOVE_DOWN);
-    registerActionType(CURSOR_LEFT, Action::Type::CURSOR_SELECT);
     registerActionType(sf::Keyboard::Enter, Action::Type::SELECT);
     registerActionType(sf::Keyboard::Escape, Action::Type::EXIT_SCENE);
 }
