@@ -29,7 +29,7 @@ class GameEngine
 
     private:
         void handleInput();
-        void update();
+        void update(double& currentTime, double& accumulator);
         void render();
 
         void createGameWindow();

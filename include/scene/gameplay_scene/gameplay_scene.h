@@ -8,7 +8,7 @@
 #include "scene/gameplay_scene/system/lifespan_system.h"
 #include "scene/gameplay_scene/system/transform_system.h"
 #include "scene/gameplay_scene/system/render_system.h"
-#include "scene/gameplay_scene/system/gui_system.h"
+#include "scene/gameplay_scene/system/gui_updater_system.h"
 #include "scene/game_over_scene/game_over_scene.h"
 #include "system_manager.h"
 

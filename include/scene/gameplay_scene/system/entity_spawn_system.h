@@ -21,7 +21,7 @@
 #include "c_render.h"
 #include "c_lifespan.h"
 #include "system.h"
-#include "gui_system.h"
+#include "gui_updater_system.h"
 
 struct SpawnProperties
 {
@@ -63,6 +63,13 @@ class EntitySpawnSystem : public System
 
     private:
         static constexpr float PI_FULL_CIRCLE = std::numbers::pi_v<float> * 2;
+
+        static inline const sf::Vector2f PLAYER_SPEED{300.0f, 300.0f};
+        static inline const sf::Vector2f SPECIAL_ATTACK_SPEED{400.0f, 400.0f};
+        static constexpr int ENEMY_SPEED_LOWER_BOUND = 50;
+        static constexpr int ENEMY_SPEED_UPPER_BOUND = 150;
+        static inline const sf::Vector2f ENEMY_DEATH_ANIMATION_SPEED{100.0f, 100.0f};
+
         static const uint8_t SPECIAL_ATTACK_COOLDOWN_OFFSET = 3;
         static constexpr uint8_t ENEMY_SCORE_MULTIPLIER = 100;
         static constexpr uint16_t ENEMY_SPAWN_OFFSET = 512;

@@ -175,10 +175,10 @@ void GameplayScene::registerSystems(GameEngine& engine)
             SystemManager::SystemType::UPDATE);
     m_systemManager.registerSystem(std::make_shared<TransformSystem>(m_entityManager),
             SystemManager::SystemType::UPDATE);
-    
-    m_systemManager.registerSystem(std::make_shared<RenderSystem>(engine.window, m_entityManager),
-            SystemManager::SystemType::RENDER);
     m_systemManager.registerSystem(
-            std::make_shared<GuiSystem>(engine.window, m_entityManager, m_gameProperties),
+            std::make_shared<GuiUpdaterSystem>(m_entityManager, m_gameProperties),
+            SystemManager::SystemType::UPDATE);
+
+    m_systemManager.registerSystem(std::make_shared<RenderSystem>(engine.window, m_entityManager),
             SystemManager::SystemType::RENDER);
 }
