@@ -20,7 +20,7 @@ class CollisionSystem : public System
     public:
         explicit CollisionSystem(EntityManager& entityManager);
 
-        void execute() override;
+        void execute(GameProperties& gameProperties) override;
         bool shouldApply(GameProperties gameProperties) override;
 
     private:

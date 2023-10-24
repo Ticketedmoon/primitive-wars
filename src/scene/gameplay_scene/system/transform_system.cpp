@@ -5,7 +5,7 @@ TransformSystem::TransformSystem(EntityManager& entityManager) : m_entityManager
 
 }
 
-void TransformSystem::execute()
+void TransformSystem::execute(GameProperties& gameProperties)
 {
     std::vector<std::shared_ptr<Entity>> entities = m_entityManager
             .getEntitiesByComponentTypes({Component::Type::TRANSFORM});
@@ -27,14 +27,14 @@ void TransformSystem::execute()
             }
         }
 
-        transformComponent->m_position.x += (transformComponent->m_speed.x * transformComponent->m_speedDelta.x);
-        transformComponent->m_position.y += (transformComponent->m_speed.y * transformComponent->m_speedDelta.y);
+        transformComponent->m_position.x += (transformComponent->m_speed.x * transformComponent->m_speedDelta.x) * DT;
+        transformComponent->m_position.y += (transformComponent->m_speed.y * transformComponent->m_speedDelta.y) * DT;
     }
 }
 
 bool TransformSystem::shouldApply(GameProperties gameProperties)
 {
-    return !gameProperties.hasPaused;
+    return !gameProperties.hasPaused();
 }
 
 void TransformSystem::updateEntityTransformByUserInput(const std::shared_ptr<Entity>& e,
@@ -45,19 +45,19 @@ void TransformSystem::updateEntityTransformByUserInput(const std::shared_ptr<Ent
 
     if (!collisionComponent->isCollidingLeft)
     {
-        transformComponent->m_position.x -= actionComponent->isMovingLeft ? transformComponent->m_speed.x : 0;
+        transformComponent->m_position.x -= (actionComponent->isMovingLeft ? transformComponent->m_speed.x : 0) * DT;
     }
     if (!collisionComponent->isCollidingRight)
     {
-        transformComponent->m_position.x += actionComponent->isMovingRight ? transformComponent->m_speed.x : 0;
+        transformComponent->m_position.x += (actionComponent->isMovingRight ? transformComponent->m_speed.x : 0) * DT;
     }
     if (!collisionComponent->isCollidingUp)
     {
-        transformComponent->m_position.y -= actionComponent->isMovingUp ? transformComponent->m_speed.y : 0;
+        transformComponent->m_position.y -= (actionComponent->isMovingUp ? transformComponent->m_speed.y : 0) * DT;
     }
     if (!collisionComponent->isCollidingDown)
     {
-        transformComponent->m_position.y += actionComponent->isMovingDown ? transformComponent->m_speed.y : 0;
+        transformComponent->m_position.y += (actionComponent->isMovingDown ? transformComponent->m_speed.y : 0) * DT;
     }
 }
 
@@ -66,10 +66,10 @@ void TransformSystem::updateTransformOnWindowBorderCollision(std::shared_ptr<CTr
 {
     if (collisionComponent->isCollidingLeft || collisionComponent->isCollidingRight)
     {
-        transformComponent->m_speed.x = -transformComponent->m_speed.x;
+        transformComponent->m_speed.x = (-transformComponent->m_speed.x);
     }
     if (collisionComponent->isCollidingUp || collisionComponent->isCollidingDown)
     {
-        transformComponent->m_speed.y = -transformComponent->m_speed.y;
+        transformComponent->m_speed.y = (-transformComponent->m_speed.y);
     }
 }

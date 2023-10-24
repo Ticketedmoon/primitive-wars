@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 
+#include "common_constants.h"
 #include "entity/entity.h"
 #include "entity/entity_manager.h"
 #include "c_transform.h"
@@ -18,7 +19,7 @@ class TransformSystem : public System
     public:
         explicit TransformSystem(EntityManager& entityManager);
 
-        void execute() override;
+        void execute(GameProperties& gameProperties) override;
         bool shouldApply(GameProperties gameProperties) override;
 
     private:
@@ -26,7 +27,7 @@ class TransformSystem : public System
                 std::shared_ptr<CTransform>& transformComponent,
                 const std::shared_ptr<CCollision>& collisionComponent);
         static void updateTransformOnWindowBorderCollision(std::shared_ptr<CTransform>& transformComponent,
-                const std::shared_ptr<CCollision>& collisionComponent) ;
+                const std::shared_ptr<CCollision>& collisionComponent);
 
     private:
         EntityManager& m_entityManager;

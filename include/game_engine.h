@@ -29,14 +29,14 @@ class GameEngine
 
     private:
         void handleInput();
-        void update();
+        void update(double& currentTime, double& accumulator);
         void render();
 
         void createGameWindow();
 
     public:
         sf::RenderWindow window;
-        sf::Clock deltaClock;
+        sf::Clock gameClock;
         AudioManager* m_audioManager = AudioManager::getInstance();
 
     private:

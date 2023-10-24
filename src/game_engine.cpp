@@ -13,19 +13,34 @@ GameEngine::~GameEngine()
 
 void GameEngine::startGameLoop()
 {
+    double currentTime = gameClock.getElapsedTime().asSeconds();
+    double accumulator = 0.0;
+
     while (window.isOpen())
     {
-        deltaClock.restart();
-
-        handleInput();
-        update();
+        update(currentTime, accumulator);
         render();
     }
 }
 
-void GameEngine::update()
+// Fixed time-step updates
+void GameEngine::update(double& currentTime, double& accumulator)
 {
-    gameScenes[currentScene]->update();
+    double newTime = gameClock.getElapsedTime().asSeconds();
+    double frameTime = newTime - currentTime;
+    currentTime = newTime;
+    accumulator += frameTime;
+
+    while (accumulator >= DT)
+    {
+        handleInput();
+        gameScenes[currentScene]->update();
+
+        accumulator -= DT;
+    }
+
+    // FPS - Shows in Console Window
+    std::cout << "FPS: " << 1.0f / frameTime << std::endl;
 }
 
 void GameEngine::render()

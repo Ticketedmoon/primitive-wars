@@ -1,26 +1,27 @@
 #include "scene/gameplay_scene/system/entity_spawn_system.h"
 
-EntitySpawnSystem::EntitySpawnSystem(EntityManager& entityManager, sf::Clock& worldClock, GameProperties& gameProperties)
-        : m_entityManager(entityManager), m_worldClock(worldClock), m_gameProperties(gameProperties)
+EntitySpawnSystem::EntitySpawnSystem(EntityManager& entityManager, GameProperties& gameProperties)
+        : m_entityManager(entityManager), m_gameProperties(gameProperties)
 {
     spawnPlayer();
 }
 
-void EntitySpawnSystem::execute()
+void EntitySpawnSystem::execute(GameProperties& gameProperties)
 {
     bool isPlayerDead = m_entityManager.getEntitiesByType(Entity::Type::PLAYER).empty();
-    float worldTimeSeconds = m_worldClock.getElapsedTime().asSeconds();
+    float worldTimeSeconds = gameProperties.getLevelClock().getElapsedTime().asSeconds();
 
-    if (m_gameProperties.hasPaused)
+    if (m_gameProperties.hasPaused())
     {
-        enemyRespawnTimeSeconds = (worldTimeSeconds + m_gameProperties.enemySpawnRateSeconds);
+        enemyRespawnTimeSeconds = (worldTimeSeconds + m_gameProperties.getEnemySpawnRateSeconds());
         return;
     }
 
     if (isPlayerDead)
     {
-        enemyRespawnTimeSeconds = (worldTimeSeconds + m_gameProperties.enemySpawnRateSeconds);
-        if (worldTimeSeconds > m_gameProperties.playerRespawnTimeSeconds)
+        enemyRespawnTimeSeconds = (worldTimeSeconds + m_gameProperties.getEnemySpawnRateSeconds());
+
+        if (worldTimeSeconds > m_gameProperties.getPlayerRespawnTimeSeconds())
         {
             spawnPlayer();
         }
@@ -30,7 +31,7 @@ void EntitySpawnSystem::execute()
     if (worldTimeSeconds > enemyRespawnTimeSeconds)
     {
         spawnEnemy();
-        enemyRespawnTimeSeconds = (worldTimeSeconds + m_gameProperties.enemySpawnRateSeconds);
+        enemyRespawnTimeSeconds = (worldTimeSeconds + m_gameProperties.getEnemySpawnRateSeconds());
     }
 
     std::vector<std::shared_ptr<Entity>>& enemies = m_entityManager.getEntitiesByType(Entity::Type::ENEMY);
@@ -40,7 +41,7 @@ void EntitySpawnSystem::execute()
         {
             std::shared_ptr<CRender> enemyRenderComponent = std::static_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
             size_t totalVertices = enemyRenderComponent->m_shape.getPointCount();
-            spawnEntityAnimation(enemy, SpawnProperties(totalVertices, Entity::Type::ENEMY, false, sf::Vector2f(2.0f, 2.0f)));
+            spawnEntityAnimation(enemy, SpawnProperties(totalVertices, Entity::Type::ENEMY, false, ENEMY_DEATH_ANIMATION_SPEED));
         }
     }
 
@@ -59,8 +60,9 @@ void EntitySpawnSystem::execute()
     }
     if (actionComponent->isPerformingSpecialAttack)
     {
-        spawnEntityAnimation(player, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(7.5f, 7.5f)));
-        m_gameProperties.specialAttackCoolDownSeconds = (m_worldClock.getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
+        spawnEntityAnimation(player, SpawnProperties(15, Entity::Type::BULLET, true, SPECIAL_ATTACK_SPEED));
+        m_gameProperties.setSpecialAttackCoolDownSeconds(
+                gameProperties.getLevelClock().getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
         actionComponent->isPerformingSpecialAttack = false;
     }
 }
@@ -74,10 +76,10 @@ void EntitySpawnSystem::spawnPlayer()
 {
     std::shared_ptr<Entity>& player = m_entityManager.addEntity(Entity::Type::PLAYER);
 
-    const sf::Vector2f& position = sf::Vector2f(10.0f, 10.0f);
+    const sf::Vector2<float>& position = sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
     sf::CircleShape shape = createShape({20.0f, 3, position, sf::Color::Black, sf::Color::Red, 5.0f});
 
-    player->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(sf::Vector2f(WINDOW_WIDTH/2, WINDOW_HEIGHT/2), position);
+    player->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(position, PLAYER_SPEED);
     player->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
     player->m_components[Component::Type::USER_INPUT] = std::make_shared<CAction>();
     player->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
@@ -101,9 +103,9 @@ void EntitySpawnSystem::spawnEnemy()
 
     sf::CircleShape shape = createShape({static_cast<float>(radius), totalVertices, position, fillColor, sf::Color::White, 3.0f});
 
+    int speed = std::experimental::randint(ENEMY_SPEED_LOWER_BOUND, ENEMY_SPEED_UPPER_BOUND);
     enemy->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(shape.getPosition(),
-            sf::Vector2f(std::experimental::randint(1, 3), std::experimental::randint(1, 3)),
-            sf::Vector2f(m_gameProperties.enemySpeed, m_gameProperties.enemySpeed));
+            sf::Vector2f(speed, speed), sf::Vector2f(m_gameProperties.getEnemySpeed(), m_gameProperties.getEnemySpeed()));
     enemy->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
     enemy->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);
     enemy->m_components[Component::Type::SCORE] = std::make_shared<CScore>(shape.getPointCount() * ENEMY_SCORE_MULTIPLIER);
@@ -138,8 +140,9 @@ void EntitySpawnSystem::spawnBullet(sf::Vector2f position, double shotAngle)
 
     sf::CircleShape shape = createShape({10, 32, position, sf::Color::White, sf::Color::Black, 1.0f});
 
-    e->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(position, sf::Vector2f(10.0f, 10.0f),
-            sf::Vector2f(cos(shotAngle) * 1.0f, sin(shotAngle) * 1.0f));
+    const sf::Vector2<float>& speed = sf::Vector2f(600.0f, 600.0f);
+    const sf::Vector2<float>& shotAngleVector = sf::Vector2f(std::cos(shotAngle) * 1.0f, std::sin(shotAngle) * 1.0f);
+    e->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(position, speed, shotAngleVector);
     e->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
     e->m_components[Component::Type::LIFESPAN] = std::make_shared<CLifespan>(100);
     e->m_components[Component::Type::RENDER] = std::make_shared<CRender>(shape);

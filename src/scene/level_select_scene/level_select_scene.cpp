@@ -51,10 +51,10 @@ void LevelSelectScene::registerActions()
 {
     registerCursorActionType(sf::Event::MouseEntered, Action::Type::CURSOR_MOVE);
     registerCursorActionType(sf::Event::MouseMoved, Action::Type::CURSOR_MOVE);
+    registerActionType(CURSOR_LEFT, Action::Type::CURSOR_SELECT);
 
     registerActionType(sf::Keyboard::Up, Action::Type::MOVE_UP);
     registerActionType(sf::Keyboard::Down, Action::Type::MOVE_DOWN);
-    registerActionType(CURSOR_LEFT, Action::Type::CURSOR_SELECT);
     registerActionType(sf::Keyboard::Enter, Action::Type::SELECT);
     registerActionType(sf::Keyboard::Escape, Action::Type::EXIT_SCENE);
 }
@@ -202,15 +202,16 @@ void LevelSelectScene::onHover(sf::Text& text, sf::Color color, sf::Cursor::Type
 void LevelSelectScene::changeToLevelWithProperties(Difficulty difficulty, float enemySpawnRateSeconds, float enemySpeed)
 {
     GameProperties gameProperties;
-    gameProperties.difficulty = difficulty;
-    gameProperties.enemySpawnRateSeconds = enemySpawnRateSeconds;
-    gameProperties.enemySpeed = enemySpeed;
+    gameProperties.setLevelDifficulty(difficulty);
+    gameProperties.setEnemySpawnRateSeconds(enemySpawnRateSeconds);
+    gameProperties.setEnemySpeed(enemySpeed);
+
     const std::shared_ptr<GameplayScene>& nextScene = std::make_shared<GameplayScene>(gameEngine, gameProperties);
     const Scene::Type sceneType = difficulty == Difficulty::EASY
             ? Scene::Type::LEVEL_ONE_GAMEPLAY_SCENE
             : difficulty == Difficulty::MEDIUM
-                ? Scene::Type::LEVEL_TWO_GAMEPLAY_SCENE
-                : Scene::Type::LEVEL_THREE_GAMEPLAY_SCENE;
+                    ? Scene::Type::LEVEL_TWO_GAMEPLAY_SCENE
+                    : Scene::Type::LEVEL_THREE_GAMEPLAY_SCENE;
     gameEngine.changeScene(sceneType, nextScene);
 }
 

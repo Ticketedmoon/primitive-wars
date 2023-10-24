@@ -1,3 +1,4 @@
+#include <iostream>
 #include "scene/gameplay_scene/system/collision_system.h"
 #include "core/common_constants.h"
 
@@ -6,7 +7,7 @@ CollisionSystem::CollisionSystem(EntityManager& entityManager) : m_entityManager
 
 }
 
-void CollisionSystem::execute()
+void CollisionSystem::execute(GameProperties& gameProperties)
 {
     std::vector<std::shared_ptr<Entity>> bulletsToUpdate = m_entityManager.getEntitiesByType(Entity::Type::BULLET);
     for (const std::shared_ptr<Entity>& bullet: bulletsToUpdate)
