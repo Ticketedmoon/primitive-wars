@@ -44,27 +44,25 @@ void GameplayScene::update()
     {
         // FIXME Not very clean here, improve
         m_audioManager->stopActiveMusic();
-        const std::shared_ptr<GameOverScene>& nextScene = std::make_shared<GameOverScene>(gameEngine, m_gameProperties.getDeltaClock());
+        const std::shared_ptr<GameOverScene>& nextScene = std::make_shared<GameOverScene>(gameEngine);
         gameEngine.changeScene(Scene::Type::GAME_OVER_SCENE, nextScene);
         return;
     }
 
     m_entityManager.update();
     m_systemManager.update(m_gameProperties);
+
+    if (m_gameProperties.hasPaused())
+    {
+        m_gameProperties.setPlayerRespawnTimeSeconds(m_gameProperties.getPlayerRespawnTimeSeconds() + DT);
+        m_gameProperties.setSpecialAttackCoolDownSeconds(m_gameProperties.getSpecialAttackCoolDownSeconds() + DT);
+    }
 }
 
 void GameplayScene::render()
 {
     gameEngine.window.clear();
     gameEngine.window.draw(backgroundSprite);
-
-    if (m_gameProperties.hasPaused())
-    {
-        float dt = gameEngine.deltaClock.getElapsedTime().asSeconds();
-        m_gameProperties.setPlayerRespawnTimeSeconds(m_gameProperties.getPlayerRespawnTimeSeconds() + dt);
-        m_gameProperties.setSpecialAttackCoolDownSeconds(m_gameProperties.getSpecialAttackCoolDownSeconds() + dt);
-    }
-
     m_systemManager.render(m_gameProperties);
 
     gameEngine.window.display();
@@ -141,8 +139,7 @@ void GameplayScene::performAction(Action& action)
 void GameplayScene::changeToLevelSelectScene(LevelClearStatus levelClearStatus)
 {
     m_audioManager->stopActiveMusic();
-    const std::shared_ptr<LevelSelectScene>& nextScene = std::make_shared<LevelSelectScene>(gameEngine,
-            m_gameProperties.getDeltaClock(), levelClearStatus);
+    const std::shared_ptr<LevelSelectScene>& nextScene = std::make_shared<LevelSelectScene>(gameEngine, levelClearStatus);
     gameEngine.changeScene(Type::LEVEL_SELECT_SCENE, nextScene);
 }
 

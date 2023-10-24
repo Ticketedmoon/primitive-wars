@@ -1,6 +1,6 @@
 #include "scene/game_over_scene/game_over_scene.h"
 
-GameOverScene::GameOverScene(GameEngine& gameEngine, sf::Clock& deltaClock) : Scene(gameEngine), m_deltaClock(deltaClock)
+GameOverScene::GameOverScene(GameEngine& gameEngine) : Scene(gameEngine)
 {
     registerCursorActionType(sf::Event::EventType::MouseEntered, Action::Type::CURSOR_MOVE);
     registerCursorActionType(sf::Event::EventType::MouseMoved, Action::Type::CURSOR_MOVE);
@@ -118,7 +118,7 @@ void GameOverScene::onHover(sf::Text& text, sf::Color color, sf::Cursor::Type cu
 
 void GameOverScene::changeToMenuScene()
 {
-    const std::shared_ptr<MenuScene>& nextScene = std::make_shared<MenuScene>(gameEngine, m_deltaClock);
+    const std::shared_ptr<MenuScene>& nextScene = std::make_shared<MenuScene>(gameEngine);
     gameEngine.changeScene(Type::MENU_SCENE, nextScene);
 }
 

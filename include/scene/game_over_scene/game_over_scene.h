@@ -11,7 +11,7 @@
 class GameOverScene : public Scene
 {
     public:
-        explicit GameOverScene(GameEngine& gameEngine, sf::Clock& deltaClock);
+        explicit GameOverScene(GameEngine& gameEngine);
 
         void update() override;
         void render() override;
@@ -38,7 +38,6 @@ class GameOverScene : public Scene
         std::pair<sf::Color, sf::Text> gameStatsText;
         std::pair<sf::Color, sf::Text> menuReturnTextButton;
         sf::Cursor cursor;
-        sf::Clock& m_deltaClock;
 };
 
 #endif //PRIMITIVE_WARS_GAME_OVER_SCENE_H

@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 
+#include "common_constants.h"
 #include "entity/entity.h"
 #include "entity/entity_manager.h"
 #include "c_transform.h"
@@ -24,7 +25,7 @@ class TransformSystem : public System
     private:
         static void updateEntityTransformByUserInput(const std::shared_ptr<Entity>& e,
                 std::shared_ptr<CTransform>& transformComponent,
-                const std::shared_ptr<CCollision>& collisionComponent, float dt);
+                const std::shared_ptr<CCollision>& collisionComponent);
         static void updateTransformOnWindowBorderCollision(std::shared_ptr<CTransform>& transformComponent,
                 const std::shared_ptr<CCollision>& collisionComponent);
 

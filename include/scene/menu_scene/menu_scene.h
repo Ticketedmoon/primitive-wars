@@ -12,7 +12,7 @@
 class MenuScene : public Scene
 {
     public:
-        explicit MenuScene(GameEngine& gameEngine, sf::Clock& deltaClock);
+        explicit MenuScene(GameEngine& gameEngine);
 
         void update() override;
         void render() override;
@@ -42,7 +42,6 @@ class MenuScene : public Scene
         std::pair<sf::Color, sf::Text> startGameTextualButtonPair;
         std::pair<sf::Color, sf::Text> exitTextualButtonPair;
         sf::Cursor cursor;
-        sf::Clock& m_deltaClock;
 };
 
 #endif //PRIMITIVE_WARS_MENU_SCENE_H

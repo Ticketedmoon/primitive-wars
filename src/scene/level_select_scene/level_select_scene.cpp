@@ -1,7 +1,6 @@
 #include "scene/level_select_scene/level_select_scene.h"
 
-LevelSelectScene::LevelSelectScene(GameEngine& gameEngine, sf::Clock& deltaClock,
-        LevelClearStatus updatedLevelClearStatus) : Scene(gameEngine), m_deltaClock(deltaClock)
+LevelSelectScene::LevelSelectScene(GameEngine& gameEngine, LevelClearStatus updatedLevelClearStatus) : Scene(gameEngine)
 {
     registerActions();
     bool isFontLoaded = m_font.loadFromFile(FONT_PATH);
@@ -70,7 +69,7 @@ void LevelSelectScene::performAction(Action& action)
             {
                 return;
             }
-            const std::shared_ptr<MenuScene>& nextScene = std::make_shared<MenuScene>(gameEngine, m_deltaClock);
+            const std::shared_ptr<MenuScene>& nextScene = std::make_shared<MenuScene>(gameEngine);
             gameEngine.changeScene(Scene::Type::MENU_SCENE, nextScene);
             break;
         }
@@ -202,7 +201,7 @@ void LevelSelectScene::onHover(sf::Text& text, sf::Color color, sf::Cursor::Type
 
 void LevelSelectScene::changeToLevelWithProperties(Difficulty difficulty, float enemySpawnRateSeconds, float enemySpeed)
 {
-    GameProperties gameProperties(m_deltaClock);
+    GameProperties gameProperties;
     gameProperties.setLevelDifficulty(difficulty);
     gameProperties.setEnemySpawnRateSeconds(enemySpawnRateSeconds);
     gameProperties.setEnemySpeed(enemySpeed);

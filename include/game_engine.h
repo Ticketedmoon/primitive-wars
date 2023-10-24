@@ -36,7 +36,7 @@ class GameEngine
 
     public:
         sf::RenderWindow window;
-        sf::Clock deltaClock;
+        sf::Clock gameClock;
         AudioManager* m_audioManager = AudioManager::getInstance();
 
     private:

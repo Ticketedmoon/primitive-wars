@@ -11,7 +11,7 @@
 class LevelSelectScene : public Scene
 {
     public:
-        explicit LevelSelectScene(GameEngine& gameEngine, sf::Clock& deltaClock, LevelClearStatus updatedLevelClearStatus);
+        explicit LevelSelectScene(GameEngine& gameEngine, LevelClearStatus updatedLevelClearStatus);
 
         void update() override;
         void render() override;
@@ -48,7 +48,6 @@ class LevelSelectScene : public Scene
         std::pair<sf::Color, sf::Text> levelTwoTextButton;
         std::pair<sf::Color, sf::Text> levelThreeTextButton;
         sf::Cursor cursor;
-        sf::Clock& m_deltaClock;
 };
 
 #endif //PRIMITIVE_WARS_LEVEL_SELECT_SCENE_H

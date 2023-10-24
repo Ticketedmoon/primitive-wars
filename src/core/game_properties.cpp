@@ -1,18 +1,17 @@
 #include "game_properties.h"
 
-GameProperties::GameProperties(sf::Clock& deltaClock) : m_deltaClock(deltaClock)
+GameProperties::GameProperties()
 {
 
 }
 GameProperties::GameProperties(Difficulty difficulty, uint8_t totalLives, bool hasPaused, sf::Clock& worldClock,
-        sf::Clock& deltaClock, float playerRespawnTimeSeconds, float specialAttackCoolDownSeconds,
-        float enemySpawnRateSeconds, float enemySpeed) : m_difficulty(difficulty), m_totalLives(totalLives),
-                                                         m_paused(hasPaused), m_levelClock(worldClock),
-                                                         m_deltaClock(deltaClock),
-                                                         m_playerRespawnTimeSeconds(playerRespawnTimeSeconds),
-                                                         m_specialAttackCoolDownSeconds(specialAttackCoolDownSeconds),
-                                                         m_enemySpawnRateSeconds(enemySpawnRateSeconds),
-                                                         m_enemySpeed(enemySpeed)
+        float playerRespawnTimeSeconds, float specialAttackCoolDownSeconds, float enemySpawnRateSeconds,
+        float enemySpeed) : m_difficulty(difficulty), m_totalLives(totalLives),
+                            m_paused(hasPaused), m_levelClock(worldClock),
+                            m_playerRespawnTimeSeconds(playerRespawnTimeSeconds),
+                            m_specialAttackCoolDownSeconds(specialAttackCoolDownSeconds),
+                            m_enemySpawnRateSeconds(enemySpawnRateSeconds),
+                            m_enemySpeed(enemySpeed)
 {
 
 }
@@ -25,11 +24,6 @@ void GameProperties::resetPropertiesForLevel(sf::Clock& levelClock, float timeTo
     m_playerRespawnTimeSeconds = 0;
     m_specialAttackCoolDownSeconds = 0;
     m_timeRemainingBeforeVictory = m_levelClock.getElapsedTime().asSeconds() + timeToCompletion;
-}
-
-sf::Clock& GameProperties::getDeltaClock()
-{
-    return m_deltaClock;
 }
 
 float GameProperties::getEnemySpawnRateSeconds() const

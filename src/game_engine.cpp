@@ -3,7 +3,7 @@
 GameEngine::GameEngine()
 {
     createGameWindow();
-    gameScenes[currentScene] = std::make_shared<MenuScene>(*this, deltaClock);
+    gameScenes[currentScene] = std::make_shared<MenuScene>(*this);
 }
 
 GameEngine::~GameEngine()
@@ -13,13 +13,32 @@ GameEngine::~GameEngine()
 
 void GameEngine::startGameLoop()
 {
+    double time = 0.0;
+    double currentTime = gameClock.getElapsedTime().asSeconds();
+    double accumulator = 0.0;
+
     while (window.isOpen())
     {
-        deltaClock.restart();
+        double newTime = gameClock.getElapsedTime().asSeconds();
+        double frameTime = newTime - currentTime;
+        currentTime = newTime;
 
-        handleInput();
-        update();
+        accumulator += frameTime;
+
+        while (accumulator >= DT)
+        {
+            handleInput();
+            update();
+
+            accumulator -= DT;
+            time += DT;
+        }
+
+        // Render Graphics
         render();
+
+        // FPS - Shows in Console Window
+        //std::cout << "FPS: " << 1.0f / frameTime << std::endl;
     }
 }
 

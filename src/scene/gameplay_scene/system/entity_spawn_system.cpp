@@ -1,3 +1,4 @@
+#include <iostream>
 #include "scene/gameplay_scene/system/entity_spawn_system.h"
 
 EntitySpawnSystem::EntitySpawnSystem(EntityManager& entityManager, GameProperties& gameProperties)
@@ -20,6 +21,8 @@ void EntitySpawnSystem::execute(GameProperties& gameProperties)
     if (isPlayerDead)
     {
         enemyRespawnTimeSeconds = (worldTimeSeconds + m_gameProperties.getEnemySpawnRateSeconds());
+
+        std::cout << "get: " << worldTimeSeconds << '\n';
         if (worldTimeSeconds > m_gameProperties.getPlayerRespawnTimeSeconds())
         {
             spawnPlayer();
@@ -40,7 +43,7 @@ void EntitySpawnSystem::execute(GameProperties& gameProperties)
         {
             std::shared_ptr<CRender> enemyRenderComponent = std::static_pointer_cast<CRender>(enemy->getComponentByType(Component::Type::RENDER));
             size_t totalVertices = enemyRenderComponent->m_shape.getPointCount();
-            const sf::Vector2<float>& speed = sf::Vector2f(2000.0f, 2000.0f);
+            const sf::Vector2<float>& speed = sf::Vector2f(100.0f, 100.0f);
             spawnEntityAnimation(enemy, SpawnProperties(totalVertices, Entity::Type::ENEMY, false, speed));
         }
     }
@@ -60,7 +63,7 @@ void EntitySpawnSystem::execute(GameProperties& gameProperties)
     }
     if (actionComponent->isPerformingSpecialAttack)
     {
-        spawnEntityAnimation(player, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(7.5f, 7.5f)));
+        spawnEntityAnimation(player, SpawnProperties(15, Entity::Type::BULLET, true, sf::Vector2f(400.0f, 400.0f)));
         m_gameProperties.setSpecialAttackCoolDownSeconds(
                 gameProperties.getLevelClock().getElapsedTime().asSeconds() + SPECIAL_ATTACK_COOLDOWN_OFFSET);
         actionComponent->isPerformingSpecialAttack = false;
@@ -77,7 +80,7 @@ void EntitySpawnSystem::spawnPlayer()
     std::shared_ptr<Entity>& player = m_entityManager.addEntity(Entity::Type::PLAYER);
 
     const sf::Vector2<float>& position = sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
-    const sf::Vector2f& speed = sf::Vector2f(50000.0f, 50000.0f);
+    const sf::Vector2f& speed = sf::Vector2f(300.0f, 300.0f);
     sf::CircleShape shape = createShape({20.0f, 3, position, sf::Color::Black, sf::Color::Red, 5.0f});
 
     player->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(position, speed);
@@ -104,7 +107,7 @@ void EntitySpawnSystem::spawnEnemy()
 
     sf::CircleShape shape = createShape({static_cast<float>(radius), totalVertices, position, fillColor, sf::Color::White, 3.0f});
 
-    int speed = std::experimental::randint(5000, 15000);
+    int speed = std::experimental::randint(50, 150);
     enemy->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(shape.getPosition(),
             sf::Vector2f(speed, speed), sf::Vector2f(m_gameProperties.getEnemySpeed(), m_gameProperties.getEnemySpeed()));
     enemy->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();
@@ -141,7 +144,7 @@ void EntitySpawnSystem::spawnBullet(sf::Vector2f position, double shotAngle)
 
     sf::CircleShape shape = createShape({10, 32, position, sf::Color::White, sf::Color::Black, 1.0f});
 
-    const sf::Vector2<float>& speed = sf::Vector2f(0.0f, 0.0f);
+    const sf::Vector2<float>& speed = sf::Vector2f(600.0f, 600.0f);
     const sf::Vector2<float>& shotAngleVector = sf::Vector2f(std::cos(shotAngle) * 1.0f, std::sin(shotAngle) * 1.0f);
     e->m_components[Component::Type::TRANSFORM] = std::make_shared<CTransform>(position, speed, shotAngleVector);
     e->m_components[Component::Type::COLLISION] = std::make_shared<CCollision>();

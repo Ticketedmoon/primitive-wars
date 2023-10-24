@@ -1,3 +1,4 @@
+#include <iostream>
 #include "scene/gameplay_scene/system/gui_system.h"
 
 GuiSystem::GuiSystem(sf::RenderWindow& renderWindow, EntityManager& entityManager, GameProperties& gameProperties)
@@ -82,8 +83,10 @@ void GuiSystem::updateGuiData()
     {
         if (e->getType() == Entity::Type::PLAYER)
         {
+            float levelTimeSeconds = m_gameProperties.getLevelClock().getElapsedTime().asSeconds();
+            std::cout << "set: " << levelTimeSeconds << '\n';
             m_gameProperties.setPlayerRespawnTimeSeconds(
-                    m_gameProperties.getLevelClock().getElapsedTime().asSeconds() + DEFAULT_RESPAWN_RATE_SECONDS);
+                    levelTimeSeconds + DEFAULT_RESPAWN_RATE_SECONDS);
             m_gameProperties.setTotalLives(m_gameProperties.getTotalLives()-1);
         }
 

@@ -1,6 +1,6 @@
 #include "scene/menu_scene/menu_scene.h"
 
-MenuScene::MenuScene(GameEngine& gameEngine, sf::Clock& deltaClock) : Scene(gameEngine), m_deltaClock(deltaClock)
+MenuScene::MenuScene(GameEngine& gameEngine) : Scene(gameEngine)
 {
     registerActions();
 
@@ -109,8 +109,7 @@ void MenuScene::registerActions()
 
 void MenuScene::changeToLevelSelectScene()
 {
-    const std::shared_ptr<LevelSelectScene>& nextScene = std::make_shared<LevelSelectScene>(gameEngine,
-            m_deltaClock, LevelClearStatus(false, false, false));
+    const std::shared_ptr<LevelSelectScene>& nextScene = std::make_shared<LevelSelectScene>(gameEngine, LevelClearStatus(false, false, false));
     gameEngine.changeScene(Type::LEVEL_SELECT_SCENE, nextScene);
 }
 

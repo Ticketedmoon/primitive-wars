@@ -17,10 +17,10 @@ enum class Difficulty
 class GameProperties
 {
     public:
-        explicit GameProperties(sf::Clock& deltaClock);
+        explicit GameProperties();
         explicit GameProperties(Difficulty difficulty, uint8_t totalLives, bool hasPaused, sf::Clock& worldClock,
-                sf::Clock& deltaClock, float playerRespawnTimeSeconds, float specialAttackCoolDownSeconds,
-                float enemySpawnRateSeconds, float enemySpeed);
+                float playerRespawnTimeSeconds, float specialAttackCoolDownSeconds, float enemySpawnRateSeconds,
+                float enemySpeed);
 
         void resetPropertiesForLevel(sf::Clock& worldClock, float timeToCompletion);
 
@@ -55,7 +55,6 @@ class GameProperties
         bool m_paused{};
 
         sf::Clock m_levelClock;
-        sf::Clock& m_deltaClock;
 
         float m_playerRespawnTimeSeconds{};
         float m_specialAttackCoolDownSeconds{};
