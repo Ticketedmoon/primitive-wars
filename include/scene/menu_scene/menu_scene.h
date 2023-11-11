@@ -33,7 +33,7 @@ class MenuScene : public Scene
         static inline const sf::Color& BACKGROUND_COLOR = sf::Color{70, 0, 0, 255};
         static inline const uint8_t TOTAL_TEXT_BUTTONS = 2;
         static inline const sf::Color& TITLE_TEXT_COLOUR = sf::Color::Red;
-        static inline const sf::Color& BUTTON_DEFAULT_COLOR = sf::Color::White;
+        static inline const sf::Color& BUTTON_DEFAULT_COLOR{0, 0, 0, 160};
         static inline const sf::Color& BUTTON_HIGHLIGHT_COLOR = sf::Color{0, 150, 200};
 
         sf::Font m_font;

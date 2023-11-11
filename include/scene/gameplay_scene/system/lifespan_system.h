@@ -20,7 +20,7 @@ class LifespanSystem : public System
         bool shouldApply(GameProperties gameProperties) override;
 
     private:
-        static constexpr sf::Uint8 LIFESPAN_FADE_INCREMENT = sf::Uint8(1.5);
+        static constexpr sf::Uint8 LIFESPAN_FADE_INCREMENT = sf::Uint8(2.25f);
 
         EntityManager& m_entityManager;
 };

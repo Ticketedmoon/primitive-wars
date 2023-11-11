@@ -9,9 +9,9 @@ MenuScene::MenuScene(GameEngine& gameEngine) : Scene(gameEngine)
 
     gameTitleTextPair = createTextElementPair("Primitive Wars", 96, TITLE_TEXT_COLOUR, sf::Color::Black, 3.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 250));
-    startGameTextualButtonPair = createTextElementPair("Start Game", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 2.0f,
+    startGameTextualButtonPair = createTextElementPair("Start Game", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 0.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - 50));
-    exitTextualButtonPair = createTextElementPair("Quit Game", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 2.0f,
+    exitTextualButtonPair = createTextElementPair("Quit Game", 72, BUTTON_DEFAULT_COLOR, sf::Color::Black, 0.0f,
             sf::Vector2f(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 + 150));
 
     if (!m_audioManager->isMusicPlaying())
@@ -51,6 +51,10 @@ void MenuScene::performAction(Action& action)
     {
         case Action::Type::EXIT_SCENE:
         {
+            if (action.getMode() == Action::Mode::RELEASE)
+            {
+                return;
+            }
             gameEngine.window.close();
         }
         case Action::Type::MOVE_DOWN:
